@@ -5,6 +5,10 @@ All rights reserved.
 
 Each contributor holds copyright over their respective contributions.
 The project versioning (Git) records all such contribution source information.
+The initial code of this repository came from https://github.com/keras-team/keras
+(the Keras repository), hence, for author information regarding commits
+that occured earlier than the first commit in the present repository,
+please see the original Keras repository.
 
 LICENSE
 
