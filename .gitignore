@@ -1,0 +1,11 @@
+*.DS_Store
+*.pyc
+dist/*
+build/*
+tags
+Keras_Preprocessing.egg-info
+
+# test-related
+.coverage
+.cache
+.pytest_cache
