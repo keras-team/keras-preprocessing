@@ -1,5 +1,7 @@
 # Keras Preprocessing
 
+[![Build Status](https://travis-ci.org/keras-team/keras-preprocessing.svg?branch=master)](https://travis-ci.org/keras-team/keras-preprocessing)
+
 Keras Preprocessing is the data preprocessing
 and data augmentation module of the Keras deep learning library.
 It provides utilities for working with image data, text data,
