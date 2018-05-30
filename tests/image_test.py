@@ -22,7 +22,8 @@ class TestImage(object):
             rgb_images.append(im)
 
             imarray = np.random.rand(cls.img_w, cls.img_h, 1) * variance + bias
-            im = Image.fromarray(imarray.astype('uint8').squeeze()).convert('L')
+            im = Image.fromarray(
+                imarray.astype('uint8').squeeze()).convert('L')
             gray_images.append(im)
 
         cls.all_test_images = [rgb_images, gray_images]
@@ -57,18 +58,20 @@ class TestImage(object):
             generator.fit(images, augment=True)
 
             for x, y in generator.flow(images, np.arange(images.shape[0]),
-                                       shuffle=False, save_to_dir=str(tmpdir),
+                                       shuffle=False,
+                                       save_to_dir=str(tmpdir),
                                        batch_size=3):
                 assert x.shape == images[:3].shape
                 assert list(y) == [0, 1, 2]
                 break
 
             # Test with sample weights
-            for x, y, w in generator.flow(images, np.arange(images.shape[0]),
-                                          shuffle=False,
-                                          sample_weight=np.arange(images.shape[0]) + 1,
-                                          save_to_dir=str(tmpdir),
-                                          batch_size=3):
+            for x, y, w in generator.flow(
+                    images, np.arange(images.shape[0]),
+                    shuffle=False,
+                    sample_weight=np.arange(images.shape[0]) + 1,
+                    save_to_dir=str(tmpdir),
+                    batch_size=3):
                 assert x.shape == images[:3].shape
                 assert list(y) == [0, 1, 2]
                 assert list(w) == [1, 2, 3]
@@ -76,7 +79,8 @@ class TestImage(object):
 
             # Test with `shuffle=True`
             for x, y in generator.flow(images, np.arange(images.shape[0]),
-                                       shuffle=True, save_to_dir=str(tmpdir),
+                                       shuffle=True,
+                                       save_to_dir=str(tmpdir),
                                        batch_size=3):
                 assert x.shape == images[:3].shape
                 # Check that the sequence is shuffled.
@@ -85,7 +89,8 @@ class TestImage(object):
 
             # Test without y
             for x in generator.flow(images, None,
-                                    shuffle=True, save_to_dir=str(tmpdir),
+                                    shuffle=True,
+                                    save_to_dir=str(tmpdir),
                                     batch_size=3):
                 assert type(x) is np.ndarray
                 assert x.shape == images[:3].shape
@@ -96,9 +101,11 @@ class TestImage(object):
             dsize = images.shape[0]
             x_misc1 = np.random.random(dsize)
 
-            for i, (x, y) in enumerate(generator.flow((images, x_misc1),
-                                                      np.arange(dsize),
-                                                      shuffle=False, batch_size=2)):
+            for i, (x, y) in enumerate(generator.flow(
+                    (images, x_misc1),
+                    np.arange(dsize),
+                    shuffle=False,
+                    batch_size=2)):
                 assert x[0].shape == images[:2].shape
                 assert (x[1] == x_misc1[(i * 2):((i + 1) * 2)]).all()
                 if i == 2:
@@ -107,9 +114,11 @@ class TestImage(object):
             # Test with two miscellaneous inputs
             x_misc2 = np.random.random((dsize, 3, 3))
 
-            for i, (x, y) in enumerate(generator.flow((images, [x_misc1, x_misc2]),
-                                                      np.arange(dsize),
-                                                      shuffle=False, batch_size=2)):
+            for i, (x, y) in enumerate(generator.flow(
+                    (images, [x_misc1, x_misc2]),
+                    np.arange(dsize),
+                    shuffle=False,
+                    batch_size=2)):
                 assert x[0].shape == images[:2].shape
                 assert (x[1] == x_misc1[(i * 2):((i + 1) * 2)]).all()
                 assert (x[2] == x_misc2[(i * 2):((i + 1) * 2)]).all()
@@ -136,12 +145,16 @@ class TestImage(object):
             x_misc_err = np.random.random((dsize + 1, 3, 3))
 
             with pytest.raises(ValueError) as e_info:
-                generator.flow((images, x_misc_err), np.arange(dsize), batch_size=3)
-            assert str(e_info.value).find('All of the arrays in') != -1
+                generator.flow((images, x_misc_err), np.arange(dsize),
+                               batch_size=3)
+            assert str(e_info.value).find(
+                'All of the arrays in') != -1
 
             with pytest.raises(ValueError) as e_info:
-                generator.flow((images, x_misc1), np.arange(dsize + 1), batch_size=3)
-            assert str(e_info.value).find('`x` (images tensor) and `y` (labels) ') != -1
+                generator.flow((images, x_misc1), np.arange(dsize + 1),
+                               batch_size=3)
+            assert str(e_info.value).find(
+                '`x` (images tensor) and `y` (labels) ') != -1
 
             # Test `flow` behavior as Sequence
             seq = generator.flow(images, np.arange(images.shape[0]),
@@ -272,7 +285,9 @@ class TestImage(object):
                 im_class = count % num_classes
                 # rotate subfolders
                 classpaths = paths[im_class]
-                filename = os.path.join(classpaths[count % len(classpaths)], 'image-{}.jpg'.format(count))
+                filename = os.path.join(
+                    classpaths[count % len(classpaths)],
+                    'image-{}.jpg'.format(count))
                 filenames.append(filename)
                 im.save(str(tmpdir / filename))
                 count += 1
@@ -303,7 +318,8 @@ class TestImage(object):
             return np.zeros_like(x)
 
         # Test usage as Sequence
-        generator = image.ImageDataGenerator(preprocessing_function=preprocessing_function)
+        generator = image.ImageDataGenerator(
+            preprocessing_function=preprocessing_function)
         dir_seq = generator.flow_from_directory(str(tmpdir),
                                                 target_size=(26, 26),
                                                 color_mode='rgb',
@@ -326,13 +342,15 @@ class TestImage(object):
         count = 0
         for test_images in self.all_test_images:
             for im in test_images:
-                filename = str(tmpdir / 'class-1' / 'image-{}.jpg'.format(count))
+                filename = str(
+                    tmpdir / 'class-1' / 'image-{}.jpg'.format(count))
                 im.save(filename)
                 count += 1
 
         # create iterator
         generator = image.ImageDataGenerator()
-        dir_iterator = generator.flow_from_directory(str(tmpdir), class_mode='input')
+        dir_iterator = generator.flow_from_directory(str(tmpdir),
+                                                     class_mode='input')
         batch = next(dir_iterator)
 
         # check if input and output have the same shape
@@ -348,7 +366,9 @@ class TestImage(object):
         (0.40, 10),
         (0.50, 8),
     ])
-    def test_directory_iterator_with_validation_split(self, validation_split, num_training):
+    def test_directory_iterator_with_validation_split(self,
+                                                      validation_split,
+                                                      num_training):
         num_classes = 2
         tmp_folder = tempfile.mkdtemp(prefix='test_images')
 
@@ -375,7 +395,9 @@ class TestImage(object):
                 im_class = count % num_classes
                 # rotate subfolders
                 classpaths = paths[im_class]
-                filename = os.path.join(classpaths[count % len(classpaths)], 'image-{}.jpg'.format(count))
+                filename = os.path.join(
+                    classpaths[count % len(classpaths)],
+                    'image-{}.jpg'.format(count))
                 filenames.append(filename)
                 im.save(os.path.join(tmp_folder, filename))
                 count += 1
@@ -386,10 +408,12 @@ class TestImage(object):
         with pytest.raises(ValueError):
             generator.flow_from_directory(tmp_folder, subset='foo')
 
-        train_iterator = generator.flow_from_directory(tmp_folder, subset='training')
+        train_iterator = generator.flow_from_directory(tmp_folder,
+                                                       subset='training')
         assert train_iterator.samples == num_training
 
-        valid_iterator = generator.flow_from_directory(tmp_folder, subset='validation')
+        valid_iterator = generator.flow_from_directory(tmp_folder,
+                                                       subset='validation')
         assert valid_iterator.samples == count - num_training
 
         # check number of classes and images
@@ -434,15 +458,19 @@ class TestImage(object):
             img = image.array_to_img(x, data_format='channels_first')
         with pytest.raises(ValueError):
             x = np.random.random((height, width, 3))
-            img = image.array_to_img(x, data_format='channels')  # unknown data_format
+            # unknown data_format
+            img = image.array_to_img(x, data_format='channels')
         with pytest.raises(ValueError):
-            x = np.random.random((height, width, 5))  # neither RGB nor gray-scale
+            # neither RGB nor gray-scale
+            x = np.random.random((height, width, 5))
             img = image.array_to_img(x, data_format='channels_last')
         with pytest.raises(ValueError):
             x = np.random.random((height, width, 3))
-            img = image.img_to_array(x, data_format='channels')  # unknown data_format
+            # unknown data_format
+            img = image.img_to_array(x, data_format='channels')
         with pytest.raises(ValueError):
-            x = np.random.random((height, width, 5, 3))  # neither RGB nor gray-scale
+            # neither RGB nor gray-scale
+            x = np.random.random((height, width, 5, 3))
             img = image.img_to_array(x, data_format='channels_last')
 
     def test_random_transforms(self):
@@ -480,7 +508,8 @@ class TestImage(object):
         assert transform_dict['zy'] != 0
         assert transform_dict['zy'] != transform_dict2['zy']
         assert transform_dict['channel_shift_intensity'] != 0
-        assert transform_dict['channel_shift_intensity'] != transform_dict2['channel_shift_intensity']
+        assert (transform_dict['channel_shift_intensity'] !=
+                transform_dict2['channel_shift_intensity'])
         assert transform_dict['brightness'] != 0
         assert transform_dict['brightness'] != transform_dict2['brightness']
 
@@ -518,8 +547,8 @@ class TestImage(object):
                                [1., 1., 1.]]])
         assert np.allclose(generator.apply_transform(x, {'theta': 45}),
                            x_rotated)
-        assert np.allclose(image.apply_affine_transform(x, theta=45, channel_axis=2,
-                                                        fill_mode='constant'), x_rotated)
+        assert np.allclose(image.apply_affine_transform(
+            x, theta=45, channel_axis=2, fill_mode='constant'), x_rotated)
 
     def test_batch_standardize(self):
         # ImageDataGenerator.standardize should work on batches

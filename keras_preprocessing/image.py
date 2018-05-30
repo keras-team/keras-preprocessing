@@ -284,20 +284,29 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
         shift_matrix = np.array([[1, 0, tx],
                                  [0, 1, ty],
                                  [0, 0, 1]])
-        transform_matrix = shift_matrix if transform_matrix is None else np.dot(transform_matrix, shift_matrix)
+        if transform_matrix is None:
+            transform_matrix = shift_matrix
+        else:
+            transform_matrix = np.dot(transform_matrix, shift_matrix)
 
     if shear != 0:
         shear = np.deg2rad(shear)
         shear_matrix = np.array([[1, -np.sin(shear), 0],
                                  [0, np.cos(shear), 0],
                                  [0, 0, 1]])
-        transform_matrix = shear_matrix if transform_matrix is None else np.dot(transform_matrix, shear_matrix)
+        if transform_matrix is None:
+            transform_matrix = shear_matrix
+        else:
+            transform_matrix = np.dot(transform_matrix, shear_matrix)
 
     if zx != 1 or zy != 1:
         zoom_matrix = np.array([[zx, 0, 0],
                                 [0, zy, 0],
                                 [0, 0, 1]])
-        transform_matrix = zoom_matrix if transform_matrix is None else np.dot(transform_matrix, zoom_matrix)
+        if transform_matrix is None:
+            transform_matrix = zoom_matrix
+        else:
+            transform_matrix = np.dot(transform_matrix, zoom_matrix)
 
     if transform_matrix is not None:
         h, w = x.shape[row_axis], x.shape[col_axis]
@@ -510,8 +519,8 @@ class ImageDataGenerator(object):
             - With `width_shift_range=2` possible values
                 are integers `[-1, 0, +1]`,
                 same as with `width_shift_range=[-1, 0, +1]`,
-                while with `width_shift_range=1.0` possible values are floats in
-                the interval [-1.0, +1.0).
+                while with `width_shift_range=1.0` possible values are floats
+                in the interval [-1.0, +1.0).
         height_shift_range: Float, 1-D array-like or int
             - float: fraction of total height, if < 1, or pixels if >= 1.
             - 1-D array-like: random elements from the array.
@@ -520,8 +529,8 @@ class ImageDataGenerator(object):
             - With `height_shift_range=2` possible values
                 are integers `[-1, 0, +1]`,
                 same as with `height_shift_range=[-1, 0, +1]`,
-                while with `height_shift_range=1.0` possible values are floats in
-                the interval [-1.0, +1.0).
+                while with `height_shift_range=1.0` possible values are floats
+                in the interval [-1.0, +1.0).
         shear_range: Float. Shear Intensity
             (Shear angle in counter-clockwise direction in degrees)
         zoom_range: Float or [lower, upper]. Range for random zoom.
@@ -770,9 +779,11 @@ class ImageDataGenerator(object):
                               'which overrides setting of '
                               '`samplewise_center`.')
 
-    def flow(self, x, y=None, batch_size=32, shuffle=True, sample_weight=None, seed=None,
+    def flow(self, x,
+             y=None, batch_size=32, shuffle=True,
+             sample_weight=None, seed=None,
              save_to_dir=None, save_prefix='', save_format='png', subset=None):
-        """Takes numpy data & label arrays, and generates batches of augmented data.
+        """Takes data & label arrays, generates batches of augmented data.
 
         # Arguments
             x: Input data. Numpy array of rank 4 or a tuple.
@@ -843,7 +854,9 @@ class ImageDataGenerator(object):
                 Any PNG, JPG, BMP, PPM or TIF images
                 inside each of the subdirectories directory tree
                 will be included in the generator.
-                See [this script](https://gist.github.com/fchollet/0830affa1f7f19fd47b06d4cf89ed44d)
+                See [this script](
+                    https://gist.github.com/fchollet/
+                    0830affa1f7f19fd47b06d4cf89ed44d)
                 for more details.
             target_size: Tuple of integers `(height, width)`,
                 default: `(256, 256)`.
@@ -973,7 +986,8 @@ class ImageDataGenerator(object):
 
         # Arguments
             seed: Random seed.
-            img_shape: Tuple of integers. Shape of the image that is transformed.
+            img_shape: Tuple of integers.
+                Shape of the image that is transformed.
 
         # Returns
             A dictionary containing randomly chosen parameters describing the
@@ -1067,7 +1081,8 @@ class ImageDataGenerator(object):
         # Arguments
             x: 3D tensor, single image.
             transform_parameters: Dictionary with string - parameter pairs
-                describing the transformation. Currently, the following parameters
+                describing the transformation.
+                Currently, the following parameters
                 from the dictionary are used:
                 - `'theta'`: Float. Rotation angle in degrees.
                 - `'tx'`: Float. Shift in the x direction.
@@ -1131,7 +1146,10 @@ class ImageDataGenerator(object):
             augment=False,
             rounds=1,
             seed=None):
-        """Computes the internal data stats related to the data-dependent transformations, based on an array of sample data.
+        """Fits the data generator to some sample data.
+
+        This computes the internal data stats related to the
+        data-dependent transformations, based on an array of sample data.
 
         Only required if `featurewise_center` or
         `featurewise_std_normalization` or `zca_whitening` are set to True.

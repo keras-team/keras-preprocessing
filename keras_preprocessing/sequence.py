@@ -112,7 +112,10 @@ def make_sampling_table(size, sampling_factor=1e-5):
     The sampling probabilities are generated according
     to the sampling distribution used in word2vec:
 
-    `p(word) = min(1, sqrt(word_frequency / sampling_factor) / (word_frequency / sampling_factor))`
+    ```
+    p(word) = (min(1, sqrt(word_frequency / sampling_factor) /
+        (word_frequency / sampling_factor)))
+    ```
 
     We assume that the word frequencies follow Zipf's law (s=1) to derive
     a numerical approximation of frequency(rank):

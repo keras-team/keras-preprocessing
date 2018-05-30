@@ -116,7 +116,8 @@ def hashing_trick(text, n,
 
     Two or more words may be assigned to the same index, due to possible
     collisions by the hashing function.
-    The [probability](https://en.wikipedia.org/wiki/Birthday_problem#Probability_table)
+    The [probability](
+        https://en.wikipedia.org/wiki/Birthday_problem#Probability_table)
     of a collision is in relation to the dimension of the hashing space and
     the number of distinct objects.
     """
@@ -224,7 +225,8 @@ class Tokenizer(object):
         wcounts.sort(key=lambda x: x[1], reverse=True)
         sorted_voc = [wc[0] for wc in wcounts]
         # note that index 0 is reserved, never assigned to an existing word
-        self.word_index = dict(list(zip(sorted_voc, list(range(1, len(sorted_voc) + 1)))))
+        self.word_index = dict(
+            list(zip(sorted_voc, list(range(1, len(sorted_voc) + 1)))))
 
         if self.oov_token is not None:
             i = self.word_index.get(self.oov_token)
