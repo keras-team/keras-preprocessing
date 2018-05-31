@@ -20,7 +20,7 @@ Keras Preprocessing is compatible with Python 2.7-3.6
 and is distributed under the MIT liense.
 '''
 
-setup(name='Keras Preprocessing',
+setup(name='Keras_Preprocessing',
       version='1.0.0',
       description='Easy data preprocessing and data augmentation '
                   'for deep learning models',
