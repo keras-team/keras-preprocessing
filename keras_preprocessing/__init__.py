@@ -11,29 +11,20 @@ def keras_module():
     global _KERAS_MODULE
     if _KERAS_MODULE is None:
         # Use `import keras` as default
-        # then fallback to `tf.keras`
-        try:
-            import keras
-        except ImportError:
-            try:
-                from tensorflow import keras
-            except ImportError:
-                raise ImportError(
-                    'You must have Keras (or TensorFlow) '
-                    'installed in order to use keras_preprocessing.')
-        set_keras_module(keras)
-    return _KERAS_MODULE
+        set_keras_module('keras')
+    if _KERAS_MODULE == 'tensorflow.keras':
+        # Due to TF namespace structure,
+        # can't `__import__('tensorflow.keras')`.
+        # Use workaround.
+        tf = __import__('tensorflow')
+        keras = tf.keras
+    else:
+        keras = __import__(_KERAS_MODULE, fromlist=['keras'])
+    # TODO: check that the Keras version is compatible with
+    # the current module.
+    return keras
 
 
 def set_keras_module(module):
     global _KERAS_MODULE
-    _keras_module_validation(module)
     _KERAS_MODULE = module
-
-
-def _keras_module_validation(module):
-    # TODO: add check on version to make sure
-    # this version of keras-preprocessing is
-    # compatible with the provided Keras version
-    # i.e. `if module.__version__ < ...`
-    pass

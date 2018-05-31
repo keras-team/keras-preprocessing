@@ -11,7 +11,7 @@ from six.moves import range
 
 from . import keras_module
 
-Sequence = keras_module().utils.Sequence
+keras = keras_module()
 
 
 def pad_sequences(sequences, maxlen=None, dtype='int32',
@@ -250,7 +250,7 @@ def _remove_long_seq(maxlen, seq, label):
     return new_seq, new_label
 
 
-class TimeseriesGenerator(Sequence):
+class TimeseriesGenerator(keras.utils.Sequence):
     """Utility class for generating batches of temporal data.
 
     This class takes in a sequence of data-points gathered at
