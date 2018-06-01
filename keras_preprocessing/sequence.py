@@ -9,9 +9,9 @@ import numpy as np
 import random
 from six.moves import range
 
-from . import keras_module
+from . import get_keras_submodule
 
-keras = keras_module()
+keras_utils = get_keras_submodule('utils')
 
 
 def pad_sequences(sequences, maxlen=None, dtype='int32',
@@ -250,7 +250,7 @@ def _remove_long_seq(maxlen, seq, label):
     return new_seq, new_label
 
 
-class TimeseriesGenerator(keras.utils.Sequence):
+class TimeseriesGenerator(keras_utils.Sequence):
     """Utility class for generating batches of temporal data.
 
     This class takes in a sequence of data-points gathered at

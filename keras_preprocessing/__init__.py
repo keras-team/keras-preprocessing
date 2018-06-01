@@ -4,27 +4,35 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-_KERAS_MODULE = None
+_KERAS_BACKEND = None
+_KERAS_UTILS = None
 
 
-def keras_module():
-    global _KERAS_MODULE
-    if _KERAS_MODULE is None:
-        # Use `import keras` as default
-        set_keras_module('keras')
-    if _KERAS_MODULE == 'tensorflow.keras':
-        # Due to TF namespace structure,
-        # can't `__import__('tensorflow.keras')`.
-        # Use workaround.
-        tf = __import__('tensorflow')
-        keras = tf.keras
-    else:
-        keras = __import__(_KERAS_MODULE, fromlist=['keras'])
-    # TODO: check that the Keras version is compatible with
-    # the current module.
-    return keras
+def set_keras_submodules(backend, utils):
+    global _KERAS_BACKEND
+    global _KERAS_UTILS
+    _KERAS_BACKEND = backend
+    _KERAS_UTILS = utils
 
 
-def set_keras_module(module):
-    global _KERAS_MODULE
-    _KERAS_MODULE = module
+def get_keras_submodule(name):
+    if name not in {'backend', 'utils'}:
+        raise ImportError(
+            'Can only retrieve "backend" and "utils". '
+            'Requested: %s' % name)
+    if _KERAS_BACKEND is None or _KERAS_UTILS is None:
+        raise ImportError('You need to first `import keras` '
+                          'in order to use `keras_preprocessing`. '
+                          'For instance, you can do:\n\n'
+                          '```\n'
+                          'import keras\n'
+                          'from keras_preprocessing import image\n'
+                          '```\n\n'
+                          'Or, preferably, this equivalent formulation:\n\n'
+                          '```\n'
+                          'from keras import preprocessing\n'
+                          '```\n')
+    if name == 'backend':
+        return _KERAS_BACKEND
+    elif name == 'utils':
+        return _KERAS_UTILS

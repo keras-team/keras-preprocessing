@@ -4,6 +4,14 @@ import numpy as np
 from numpy.testing import assert_allclose
 from numpy.testing import assert_raises
 
+import keras
+
+# TODO: remove the 3 lines below once the Keras release
+# is configured to use keras_preprocessing
+import keras_preprocessing
+keras_preprocessing.set_keras_submodules(
+    backend=keras.backend, utils=keras.utils)
+
 from keras_preprocessing import sequence
 
 

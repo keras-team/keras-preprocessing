@@ -15,9 +15,10 @@ import warnings
 import multiprocessing.pool
 from functools import partial
 
-from . import keras_module
+from . import get_keras_submodule
 
-keras = keras_module()
+backend = get_keras_submodule('backend')
+keras_utils = get_keras_submodule('utils')
 
 try:
     from PIL import ImageEnhance
@@ -354,13 +355,13 @@ def array_to_img(x, data_format=None, scale=True):
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
                           'The use of `array_to_img` requires PIL.')
-    x = np.asarray(x, dtype=keras.backend.floatx())
+    x = np.asarray(x, dtype=backend.floatx())
     if x.ndim != 3:
         raise ValueError('Expected image array to have rank 3 (single image). '
                          'Got array with shape:', x.shape)
 
     if data_format is None:
-        data_format = keras.backend.image_data_format()
+        data_format = backend.image_data_format()
     if data_format not in {'channels_first', 'channels_last'}:
         raise ValueError('Invalid data_format:', data_format)
 
@@ -400,13 +401,13 @@ def img_to_array(img, data_format=None):
         ValueError: if invalid `img` or `data_format` is passed.
     """
     if data_format is None:
-        data_format = keras.backend.image_data_format()
+        data_format = backend.image_data_format()
     if data_format not in {'channels_first', 'channels_last'}:
         raise ValueError('Unknown data_format: ', data_format)
     # Numpy array x has format (height, width, channel)
     # or (channel, height, width)
     # but original PIL image has format (width, height, channel)
-    x = np.asarray(img, dtype=keras.backend.floatx())
+    x = np.asarray(img, dtype=backend.floatx())
     if len(x.shape) == 3:
         if data_format == 'channels_first':
             x = x.transpose(2, 0, 1)
@@ -697,7 +698,7 @@ class ImageDataGenerator(object):
                  data_format=None,
                  validation_split=0.0):
         if data_format is None:
-            data_format = keras.backend.image_data_format()
+            data_format = backend.image_data_format()
         self.featurewise_center = featurewise_center
         self.samplewise_center = samplewise_center
         self.featurewise_std_normalization = featurewise_std_normalization
@@ -949,7 +950,7 @@ class ImageDataGenerator(object):
         if self.samplewise_center:
             x -= np.mean(x, keepdims=True)
         if self.samplewise_std_normalization:
-            x /= (np.std(x, keepdims=True) + keras.backend.epsilon())
+            x /= (np.std(x, keepdims=True) + backend.epsilon())
 
         if self.featurewise_center:
             if self.mean is not None:
@@ -961,7 +962,7 @@ class ImageDataGenerator(object):
                               'first by calling `.fit(numpy_data)`.')
         if self.featurewise_std_normalization:
             if self.std is not None:
-                x /= (self.std + keras.backend.epsilon())
+                x /= (self.std + backend.epsilon())
             else:
                 warnings.warn('This ImageDataGenerator specifies '
                               '`featurewise_std_normalization`, '
@@ -1165,7 +1166,7 @@ class ImageDataGenerator(object):
                 this is how many augmentation passes over the data to use.
             seed: Int (default: None). Random seed.
        """
-        x = np.asarray(x, dtype=keras.backend.floatx())
+        x = np.asarray(x, dtype=backend.floatx())
         if x.ndim != 4:
             raise ValueError('Input to `.fit()` should have rank 4. '
                              'Got array with shape: ' + str(x.shape))
@@ -1188,7 +1189,7 @@ class ImageDataGenerator(object):
         if augment:
             ax = np.zeros(
                 tuple([rounds * x.shape[0]] + list(x.shape)[1:]),
-                dtype=keras.backend.floatx())
+                dtype=backend.floatx())
             for r in range(rounds):
                 for i in range(x.shape[0]):
                     ax[i + r * x.shape[0]] = self.random_transform(x[i])
@@ -1206,7 +1207,7 @@ class ImageDataGenerator(object):
             broadcast_shape = [1, 1, 1]
             broadcast_shape[self.channel_axis - 1] = x.shape[self.channel_axis]
             self.std = np.reshape(self.std, broadcast_shape)
-            x /= (self.std + keras.backend.epsilon())
+            x /= (self.std + backend.epsilon())
 
         if self.zca_whitening:
             flat_x = np.reshape(
@@ -1217,7 +1218,7 @@ class ImageDataGenerator(object):
             self.principal_components = (u * s_inv).dot(u.T)
 
 
-class Iterator(keras.utils.Sequence):
+class Iterator(keras_utils.Sequence):
     """Base class for image data iterators.
 
     Every `Iterator` must implement the `_get_batches_of_transformed_samples`
@@ -1384,8 +1385,8 @@ class NumpyArrayIterator(Iterator):
                 if y is not None:
                     y = y[split_idx:]
         if data_format is None:
-            data_format = keras.backend.image_data_format()
-        self.x = np.asarray(x, dtype=keras.backend.floatx())
+            data_format = backend.image_data_format()
+        self.x = np.asarray(x, dtype=backend.floatx())
         self.x_misc = x_misc
         if self.x.ndim != 4:
             raise ValueError('Input data in `NumpyArrayIterator` '
@@ -1421,12 +1422,12 @@ class NumpyArrayIterator(Iterator):
 
     def _get_batches_of_transformed_samples(self, index_array):
         batch_x = np.zeros(tuple([len(index_array)] + list(self.x.shape)[1:]),
-                           dtype=keras.backend.floatx())
+                           dtype=backend.floatx())
         for i, j in enumerate(index_array):
             x = self.x[j]
             params = self.image_data_generator.get_random_transform(x.shape)
             x = self.image_data_generator.apply_transform(
-                x.astype(keras.backend.floatx()), params)
+                x.astype(backend.floatx()), params)
             x = self.image_data_generator.standardize(x)
             batch_x[i] = x
 
@@ -1625,7 +1626,7 @@ class DirectoryIterator(Iterator):
                  subset=None,
                  interpolation='nearest'):
         if data_format is None:
-            data_format = keras.backend.image_data_format()
+            data_format = backend.image_data_format()
         self.directory = directory
         self.image_data_generator = image_data_generator
         self.target_size = tuple(target_size)
@@ -1722,7 +1723,7 @@ class DirectoryIterator(Iterator):
     def _get_batches_of_transformed_samples(self, index_array):
         batch_x = np.zeros(
             (len(index_array),) + self.image_shape,
-            dtype=keras.backend.floatx())
+            dtype=backend.floatx())
         grayscale = self.color_mode == 'grayscale'
         # build batch of image data
         for i, j in enumerate(index_array):
@@ -1752,11 +1753,11 @@ class DirectoryIterator(Iterator):
         elif self.class_mode == 'sparse':
             batch_y = self.classes[index_array]
         elif self.class_mode == 'binary':
-            batch_y = self.classes[index_array].astype(keras.backend.floatx())
+            batch_y = self.classes[index_array].astype(backend.floatx())
         elif self.class_mode == 'categorical':
             batch_y = np.zeros(
                 (len(batch_x), self.num_classes),
-                dtype=keras.backend.floatx())
+                dtype=backend.floatx())
             for i, label in enumerate(self.classes[index_array]):
                 batch_y[i, label] = 1.
         else:
