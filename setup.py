@@ -17,7 +17,7 @@ from keras import preprocessing
 ```
 
 Keras Preprocessing is compatible with Python 2.7-3.6
-and is distributed under the MIT liense.
+and is distributed under the MIT license.
 '''
 
 setup(name='Keras_Preprocessing',
@@ -28,7 +28,7 @@ setup(name='Keras_Preprocessing',
       author='Keras Team',
       url='https://github.com/keras-team/keras-preprocessing',
       download_url='https://github.com/keras-team/'
-                   'keras_preprocessing/tarball/1.0.0',
+                   'keras-preprocessing/tarball/1.0.0',
       license='MIT',
       install_requires=['keras>=2.1.6',
                         'numpy>=1.9.1',

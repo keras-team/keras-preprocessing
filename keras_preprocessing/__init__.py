@@ -20,7 +20,7 @@ def get_keras_submodule(name):
         raise ImportError(
             'Can only retrieve "backend" and "utils". '
             'Requested: %s' % name)
-    if _KERAS_BACKEND is None or _KERAS_UTILS is None:
+    if _KERAS_BACKEND is None:
         raise ImportError('You need to first `import keras` '
                           'in order to use `keras_preprocessing`. '
                           'For instance, you can do:\n\n'
