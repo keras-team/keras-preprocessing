@@ -1058,7 +1058,7 @@ class ImageDataGenerator(object):
             if len(self.brightness_range) != 2:
                 raise ValueError(
                     '`brightness_range should be tuple or list of two floats. '
-                    'Received: %s' % brightness_range)
+                    'Received: %s' % self.brightness_range)
             brightness = np.random.uniform(self.brightness_range[0],
                                            self.brightness_range[1])
 
