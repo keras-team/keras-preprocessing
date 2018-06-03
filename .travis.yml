@@ -45,7 +45,7 @@ install:
     elif [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
       conda install Pillow;
     fi
-  - if [["$KERAS_HEAD"]]; then
+  - if [[ $KERAS_HEAD == "true" ]]; then
       pip install git+https://github.com/keras-team/keras.git ;
     fi
   - pip install -e .[tests]
@@ -55,7 +55,7 @@ install:
 
 # command to run tests
 script:
-  - if [[ "$TEST_MODE" == "PEP8" ]]; then
+  - if [[ "$TEST_MODE" == "PEP8" ]] then
       PYTHONPATH=$PWD:$PYTHONPATH py.test --pep8 -m pep8 -n0;
     elif [[ "$TEST_MODE" == "INTEGRATION_TESTS" ]]; then
       PYTHONPATH=$PWD:$PYTHONPATH py.test tests/integration_test.py;
