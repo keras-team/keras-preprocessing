@@ -8,7 +8,7 @@ from __future__ import print_function
 import string
 import sys
 import warnings
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from hashlib import md5
 
 import numpy as np
@@ -178,7 +178,7 @@ class Tokenizer(object):
             raise TypeError('Unrecognized keyword arguments: ' + str(kwargs))
 
         self.word_counts = OrderedDict()
-        self.word_docs = {}
+        self.word_docs = defaultdict(int)
         self.filters = filters
         self.split = split
         self.lower = lower
@@ -186,7 +186,7 @@ class Tokenizer(object):
         self.document_count = 0
         self.char_level = char_level
         self.oov_token = oov_token
-        self.index_docs = {}
+        self.index_docs = defaultdict(int)
 
     def fit_on_texts(self, texts):
         """Updates internal vocabulary based on a list of texts.
@@ -216,10 +216,8 @@ class Tokenizer(object):
                 else:
                     self.word_counts[w] = 1
             for w in set(seq):
-                if w in self.word_docs:
-                    self.word_docs[w] += 1
-                else:
-                    self.word_docs[w] = 1
+                # In how many documents each word occurs
+                self.word_docs[w] += 1
 
         wcounts = list(self.word_counts.items())
         wcounts.sort(key=lambda x: x[1], reverse=True)
@@ -250,10 +248,7 @@ class Tokenizer(object):
         for seq in sequences:
             seq = set(seq)
             for i in seq:
-                if i not in self.index_docs:
-                    self.index_docs[i] = 1
-                else:
-                    self.index_docs[i] += 1
+                self.index_docs[i] += 1
 
     def texts_to_sequences(self, texts):
         """Transforms each text in texts in a sequence of integers.
