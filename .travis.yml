@@ -8,6 +8,10 @@ matrix:
         - python: 2.7
           env: TEST_MODE=INTEGRATION_TESTS
         - python: 2.7
+          env: KERAS_HEAD=true
+        - python: 3.6
+          env: KERAS_HEAD=true
+        - python: 2.7
         - python: 3.6
         - python: 3.6
           env: TEST_MODE=INTEGRATION_TESTS
@@ -41,7 +45,9 @@ install:
     elif [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
       conda install Pillow;
     fi
-
+  - if [["$KERAS_HEAD"]]; then
+      pip install git+https://github.com/keras-team/keras.git ;
+    fi
   - pip install -e .[tests]
 
   # install TensorFlow (CPU version).
