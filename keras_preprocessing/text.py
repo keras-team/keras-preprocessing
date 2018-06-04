@@ -8,7 +8,8 @@ from __future__ import print_function
 import string
 import sys
 import warnings
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
+from collections import defaultdict
 from hashlib import md5
 
 import numpy as np
@@ -350,14 +351,11 @@ class Tokenizer(object):
         for i, seq in enumerate(sequences):
             if not seq:
                 continue
-            counts = {}
+            counts = defaultdict(int)
             for j in seq:
                 if j >= num_words:
                     continue
-                if j not in counts:
-                    counts[j] = 1.
-                else:
-                    counts[j] += 1
+                counts[j] += 1
             for j, c in list(counts.items()):
                 if mode == 'count':
                     x[i][j] = c
