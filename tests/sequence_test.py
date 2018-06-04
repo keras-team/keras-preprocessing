@@ -104,7 +104,8 @@ def test_remove_long_seq():
 
 
 from keras_preprocessing.sequence import TimeseriesGenerator
-    
+
+
 def test_TimeseriesGenerator():
     data = np.array([[i] for i in range(50)])
     targets = np.array([[i] for i in range(50)])
@@ -445,6 +446,6 @@ def test_TimeseriesGenerator_previous_tests():
     assert (np.allclose(data_gen[0][1],
                         np.array([targets[20], targets[21]])))
 
-    
+
 if __name__ == '__main__':
     pytest.main([__file__])
