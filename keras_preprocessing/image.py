@@ -498,6 +498,8 @@ class ImageDataGenerator(object):
                 same as with `height_shift_range=[-1, 0, +1]`,
                 while with `height_shift_range=1.0` possible values are floats
                 in the interval [-1.0, +1.0).
+        center_crop: Boolean. Perform center crop.
+        center_crop_size: Int (square crop) or List. Size of the desired center crop.
         shear_range: Float. Shear Intensity
             (Shear angle in counter-clockwise direction in degrees)
         zoom_range: Float or [lower, upper]. Range for random zoom.
@@ -1077,7 +1079,7 @@ class ImageDataGenerator(object):
         if transform_parameters.get('brightness') is not None:
             x = apply_brightness_shift(x, transform_parameters['brightness'])
 
-        if self.center_crop: # FIXME normalize how it's done
+        if self.center_crop: 
             sizes = [x.shape[img_row_axis], x.shape[img_col_axis]]
 
             if np.all([a>0 for a in self.center_crop_size]) and np.all([self.center_crop_size[i]<=sizes[i] for i in range(len(self.center_crop_size))]):
@@ -1383,9 +1385,10 @@ class NumpyArrayIterator(Iterator):
         else:
             if isinstance(self, NumpyArrayIterator):
                 new_size = [self.x.shape[1 if backend.image_data_format() == 'channels_first' else -1], self.image_data_generator.center_crop_size[0], self.image_data_generator.center_crop_size[1]]
+
             else:
                 new_size = [self.image_shape[0 if backend.image_data_format() == 'channels_first' else -1 ], self.image_data_generator.center_crop_size[0], self.image_data_generator.center_crop_size[1]]
-                
+
             batch_x = np.zeros(tuple([len(index_array)] + new_size), dtype=backend.floatx())
 
         for i, j in enumerate(index_array):
