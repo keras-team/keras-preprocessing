@@ -265,7 +265,8 @@ class TimeseriesGenerator(Sequence):
             if 2D or more, axis 0 is expected to be the time dimension.
         targets: Targets corresponding to timesteps in `data`.
             It should have at least the same length as `data`.
-        length: length of the output sub-sequence before sampling (depreciated, use hlength instead).
+        length: length of the output sub-sequence before sampling
+            (depreciated, use hlength instead).
         sampling_rate: Period between successive individual timesteps
             within sequences, `length` has to be a multiple of `sampling_rate`.
         stride: Period between successive output sequences.
@@ -279,17 +280,22 @@ class TimeseriesGenerator(Sequence):
         reverse: Boolean: if `True`, timesteps in each output sample will be
             in reverse chronological order.
         batch_size: Number of timeseries samples in each batch.
-        hlength: Effective "history" length of the output sub-sequences after sampling (in number of timesteps).
-        gap: prediction gap, i.e. numer of timesteps ahead (usually zero, or same as samplig_rate)
-            `x=data[i - (hlength-1)*sampling_rate - gap:i-gap+1:sampling_rate]` and `y=targets[i]`
+        hlength: Effective "history" length of the output sub-sequences after 
+            sampling (in number of timesteps).
+        gap: prediction gap, i.e. numer of timesteps ahead (usually zero, or 
+            same as samplig_rate)
+            `x=data[i - (hlength-1)*sampling_rate - gap:i-gap+1:sampling_rate]` 
+            and `y=targets[i]`
             are used respectively as sample sequence `x` and target value `y`.
         target_seq: Boolean: if 'True', produces full shifted sequence targets:
             If target_seq is set, for sampling rate `r`, timesteps
-            `data[i - (hlength-1)*r - gap]`, ..., `data[i-r-gap]`, `data[i-gap]` and
+            `data[i - (hlength-1)*r - gap]`, ..., `data[i-r-gap]`, `data[i-gap]` 
+             and
             `targets[i - (hlength-1)*r]`, ..., `data[i-r]`, `data[i]`
             are used respectively as sample sequence `x` and target sequence `y`.
         dtype: force sample/target dtype (default is None)
-        stateful: helper to check if parameters are valid for stateful learning (experimental).
+        stateful: helper to check if parameters are valid for stateful learning 
+        (experimental).
 
 
     # Returns
@@ -378,12 +384,14 @@ class TimeseriesGenerator(Sequence):
         if hlength is None:
             if length % sampling_rate != 0:
                 raise ValueError(
-                    '`length` has to be a multiple of `sampling_rate`. For instance, `length=%i` would do.' % (2 * sampling_rate))
+                    '`length` has to be a multiple of `sampling_rate`.' +
+                    ' For instance, `length=%i` would do.' % (2 * sampling_rate))
             hlength = length // sampling_rate
 
         if gap % sampling_rate != 0:
             warnings.warn(
-                'Unless you know what you do, `gap` should be zero or a multiple of `sampling_rate`.', UserWarning)
+                'Unless you know what you do, `gap` should be zero or' +
+                ' a multiple of `sampling_rate`.', UserWarning)
 
         self.hlength = hlength
         assert self.hlength > 0
@@ -407,11 +415,14 @@ class TimeseriesGenerator(Sequence):
             if shuffle:
                 raise ValueError('Do not shuffle for stateful learning.')
             if self.hlength % batch_size != 0:
-                raise ValueError('For stateful learning, `hlength` has to be a multiple of `batch_size`.'
-                                 'For instance, `hlength=%i` would do.' % (3 * batch_size))
+                raise ValueError('For stateful learning, `hlength` has to be' +
+                                 'a multiple of `batch_size`.'
+                                 'For instance, `hlength=%i` would do.'
+                                 % (3 * batch_size))
             if stride != (self.hlength // batch_size) * sampling_rate:
                 raise ValueError(
-                    '`stride=%i`, for these parameters set `stride=%i`.' % (stride, (hlength // batch_size) * sampling_rate))
+                    '`stride=%i`, for these parameters set `stride=%i`.'
+                    % (stride, (hlength // batch_size) * sampling_rate))
 
         self.sampling_rate = sampling_rate
         self.batch_size = batch_size
@@ -431,7 +442,8 @@ class TimeseriesGenerator(Sequence):
         self.len = int(ceil(float(self.end_index - self.start_index) /
                             (self.batch_size * self.stride)))
         if self.len <= 0:
-            err = 'This configuration gives no output, try with a longer input sequence or different parameters.'
+            err = 'This configuration gives no output, try with a longer' +
+            ' input sequence or different parameters.'
             raise ValueError(err)
 
         assert self.len > 0
@@ -452,7 +464,8 @@ class TimeseriesGenerator(Sequence):
             targets_shape = [num_rows]
         targets_shape.extend(self.targets.shape[1:])
 
-        return np.empty(samples_shape, dtype=self.data_type), np.empty(targets_shape, dtype=self.targets_type)
+        return np.empty(samples_shape, dtype=self.data_type),
+            np.empty(targets_shape, dtype=self.targets_type)
 
     def __getitem__(self, index):
         while index < 0:
@@ -460,16 +473,20 @@ class TimeseriesGenerator(Sequence):
         assert index < self.len
         batch_start = self.batch_size * self.stride * index
         rows = np.arange(batch_start, min(batch_start + self.batch_size *
-                                          self.stride, self.end_index - self.start_index), self.stride)
+                                          self.stride,
+                                          self.end_index - self.start_index),
+                         self.stride)
         rows = self.perm[rows]
 
         samples, targets = self._empty_batch(len(rows))
         for j, row in enumerate(rows):
-            indices = range(rows[j] - self.gap - (self.hlength - 1) * self.sampling_rate,
+            indices = range(rows[j] - self.gap -
+                            (self.hlength - 1) * self.sampling_rate,
                             rows[j] - self.gap + 1, self.sampling_rate)
             samples[j] = self.data[indices]
             if self.target_seq:
-                shifted_indices = range(rows[j] - (self.hlength - 1) * self.sampling_rate,
+                shifted_indices = range(rows[j] - (self.hlength - 1) *
+                                        self.sampling_rate,
                                         rows[j] + 1, self.sampling_rate)
                 targets[j] = self.targets[shifted_indices]
             else:

@@ -214,13 +214,15 @@ def test_TimeseriesGenerator_exceptions():
         TimeseriesGenerator(data, data, length=50, sampling_rate=51)
     error = str(context.exception)
     print(error)
-    assert '`length` has to be a multiple of `sampling_rate`. For instance, `length=102` would do.' in error
+    assert '`length` has to be a multiple of `sampling_rate`.' +
+    ' For instance, `length=102` would do.' in error
 
     with assert_raises(ValueError) as context:
         TimeseriesGenerator(data, data, length=10, sampling_rate=3)
     error = str(context.exception)
     print(error)
-    assert '`length` has to be a multiple of `sampling_rate`. For instance, `length=6` would do.' in error
+    assert '`length` has to be a multiple of `sampling_rate`.' +
+    ' For instance, `length=6` would do.' in error
 
 
 def test_TimeSeriesGenerator_doesnt_miss_any_sample1():
@@ -235,10 +237,6 @@ def test_TimeSeriesGenerator_doesnt_miss_any_sample1():
                 g = TimeseriesGenerator(x, x,
                                         length=length,
                                         batch_size=1, gap=gap)
-
-                # print('gap: %i, hlength: %i, expected-len:%i, len: %i' % (g.gap, g.hlength, expected, g.len))
-                # for i in range(len(g)):
-                #    print(i,g[i])
 
                 actual = len(g)
                 assert expected == actual
@@ -359,7 +357,8 @@ def test_TimeseriesGenerator_types():
 
     print("** test 4 (stateful)")
     data_gen = TimeseriesGenerator(
-        data, targets, hlength=10, sampling_rate=2, batch_size=5, stateful=True, gap=2, stride=4)
+        data, targets, hlength=10, sampling_rate=2, batch_size=5, stateful=True,
+        gap=2, stride=4)
 
 
 def test_TimeseriesGenerator_on_text():
