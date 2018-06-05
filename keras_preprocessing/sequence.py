@@ -384,14 +384,14 @@ class TimeseriesGenerator(Sequence):
         if hlength is None:
             if length % sampling_rate != 0:
                 raise ValueError(
-                    '`length` has to be a multiple of `sampling_rate`.' +
-                    ' For instance, `length=%i` would do.' % (2 * sampling_rate))
+                    "`length` has to be a multiple of `sampling_rate`."
+                    " For instance, `length=%i` would do." % (2 * sampling_rate))
             hlength = length // sampling_rate
 
         if gap % sampling_rate != 0:
             warnings.warn(
-                'Unless you know what you do, `gap` should be zero or' +
-                ' a multiple of `sampling_rate`.', UserWarning)
+                "Unless you know what you do, `gap` should be zero or"
+                " a multiple of `sampling_rate`.", UserWarning)
 
         self.hlength = hlength
         assert self.hlength > 0
@@ -415,9 +415,9 @@ class TimeseriesGenerator(Sequence):
             if shuffle:
                 raise ValueError('Do not shuffle for stateful learning.')
             if self.hlength % batch_size != 0:
-                raise ValueError('For stateful learning, `hlength` has to be' +
-                                 'a multiple of `batch_size`.'
-                                 'For instance, `hlength=%i` would do.'
+                raise ValueError("For stateful learning, `hlength` has to be"
+                                 "a multiple of `batch_size`."
+                                 "For instance, `hlength=%i` would do."
                                  % (3 * batch_size))
             if stride != (self.hlength // batch_size) * sampling_rate:
                 raise ValueError(
@@ -442,8 +442,8 @@ class TimeseriesGenerator(Sequence):
         self.len = int(ceil(float(self.end_index - self.start_index) /
                             (self.batch_size * self.stride)))
         if self.len <= 0:
-            err = 'This configuration gives no output, try with a longer' +
-            ' input sequence or different parameters.'
+            err = "This configuration gives no output, try with a longer"
+            " input sequence or different parameters."
             raise ValueError(err)
 
         assert self.len > 0
@@ -464,8 +464,8 @@ class TimeseriesGenerator(Sequence):
             targets_shape = [num_rows]
         targets_shape.extend(self.targets.shape[1:])
 
-        return np.empty(samples_shape, dtype=self.data_type),
-            np.empty(targets_shape, dtype=self.targets_type)
+        return np.empty(samples_shape, dtype=self.data_type), np.empty(
+            targets_shape, dtype=self.targets_type)
 
     def __getitem__(self, index):
         while index < 0:

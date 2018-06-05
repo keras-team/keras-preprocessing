@@ -214,15 +214,15 @@ def test_TimeseriesGenerator_exceptions():
         TimeseriesGenerator(data, data, length=50, sampling_rate=51)
     error = str(context.exception)
     print(error)
-    assert '`length` has to be a multiple of `sampling_rate`.' +
-    ' For instance, `length=102` would do.' in error
+    assert "`length` has to be a multiple of `sampling_rate`."
+    " For instance, `length=102` would do." in error
 
     with assert_raises(ValueError) as context:
         TimeseriesGenerator(data, data, length=10, sampling_rate=3)
     error = str(context.exception)
     print(error)
-    assert '`length` has to be a multiple of `sampling_rate`.' +
-    ' For instance, `length=6` would do.' in error
+    assert "`length` has to be a multiple of `sampling_rate`."
+    " For instance, `length=6` would do." in error
 
 
 def test_TimeSeriesGenerator_doesnt_miss_any_sample1():
