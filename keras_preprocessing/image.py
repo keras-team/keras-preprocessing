@@ -45,7 +45,6 @@ if pil_image is not None:
 def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
                     fill_mode='nearest', cval=0.):
     """Performs a random rotation of a Numpy image tensor.
-
     # Arguments
         x: Input tensor. Must be 3D.
         rg: Rotation range, in degrees.
@@ -57,7 +56,6 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-
     # Returns
         Rotated Numpy image tensor.
     """
@@ -70,7 +68,6 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
 def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
                  fill_mode='nearest', cval=0.):
     """Performs a random spatial shift of a Numpy image tensor.
-
     # Arguments
         x: Input tensor. Must be 3D.
         wrg: Width shift range, as a float fraction of the width.
@@ -83,7 +80,6 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-
     # Returns
         Shifted Numpy image tensor.
     """
@@ -98,7 +94,6 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
 def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
                  fill_mode='nearest', cval=0.):
     """Performs a random spatial shear of a Numpy image tensor.
-
     # Arguments
         x: Input tensor. Must be 3D.
         intensity: Transformation intensity in degrees.
@@ -110,7 +105,6 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-
     # Returns
         Sheared Numpy image tensor.
     """
@@ -123,7 +117,6 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
 def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
                 fill_mode='nearest', cval=0.):
     """Performs a random spatial zoom of a Numpy image tensor.
-
     # Arguments
         x: Input tensor. Must be 3D.
         zoom_range: Tuple of floats; zoom range for width and height.
@@ -135,10 +128,8 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-
     # Returns
         Zoomed Numpy image tensor.
-
     # Raises
         ValueError: if `zoom_range` isn't a tuple.
     """
@@ -157,15 +148,12 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
 
 def apply_channel_shift(x, intensity, channel_axis=0):
     """Performs a channel shift.
-
     # Arguments
         x: Input tensor. Must be 3D.
         intensity: Transformation intensity.
         channel_axis: Index of axis for channels in the input tensor.
-
     # Returns
         Numpy image tensor.
-
     """
     x = np.rollaxis(x, channel_axis, 0)
     min_x, max_x = np.min(x), np.max(x)
@@ -181,12 +169,10 @@ def apply_channel_shift(x, intensity, channel_axis=0):
 
 def random_channel_shift(x, intensity_range, channel_axis=0):
     """Performs a random channel shift.
-
     # Arguments
         x: Input tensor. Must be 3D.
         intensity_range: Transformation intensity.
         channel_axis: Index of axis for channels in the input tensor.
-
     # Returns
         Numpy image tensor.
     """
@@ -196,15 +182,12 @@ def random_channel_shift(x, intensity_range, channel_axis=0):
 
 def apply_brightness_shift(x, brightness):
     """Performs a brightness shift.
-
     # Arguments
         x: Input tensor. Must be 3D.
         brightness: Float. The new brightness value.
         channel_axis: Index of axis for channels in the input tensor.
-
     # Returns
         Numpy image tensor.
-
     # Raises
         ValueError if `brightness_range` isn't a tuple.
     """
@@ -217,15 +200,12 @@ def apply_brightness_shift(x, brightness):
 
 def random_brightness(x, brightness_range):
     """Performs a random brightness shift.
-
     # Arguments
         x: Input tensor. Must be 3D.
         brightness_range: Tuple of floats; brightness range.
         channel_axis: Index of axis for channels in the input tensor.
-
     # Returns
         Numpy image tensor.
-
     # Raises
         ValueError if `brightness_range` isn't a tuple.
     """
@@ -251,7 +231,6 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
                            row_axis=0, col_axis=1, channel_axis=2,
                            fill_mode='nearest', cval=0.):
     """Applies an affine transformation specified by the parameters given.
-
     # Arguments
         x: 2D numpy array, single image.
         theta: Rotation angle in degrees.
@@ -268,7 +247,6 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-
     # Returns
         The transformed version of the input.
     """
@@ -337,17 +315,14 @@ def flip_axis(x, axis):
 
 def array_to_img(x, data_format=None, scale=True):
     """Converts a 3D Numpy array to a PIL Image instance.
-
     # Arguments
         x: Input Numpy array.
         data_format: Image data format.
             either "channels_first" or "channels_last".
         scale: Whether to rescale image values
             to be within `[0, 255]`.
-
     # Returns
         A PIL Image instance.
-
     # Raises
         ImportError: if PIL is not available.
         ValueError: if invalid `x` or `data_format` is passed.
@@ -388,15 +363,12 @@ def array_to_img(x, data_format=None, scale=True):
 
 def img_to_array(img, data_format=None):
     """Converts a PIL Image instance to a Numpy array.
-
     # Arguments
         img: PIL Image instance.
         data_format: Image data format,
             either "channels_first" or "channels_last".
-
     # Returns
         A 3D Numpy array.
-
     # Raises
         ValueError: if invalid `img` or `data_format` is passed.
     """
@@ -427,7 +399,6 @@ def save_img(path,
              file_format=None,
              scale=True, **kwargs):
     """Saves an image stored as a Numpy array to a path or file object.
-
     # Arguments
         path: Path or file object.
         x: Numpy array.
@@ -447,7 +418,6 @@ def save_img(path,
 def load_img(path, grayscale=False, target_size=None,
              interpolation='nearest'):
     """Loads an image into PIL format.
-
     # Arguments
         path: Path to image file.
         grayscale: Boolean, whether to load the image as grayscale.
@@ -459,10 +429,8 @@ def load_img(path, grayscale=False, target_size=None,
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
-
     # Returns
         A PIL Image instance.
-
     # Raises
         ImportError: if PIL is not available.
         ValueError: if interpolation method is not supported.
@@ -500,7 +468,6 @@ def list_pictures(directory, ext='jpg|jpeg|bmp|png|ppm'):
 class ImageDataGenerator(object):
     """Generate batches of tensor image data with real-time data augmentation.
      The data will be looped over (in batches).
-
     # Arguments
         featurewise_center: Boolean.
             Set input mean to 0 over the dataset, feature-wise.
@@ -569,15 +536,12 @@ class ImageDataGenerator(object):
             If you never set it, then it will be "channels_last".
         validation_split: Float. Fraction of images reserved for validation
             (strictly between 0 and 1).
-
     # Examples
     Example of using `.flow(x, y)`:
-
     ```python
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
     y_train = np_utils.to_categorical(y_train, num_classes)
     y_test = np_utils.to_categorical(y_test, num_classes)
-
     datagen = ImageDataGenerator(
         featurewise_center=True,
         featurewise_std_normalization=True,
@@ -585,15 +549,12 @@ class ImageDataGenerator(object):
         width_shift_range=0.2,
         height_shift_range=0.2,
         horizontal_flip=True)
-
     # compute quantities required for featurewise normalization
     # (std, mean, and principal components if ZCA whitening is applied)
     datagen.fit(x_train)
-
     # fits the model on batches with real-time data augmentation:
     model.fit_generator(datagen.flow(x_train, y_train, batch_size=32),
                         steps_per_epoch=len(x_train) / 32, epochs=epochs)
-
     # here's a more "manual" example
     for e in range(epochs):
         print('Epoch', e)
@@ -607,28 +568,23 @@ class ImageDataGenerator(object):
                 break
     ```
     Example of using `.flow_from_directory(directory)`:
-
     ```python
     train_datagen = ImageDataGenerator(
             rescale=1./255,
             shear_range=0.2,
             zoom_range=0.2,
             horizontal_flip=True)
-
     test_datagen = ImageDataGenerator(rescale=1./255)
-
     train_generator = train_datagen.flow_from_directory(
             'data/train',
             target_size=(150, 150),
             batch_size=32,
             class_mode='binary')
-
     validation_generator = test_datagen.flow_from_directory(
             'data/validation',
             target_size=(150, 150),
             batch_size=32,
             class_mode='binary')
-
     model.fit_generator(
             train_generator,
             steps_per_epoch=2000,
@@ -636,9 +592,7 @@ class ImageDataGenerator(object):
             validation_data=validation_generator,
             validation_steps=800)
     ```
-
     Example of transforming images and masks together.
-
     ```python
     # we create two instances with the same arguments
     data_gen_args = dict(featurewise_center=True,
@@ -649,25 +603,20 @@ class ImageDataGenerator(object):
                          zoom_range=0.2)
     image_datagen = ImageDataGenerator(**data_gen_args)
     mask_datagen = ImageDataGenerator(**data_gen_args)
-
     # Provide the same seed and keyword arguments to the fit and flow methods
     seed = 1
     image_datagen.fit(images, augment=True, seed=seed)
     mask_datagen.fit(masks, augment=True, seed=seed)
-
     image_generator = image_datagen.flow_from_directory(
         'data/images',
         class_mode=None,
         seed=seed)
-
     mask_generator = mask_datagen.flow_from_directory(
         'data/masks',
         class_mode=None,
         seed=seed)
-
     # combine generators into one which yields image and masks
     train_generator = zip(image_generator, mask_generator)
-
     model.fit_generator(
         train_generator,
         steps_per_epoch=2000,
@@ -685,6 +634,8 @@ class ImageDataGenerator(object):
                  rotation_range=0.,
                  width_shift_range=0.,
                  height_shift_range=0.,
+                 center_crop = False,
+                 center_crop_size =0,
                  brightness_range=None,
                  shear_range=0.,
                  zoom_range=0.,
@@ -709,6 +660,8 @@ class ImageDataGenerator(object):
         self.width_shift_range = width_shift_range
         self.height_shift_range = height_shift_range
         self.brightness_range = brightness_range
+        self.center_crop = center_crop
+        self.center_crop_size = center_crop_size,
         self.shear_range = shear_range
         self.zoom_range = zoom_range
         self.channel_shift_range = channel_shift_range
@@ -718,6 +671,12 @@ class ImageDataGenerator(object):
         self.vertical_flip = vertical_flip
         self.rescale = rescale
         self.preprocessing_function = preprocessing_function
+
+        if center_crop:
+            if not isinstance(self.center_crop_size, list):
+                self.center_crop_size = [self.center_crop_size[0], self.center_crop_size[0]]
+            elif len(self.center_crop_size) != 2:
+                raise ValueError('center_crop_size needs to be either a single int or a length-2 list')
 
         if data_format not in {'channels_last', 'channels_first'}:
             raise ValueError(
@@ -784,7 +743,6 @@ class ImageDataGenerator(object):
              sample_weight=None, seed=None,
              save_to_dir=None, save_prefix='', save_format='png', subset=None):
         """Takes data & label arrays, generates batches of augmented data.
-
         # Arguments
             x: Input data. Numpy array of rank 4 or a tuple.
                 If tuple, the first element
@@ -813,7 +771,6 @@ class ImageDataGenerator(object):
                 (only relevant if `save_to_dir` is set). Default: "png".
             subset: Subset of data (`"training"` or `"validation"`) if
                 `validation_split` is set in `ImageDataGenerator`.
-
         # Returns
             An `Iterator` yielding tuples of `(x, y)`
                 where `x` is a numpy array of image data
@@ -847,7 +804,6 @@ class ImageDataGenerator(object):
                             subset=None,
                             interpolation='nearest'):
         """Takes the path to a directory & generates batches of augmented data.
-
         # Arguments
             directory: Path to the target directory.
                 It should contain one subdirectory per class.
@@ -914,7 +870,6 @@ class ImageDataGenerator(object):
                 supported. If PIL version 3.4.0 or newer is installed,
                 `"box"` and `"hamming"` are also supported.
                 By default, `"nearest"` is used.
-
         # Returns
             A `DirectoryIterator` yielding tuples of `(x, y)`
                 where `x` is a numpy array containing a batch
@@ -936,10 +891,8 @@ class ImageDataGenerator(object):
 
     def standardize(self, x):
         """Applies the normalization configuration to a batch of inputs.
-
         # Arguments
             x: Batch of inputs to be normalized.
-
         # Returns
             The inputs, normalized.
         """
@@ -983,18 +936,17 @@ class ImageDataGenerator(object):
 
     def get_random_transform(self, img_shape, seed=None):
         """Generates random parameters for a transformation.
-
         # Arguments
             seed: Random seed.
             img_shape: Tuple of integers.
                 Shape of the image that is transformed.
-
         # Returns
             A dictionary containing randomly chosen parameters describing the
             transformation.
         """
         img_row_axis = self.row_axis - 1
         img_col_axis = self.col_axis - 1
+        img_channel_axis = self.channel_axis - 1
 
         if seed is not None:
             np.random.seed(seed)
@@ -1077,7 +1029,6 @@ class ImageDataGenerator(object):
 
     def apply_transform(self, x, transform_parameters):
         """Applies a transformation to an image according to given parameters.
-
         # Arguments
             x: 3D tensor, single image.
             transform_parameters: Dictionary with string - parameter pairs
@@ -1094,7 +1045,6 @@ class ImageDataGenerator(object):
                 - `'flip_vertical'`: Boolean. Vertical flip.
                 - `'channel_shift_intencity'`: Float. Channel shift intensity.
                 - `'brightness'`: Float. Brightness shift intensity.
-
         # Returns
             A ransformed version of the input (same shape).
         """
@@ -1127,15 +1077,28 @@ class ImageDataGenerator(object):
         if transform_parameters.get('brightness') is not None:
             x = apply_brightness_shift(x, transform_parameters['brightness'])
 
-        return x
+        if self.center_crop: # FIXME normalize how it's done
+            sizes = [x.shape[img_row_axis], x.shape[img_col_axis]]
+
+            if np.all([a>0 for a in self.center_crop_size]) and np.all([self.center_crop_size[i]<=sizes[i] for i in range(len(self.center_crop_size))]):
+
+                center_crop_x = self.center_crop_size[0]//2
+                center_crop_y = self.center_crop_size[1]//2
+
+                if img_channel_axis == 0:
+                    _, center_rows, center_cols = [a // 2 for a in x.shape]
+                    x = x[:,center_rows-center_crop_x:center_rows+center_crop_x,
+                        center_cols-center_crop_y:center_cols+center_crop_y]
+                else:
+                    center_rows, center_cols, _ = [a // 2 for a in x.shape]
+                    x = x[center_rows-center_crop_x:center_rows+center_crop_x,
+                        center_cols-center_crop_y:center_cols+center_crop_y,:]
 
     def random_transform(self, x, seed=None):
         """Applies a random transformation to an image.
-
         # Arguments
             x: 3D tensor, single image.
             seed: Random seed.
-
         # Returns
             A randomly transformed version of the input (same shape).
         """
@@ -1147,13 +1110,10 @@ class ImageDataGenerator(object):
             rounds=1,
             seed=None):
         """Fits the data generator to some sample data.
-
         This computes the internal data stats related to the
         data-dependent transformations, based on an array of sample data.
-
         Only required if `featurewise_center` or
         `featurewise_std_normalization` or `zca_whitening` are set to True.
-
         # Arguments
             x: Sample data. Should have rank 4.
              In case of grayscale data,
@@ -1220,10 +1180,8 @@ class ImageDataGenerator(object):
 
 class Iterator(keras_utils.Sequence):
     """Base class for image data iterators.
-
     Every `Iterator` must implement the `_get_batches_of_transformed_samples`
     method.
-
     # Arguments
         n: Integer, total number of samples in the dataset to loop over.
         batch_size: Integer, size of a batch.
@@ -1299,10 +1257,8 @@ class Iterator(keras_utils.Sequence):
 
     def _get_batches_of_transformed_samples(self, index_array):
         """Gets a batch of transformed samples.
-
         # Arguments
             index_array: Array of sample indices to include in batch.
-
         # Returns
             A batch of transformed samples.
         """
@@ -1311,7 +1267,6 @@ class Iterator(keras_utils.Sequence):
 
 class NumpyArrayIterator(Iterator):
     """Iterator yielding data from a Numpy array.
-
     # Arguments
         x: Numpy array of input data or tuple.
             If tuple, the second elements is either
@@ -1421,8 +1376,18 @@ class NumpyArrayIterator(Iterator):
                                                  seed)
 
     def _get_batches_of_transformed_samples(self, index_array):
-        batch_x = np.zeros(tuple([len(index_array)] + list(self.x.shape)[1:]),
-                           dtype=backend.floatx())
+        if not self.image_data_generator.center_crop:
+            shape_this = list(self.x.shape)
+            batch_x = np.zeros(tuple([len(index_array)] + list(shape_this)[1:]),
+                               dtype=backend.floatx())
+        else:
+            if isinstance(self, NumpyArrayIterator):
+                new_size = [self.x.shape[1 if backend.image_data_format() == 'channels_first' else -1], self.image_data_generator.center_crop_size[0], self.image_data_generator.center_crop_size[1]]
+            else:
+                new_size = [self.image_shape[0 if backend.image_data_format() == 'channels_first' else -1 ], self.image_data_generator.center_crop_size[0], self.image_data_generator.center_crop_size[1]]
+                
+            batch_x = np.zeros(tuple([len(index_array)] + new_size), dtype=backend.floatx())
+
         for i, j in enumerate(index_array):
             x = self.x[j]
             params = self.image_data_generator.get_random_transform(x.shape)
@@ -1452,7 +1417,6 @@ class NumpyArrayIterator(Iterator):
 
     def next(self):
         """For python 2.x.
-
         # Returns
             The next batch.
         """
@@ -1467,14 +1431,12 @@ class NumpyArrayIterator(Iterator):
 
 def _iter_valid_files(directory, white_list_formats, follow_links):
     """Iterates on files with extension in `white_list_formats` contained in `directory`.
-
     # Arguments
         directory: Absolute path to the directory
             containing files to be counted
         white_list_formats: Set of strings containing allowed extensions for
             the files to be counted.
         follow_links: Boolean.
-
     # Yields
         Tuple of (root, filename) with extension in `white_list_formats`.
     """
@@ -1498,7 +1460,6 @@ def _count_valid_files_in_directory(directory,
                                     split,
                                     follow_links):
     """Counts files with extension in `white_list_formats` contained in `directory`.
-
     # Arguments
         directory: absolute path to the directory
             containing files to be counted
@@ -1509,7 +1470,6 @@ def _count_valid_files_in_directory(directory,
             E.g.: `segment=(0.6, 1.0)` would only account for last 40 percent
             of images in each directory.
         follow_links: boolean.
-
     # Returns
         the count of files with extension in `white_list_formats` contained in
         the directory.
@@ -1526,7 +1486,6 @@ def _count_valid_files_in_directory(directory,
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,
                                        class_indices, follow_links):
     """Lists paths of files in `subdir` with extensions in `white_list_formats`.
-
     # Arguments
         directory: absolute path to a directory containing the files to list.
             The directory name is used as class label
@@ -1539,7 +1498,6 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             of images in each directory.
         class_indices: dictionary mapping a class name to its index.
         follow_links: boolean.
-
     # Returns
         classes: a list of class indices
         filenames: the path of valid files in `directory`, relative from
@@ -1573,7 +1531,6 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
 
 class DirectoryIterator(Iterator):
     """Iterator capable of reading images from a directory on disk.
-
     # Arguments
         directory: Path to the directory to read images from.
             Each subdirectory in this directory will be
@@ -1721,9 +1678,12 @@ class DirectoryIterator(Iterator):
                                                 seed)
 
     def _get_batches_of_transformed_samples(self, index_array):
-        batch_x = np.zeros(
-            (len(index_array),) + self.image_shape,
-            dtype=backend.floatx())
+        if not self.image_data_generator.center_crop:
+            batch_x = np.zeros((len(index_array),) + self.image_shape, dtype=backend.floatx())
+        else:
+            new_size = (self.image_shape[0], self.image_data_generator.center_crop_size[0], self.image_data_generator.center_crop_size[1])
+            batch_x = np.zeros((len(index_array),) + new_size, dtype=backend.floatx())
+
         grayscale = self.color_mode == 'grayscale'
         # build batch of image data
         for i, j in enumerate(index_array):
@@ -1766,7 +1726,6 @@ class DirectoryIterator(Iterator):
 
     def next(self):
         """For python 2.x.
-
         # Returns
             The next batch.
         """
