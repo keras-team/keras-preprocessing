@@ -697,6 +697,9 @@ class ImageDataGenerator(object):
                  preprocessing_function=None,
                  data_format=None,
                  validation_split=0.0):
+        if brightness_range is not None and len(brightness_range) != 2:
+            raise ValueError('`brightness_range` should be tuple or list of '
+                             'two floats. Received: %s' % brightness_range)
         if data_format is None:
             data_format = backend.image_data_format()
         self.featurewise_center = featurewise_center
@@ -1054,11 +1057,7 @@ class ImageDataGenerator(object):
                                                         self.channel_shift_range)
 
         brightness = None
-        if self.brightness_range is not None:
-            if len(self.brightness_range) != 2:
-                raise ValueError(
-                    '`brightness_range should be tuple or list of two floats. '
-                    'Received: %s' % self.brightness_range)
+        if self.brightness_range:
             brightness = np.random.uniform(self.brightness_range[0],
                                            self.brightness_range[1])
 
