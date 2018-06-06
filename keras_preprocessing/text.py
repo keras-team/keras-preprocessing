@@ -206,7 +206,10 @@ class Tokenizer(object):
             self.document_count += 1
             if self.char_level or isinstance(text, list):
                 if self.lower:
-                    text = text.lower()
+                    if isinstance(text, list):
+                        text = [text_elem.lower() for text_elem in text]
+                    else:
+                        text = text.lower()
                 seq = text
             else:
                 seq = text_to_word_sequence(text,
@@ -289,7 +292,10 @@ class Tokenizer(object):
         for text in texts:
             if self.char_level or isinstance(text, list):
                 if self.lower:
-                    text = text.lower()
+                    if isinstance(text, list):
+                        text = [text_elem.lower() for text_elem in text]
+                    else:
+                        text = text.lower()
                 seq = text
             else:
                 seq = text_to_word_sequence(text,
