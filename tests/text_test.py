@@ -134,9 +134,9 @@ def test_tokenizer_lower_flag():
              'The dog sat on the log.',
              'Dog and Cat living Together.']
     word_tokenizer.fit_on_texts(texts)
-    expected_word_counts = OrderedDict([('the', 4), ('cat', 2), ('sat', 2), \
-                                        ('on', 2), ('mat', 1), ('dog', 2), \
-                                        ('log', 1), ('and', 1), ('living', 1), \
+    expected_word_counts = OrderedDict([('the', 4), ('cat', 2), ('sat', 2),
+                                        ('on', 2), ('mat', 1), ('dog', 2),
+                                        ('log', 1), ('and', 1), ('living', 1),
                                         ('together', 1)])
     assert word_tokenizer.word_counts == expected_word_counts
 
@@ -147,8 +147,8 @@ def test_tokenizer_lower_flag():
         ['The', 'dog', 'is', 'standing']
     ]
     word_tokenizer.fit_on_texts(word_sequences)
-    expected_word_counts = OrderedDict([('the', 2), ('cat', 1), ('is', 2), \
-                                        ('sitting', 1), ('dog', 1), \
+    expected_word_counts = OrderedDict([('the', 2), ('cat', 1), ('is', 2),
+                                        ('sitting', 1), ('dog', 1),
                                         ('standing', 1)])
     assert word_tokenizer.word_counts == expected_word_counts
 
@@ -158,10 +158,10 @@ def test_tokenizer_lower_flag():
              'The dog sat on the log.',
              'Dog and Cat living Together.']
     char_tokenizer.fit_on_texts(texts)
-    expected_word_counts = OrderedDict([('t', 11), ('h', 5), ('e', 6), (' ', 14), \
-                                        ('c', 2), ('a', 6), ('s', 2), ('o', 6), \
-                                        ('n', 4), ('m', 1), ('.', 3), ('d', 3), \
-                                        ('g', 5), ('l', 2), ('i', 2), ('v', 1), \
+    expected_word_counts = OrderedDict([('t', 11), ('h', 5), ('e', 6), (' ', 14),
+                                        ('c', 2), ('a', 6), ('s', 2), ('o', 6),
+                                        ('n', 4), ('m', 1), ('.', 3), ('d', 3),
+                                        ('g', 5), ('l', 2), ('i', 2), ('v', 1),
                                         ('r', 1)])
     assert char_tokenizer.word_counts == expected_word_counts
 
