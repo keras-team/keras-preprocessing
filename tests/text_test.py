@@ -13,6 +13,7 @@ keras_preprocessing.set_keras_submodules(
 from keras_preprocessing import text
 from collections import OrderedDict
 
+
 def test_one_hot():
     sample_text = 'The cat sat on the mat.'
     encoded = text.one_hot(sample_text, 5)
@@ -124,6 +125,7 @@ def test_tokenizer_oov_flag():
     tokenizer.fit_on_texts(x_train)
     x_test_seq = tokenizer.texts_to_sequences(x_test)
     assert len(x_test_seq[0]) == 6  # OOVs marked in place
+
 
 def test_tokenizer_lower_flag():
     """Tests for `lower` flag in text.Tokenizer
