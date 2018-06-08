@@ -11,6 +11,7 @@ keras_preprocessing.set_keras_submodules(
     backend=keras.backend, utils=keras.utils)
 
 from keras_preprocessing import text
+from collections import OrderedDict
 
 
 def test_one_hot():
@@ -125,6 +126,46 @@ def test_tokenizer_oov_flag():
     x_test_seq = tokenizer.texts_to_sequences(x_test)
     assert len(x_test_seq[0]) == 6  # OOVs marked in place
 
+
+def test_tokenizer_lower_flag():
+    """Tests for `lower` flag in text.Tokenizer
+    """
+    # word level tokenizer with sentences as texts
+    word_tokenizer = text.Tokenizer(lower=True)
+    texts = ['The cat sat on the mat.',
+             'The dog sat on the log.',
+             'Dog and Cat living Together.']
+    word_tokenizer.fit_on_texts(texts)
+    expected_word_counts = OrderedDict([('the', 4), ('cat', 2), ('sat', 2),
+                                        ('on', 2), ('mat', 1), ('dog', 2),
+                                        ('log', 1), ('and', 1), ('living', 1),
+                                        ('together', 1)])
+    assert word_tokenizer.word_counts == expected_word_counts
+
+    # word level tokenizer with word_sequences as texts
+    word_tokenizer = text.Tokenizer(lower=True)
+    word_sequences = [
+        ['The', 'cat', 'is', 'sitting'],
+        ['The', 'dog', 'is', 'standing']
+    ]
+    word_tokenizer.fit_on_texts(word_sequences)
+    expected_word_counts = OrderedDict([('the', 2), ('cat', 1), ('is', 2),
+                                        ('sitting', 1), ('dog', 1),
+                                        ('standing', 1)])
+    assert word_tokenizer.word_counts == expected_word_counts
+
+    # char level tokenizer with sentences as texts
+    char_tokenizer = text.Tokenizer(lower=True, char_level=True)
+    texts = ['The cat sat on the mat.',
+             'The dog sat on the log.',
+             'Dog and Cat living Together.']
+    char_tokenizer.fit_on_texts(texts)
+    expected_word_counts = OrderedDict([('t', 11), ('h', 5), ('e', 6), (' ', 14),
+                                        ('c', 2), ('a', 6), ('s', 2), ('o', 6),
+                                        ('n', 4), ('m', 1), ('.', 3), ('d', 3),
+                                        ('g', 5), ('l', 2), ('i', 2), ('v', 1),
+                                        ('r', 1)])
+    assert char_tokenizer.word_counts == expected_word_counts
 
 if __name__ == '__main__':
     pytest.main([__file__])
