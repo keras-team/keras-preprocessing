@@ -643,7 +643,7 @@ class ImageDataGenerator(object):
     # we create two instances with the same arguments
     data_gen_args = dict(featurewise_center=True,
                          featurewise_std_normalization=True,
-                         rotation_range=90.,
+                         rotation_range=90,
                          width_shift_range=0.1,
                          height_shift_range=0.1,
                          zoom_range=0.2)
@@ -682,7 +682,7 @@ class ImageDataGenerator(object):
                  samplewise_std_normalization=False,
                  zca_whitening=False,
                  zca_epsilon=1e-6,
-                 rotation_range=0.,
+                 rotation_range=0,
                  width_shift_range=0.,
                  height_shift_range=0.,
                  brightness_range=None,
