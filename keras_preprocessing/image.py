@@ -144,7 +144,7 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
     """
     if len(zoom_range) != 2:
         raise ValueError('`zoom_range` should be a tuple or list of two'
-                         ' floats. Received: ', zoom_range)
+                         ' floats. Received: ', (zoom_range,))
 
     if zoom_range[0] == 1 and zoom_range[1] == 1:
         zx, zy = 1, 1
@@ -232,7 +232,7 @@ def random_brightness(x, brightness_range):
     if len(brightness_range) != 2:
         raise ValueError(
             '`brightness_range should be tuple or list of two floats. '
-            'Received: %s' % brightness_range)
+            'Received: %s' % (brightness_range,))
 
     u = np.random.uniform(brightness_range[0], brightness_range[1])
     return apply_brightness_shift(x, u)
@@ -751,7 +751,7 @@ class ImageDataGenerator(object):
         else:
             raise ValueError('`zoom_range` should be a float or '
                              'a tuple or list of two floats. '
-                             'Received: %s' % zoom_range)
+                             'Received: %s' % (zoom_range,))
         if zca_whitening:
             if not featurewise_center:
                 self.featurewise_center = True
@@ -1058,7 +1058,7 @@ class ImageDataGenerator(object):
             if len(self.brightness_range) != 2:
                 raise ValueError(
                     '`brightness_range should be tuple or list of two floats. '
-                    'Received: %s' % brightness_range)
+                    'Received: %s' % (self.brightness_range,))
             brightness = np.random.uniform(self.brightness_range[0],
                                            self.brightness_range[1])
 
