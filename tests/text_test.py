@@ -126,7 +126,7 @@ def test_tokenizer_oov_flag():
     x_test_seq = tokenizer.texts_to_sequences(x_test)
     assert len(x_test_seq[0]) == 6  # OOVs marked in place
 
-    
+
 def test_tokenizer_oov_flag_and_num_words(self):
     x_train = ['This text has only known words this text']
     x_test = ['This text has some unknown words']
@@ -138,7 +138,7 @@ def test_tokenizer_oov_flag_and_num_words(self):
     trans_text = ' '.join(tokenizer.index_word[t] for t in x_test_seq[0])
     self.assertEqual(len(x_test_seq[0]), 6)
     self.assertEqual(trans_text, 'this <unk> <unk> <unk> <unk> <unk>')
-    
+
 
 def test_tokenizer_lower_flag():
     """Tests for `lower` flag in text.Tokenizer
