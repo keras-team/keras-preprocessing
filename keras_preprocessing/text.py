@@ -227,16 +227,19 @@ class Tokenizer(object):
 
         wcounts = list(self.word_counts.items())
         wcounts.sort(key=lambda x: x[1], reverse=True)
-        sorted_voc = [wc[0] for wc in wcounts]
+        # forcing the oov_token to index 1 if it exists
+        if self.oov_token is None:
+          sorted_voc = []
+        else:
+          sorted_voc = [self.oov_token]            
+        sorted_voc.extend(wc[0] for wc in wcounts)
+
         # note that index 0 is reserved, never assigned to an existing word
         self.word_index = dict(
             list(zip(sorted_voc, list(range(1, len(sorted_voc) + 1)))))
-
-        if self.oov_token is not None:
-            i = self.word_index.get(self.oov_token)
-            if i is None:
-                self.word_index[self.oov_token] = len(self.word_index) + 1
-
+        
+        self.index_word = dict((c, w) for w, c in self.word_index.items())
+        
         for w, c in list(self.word_docs.items()):
             self.index_docs[self.word_index[w]] = c
 
@@ -257,7 +260,7 @@ class Tokenizer(object):
                 self.index_docs[i] += 1
 
     def texts_to_sequences(self, texts):
-        """Transforms each text in texts in a sequence of integers.
+        """Transforms each text in texts to a sequence of integers.
 
         Only top "num_words" most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
@@ -307,13 +310,14 @@ class Tokenizer(object):
                 i = self.word_index.get(w)
                 if i is not None:
                     if num_words and i >= num_words:
-                        continue
+                        oov_token_index = self.word_index.get(self.oov_token)
+                        if oov_token_index is not None:
+                          vect.append(oov_token_index)
                     else:
                         vect.append(i)
                 elif self.oov_token is not None:
                     i = self.word_index.get(self.oov_token)
-                    if i is not None:
-                        vect.append(i)
+                    vect.append(i)
             yield vect
 
     def texts_to_matrix(self, texts, mode='binary'):
