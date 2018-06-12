@@ -127,7 +127,7 @@ def test_tokenizer_oov_flag():
     assert len(x_test_seq[0]) == 6  # OOVs marked in place
 
 
-def test_tokenizer_oov_flag_and_num_words(self):
+def test_tokenizer_oov_flag_and_num_words():
     x_train = ['This text has only known words this text']
     x_test = ['This text has some unknown words']
 
