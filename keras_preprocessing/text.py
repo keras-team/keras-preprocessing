@@ -277,7 +277,7 @@ class Tokenizer(object):
         return res
 
     def texts_to_sequences_generator(self, texts):
-        """Transforms each text in `texts` in a sequence of integers.
+        """Transforms each text in `texts` to a sequence of integers.
 
         Each item in texts can also be a list,
         in which case we assume each item of that list to be a token.
@@ -316,8 +316,58 @@ class Tokenizer(object):
                     else:
                         vect.append(i)
                 elif self.oov_token is not None:
-                    i = self.word_index.get(self.oov_token)
-                    vect.append(i)
+                    oov_token_index = self.word_index.get(self.oov_token)
+                    vect.append(oov_token_index)
+            yield vect
+    
+    def sequences_to_texts(self, sequences):
+        """Transforms each sequence into a list of text.
+
+        Only top "num_words" most frequent words will be taken into account.
+        Only words known by the tokenizer will be taken into account.
+
+        # Arguments
+            texts: A list of sequences (list of integers).
+
+        # Returns
+            A list of texts (strings)
+        """
+        res = []
+        for seq in self.sequences_to_texts_generator(sequences):
+            res.append(seq)
+        return res
+
+    def sequences_to_texts_generator(self, sequences):
+        """Transforms each sequence in `sequences` to a list of texts(strings).
+
+        Each sequence has to a list of integers.
+        In other words, sequences should be a list of sequences
+
+        Only top "num_words" most frequent words will be taken into account.
+        Only words known by the tokenizer will be taken into account.
+
+        # Arguments
+            texts: A list of sequences.
+
+        # Yields
+            Yields individual texts.
+        """
+        num_words = self.num_words
+        for seq in sequences:
+            vect = []
+            for num in seq:
+                word = self.index_word.get(num)
+                if word is not None:
+                    if num_words and num >= num_words:
+                        oov_token_index = self.word_index.get(self.oov_token)
+                        if oov_token_index is not None:
+                            vect.append(self.index_word[oov_token_index])
+                    else:
+                        vect.append(word)
+                elif self.oov_token is not None:
+                    oov_token_index = self.word_index.get(self.oov_token)
+                    vect.append(self.index_word[oov_token_index])
+            vect = ' '.join(vect)
             yield vect
 
     def texts_to_matrix(self, texts, mode='binary'):
