@@ -216,7 +216,7 @@ def test_sequences_to_texts():
     print (trans_text)
     assert trans_text == ['the cat sat on the mat', 
                           'the dog sat on the log', 
-                          'dogs <unk> <unk> <unk> <unk>'])
+                          'dogs <unk> <unk> <unk> <unk>']
 
 
 def test_tokenizer_lower_flag():
