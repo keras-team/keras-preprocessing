@@ -319,7 +319,7 @@ class Tokenizer(object):
                     oov_token_index = self.word_index.get(self.oov_token)
                     vect.append(oov_token_index)
             yield vect
-    
+
     def sequences_to_texts(self, sequences):
         """Transforms each sequence into a list of text.
 

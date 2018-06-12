@@ -214,8 +214,8 @@ def test_sequences_to_texts():
     tokenized_text = tokenizer.texts_to_sequences(texts)
     trans_text = tokenizer.sequences_to_texts(tokenized_text)
     print (trans_text)
-    assert trans_text == ['the cat sat on the mat', 
-                          'the dog sat on the log', 
+    assert trans_text == ['the cat sat on the mat',
+                          'the dog sat on the log',
                           'dogs <unk> <unk> <unk> <unk>']
 
 
