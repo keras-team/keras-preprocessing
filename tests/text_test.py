@@ -136,8 +136,8 @@ def test_tokenizer_oov_flag_and_num_words():
     tokenizer.fit_on_texts(x_train)
     x_test_seq = tokenizer.texts_to_sequences(x_test)
     trans_text = ' '.join(tokenizer.index_word[t] for t in x_test_seq[0])
-    self.assertEqual(len(x_test_seq[0]), 6)
-    self.assertEqual(trans_text, 'this <unk> <unk> <unk> <unk> <unk>')
+    assert len(x_test_seq[0]) == 6
+    assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
 
 
 def test_tokenizer_lower_flag():
