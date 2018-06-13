@@ -552,7 +552,7 @@ class ImageDataGenerator(object):
         rescale: rescaling factor. Defaults to None.
             If None or 0, no rescaling is applied,
             otherwise we multiply the data by the value provided
-            (before applying any other transformation).
+            (after applying all other transformations).
         preprocessing_function: function that will be implied on each input.
             The function will run after the image is resized and augmented.
             The function should take one argument:
