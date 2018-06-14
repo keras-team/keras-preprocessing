@@ -359,6 +359,10 @@ class Tokenizer(object):
             raise ValueError('Fit the Tokenizer on some data '
                              'before using tfidf mode.')
 
+        if mode in ['tfidf','freq'] or (mode == 'count' and dtype == np.bool_):
+            warnings.warn('Reverting to np.float64 data type.')
+            dtype = np.float64
+
         x = np.zeros((len(sequences), num_words), dtype=dtype)
         for i, seq in enumerate(sequences):
             if not seq:
