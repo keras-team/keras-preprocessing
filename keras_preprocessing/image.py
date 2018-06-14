@@ -855,8 +855,7 @@ class ImageDataGenerator(object):
                 inside each of the subdirectories directory tree
                 will be included in the generator.
                 See [this script](
-                    https://gist.github.com/fchollet/
-                    0830affa1f7f19fd47b06d4cf89ed44d)
+                https://gist.github.com/fchollet/0830affa1f7f19fd47b06d4cf89ed44d)
                 for more details.
             target_size: Tuple of integers `(height, width)`,
                 default: `(256, 256)`.
