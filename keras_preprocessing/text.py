@@ -316,26 +316,28 @@ class Tokenizer(object):
                         vect.append(i)
             yield vect
 
-    def texts_to_matrix(self, texts, mode='binary'):
+    def texts_to_matrix(self, texts, mode='binary', dtype=np.float64):
         """Convert a list of texts to a Numpy matrix.
 
         # Arguments
             texts: list of strings.
             mode: one of "binary", "count", "tfidf", "freq".
+            dtype: a NumPy data type.
 
         # Returns
             A Numpy matrix.
         """
         sequences = self.texts_to_sequences(texts)
-        return self.sequences_to_matrix(sequences, mode=mode)
+        return self.sequences_to_matrix(sequences, mode=mode, dtype=dtype)
 
-    def sequences_to_matrix(self, sequences, mode='binary'):
+    def sequences_to_matrix(self, sequences, mode='binary', dtype=np.float64):
         """Converts a list of sequences into a Numpy matrix.
 
         # Arguments
             sequences: list of sequences
                 (a sequence is a list of integer word indices).
             mode: one of "binary", "count", "tfidf", "freq"
+            dtype: a NumPy data type.
 
         # Returns
             A Numpy matrix.
@@ -357,7 +359,7 @@ class Tokenizer(object):
             raise ValueError('Fit the Tokenizer on some data '
                              'before using tfidf mode.')
 
-        x = np.zeros((len(sequences), num_words))
+        x = np.zeros((len(sequences), num_words), dtype=dtype)
         for i, seq in enumerate(sequences):
             if not seq:
                 continue
