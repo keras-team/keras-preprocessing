@@ -271,8 +271,7 @@ class Tokenizer(object):
         # Returns
             A list of sequences.
         """
-        res = list(self.texts_to_sequences_generator(texts))
-        return res
+        return list(self.texts_to_sequences_generator(texts))
 
     def texts_to_sequences_generator(self, texts):
         """Transforms each text in `texts` to a sequence of integers.
@@ -329,8 +328,7 @@ class Tokenizer(object):
         # Returns
             A list of texts (strings)
         """
-        res = list(self.sequences_to_texts_generator(sequences))
-        return res
+        return list(self.sequences_to_texts_generator(sequences))
 
     def sequences_to_texts_generator(self, sequences):
         """Transforms each sequence in `sequences` to a list of texts(strings).
