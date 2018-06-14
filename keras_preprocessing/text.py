@@ -271,9 +271,7 @@ class Tokenizer(object):
         # Returns
             A list of sequences.
         """
-        res = []
-        for vect in self.texts_to_sequences_generator(texts):
-            res.append(vect)
+        res = list(self.texts_to_sequences_generator(texts))
         return res
 
     def texts_to_sequences_generator(self, texts):
@@ -292,6 +290,7 @@ class Tokenizer(object):
             Yields individual sequences.
         """
         num_words = self.num_words
+        oov_token_index = self.word_index.get(self.oov_token)
         for text in texts:
             if self.char_level or isinstance(text, list):
                 if self.lower:
@@ -310,13 +309,11 @@ class Tokenizer(object):
                 i = self.word_index.get(w)
                 if i is not None:
                     if num_words and i >= num_words:
-                        oov_token_index = self.word_index.get(self.oov_token)
                         if oov_token_index is not None:
                             vect.append(oov_token_index)
                     else:
                         vect.append(i)
                 elif self.oov_token is not None:
-                    oov_token_index = self.word_index.get(self.oov_token)
                     vect.append(oov_token_index)
             yield vect
 
@@ -332,9 +329,7 @@ class Tokenizer(object):
         # Returns
             A list of texts (strings)
         """
-        res = []
-        for seq in self.sequences_to_texts_generator(sequences):
-            res.append(seq)
+        res = list(self.sequences_to_texts_generator(sequences))
         return res
 
     def sequences_to_texts_generator(self, sequences):
@@ -353,19 +348,18 @@ class Tokenizer(object):
             Yields individual texts.
         """
         num_words = self.num_words
+        oov_token_index = self.word_index.get(self.oov_token)
         for seq in sequences:
             vect = []
             for num in seq:
                 word = self.index_word.get(num)
                 if word is not None:
                     if num_words and num >= num_words:
-                        oov_token_index = self.word_index.get(self.oov_token)
                         if oov_token_index is not None:
                             vect.append(self.index_word[oov_token_index])
                     else:
                         vect.append(word)
                 elif self.oov_token is not None:
-                    oov_token_index = self.word_index.get(self.oov_token)
                     vect.append(self.index_word[oov_token_index])
             vect = ' '.join(vect)
             yield vect
