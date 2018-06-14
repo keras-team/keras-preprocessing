@@ -127,6 +127,98 @@ def test_tokenizer_oov_flag():
     assert len(x_test_seq[0]) == 6  # OOVs marked in place
 
 
+def test_tokenizer_oov_flag_and_num_words():
+    x_train = ['This text has only known words this text']
+    x_test = ['This text has some unknown words']
+
+    tokenizer = keras.preprocessing.text.Tokenizer(num_words=3,
+                                                   oov_token='<unk>')
+    tokenizer.fit_on_texts(x_train)
+    x_test_seq = tokenizer.texts_to_sequences(x_test)
+    trans_text = ' '.join(tokenizer.index_word[t] for t in x_test_seq[0])
+    assert len(x_test_seq[0]) == 6
+    assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
+
+
+def test_tokenizer_oov_flag_and_num_words():
+    x_train = ['This text has only known words this text']
+    x_test = ['This text has some unknown words']
+
+    tokenizer = keras.preprocessing.text.Tokenizer(num_words=3,
+                                                   oov_token='<unk>')
+    tokenizer.fit_on_texts(x_train)
+    x_test_seq = tokenizer.texts_to_sequences(x_test)
+    trans_text = ' '.join(tokenizer.index_word[t] for t in x_test_seq[0])
+    assert len(x_test_seq[0]) == 6
+    assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
+
+
+def test_sequences_to_texts_with_num_words_and_oov_token():
+    x_train = ['This text has only known words this text']
+    x_test = ['This text has some unknown words']
+
+    tokenizer = keras.preprocessing.text.Tokenizer(num_words=3,
+                                                   oov_token='<unk>')
+
+    tokenizer.fit_on_texts(x_train)
+    x_test_seq = tokenizer.texts_to_sequences(x_test)
+    trans_text = tokenizer.sequences_to_texts(x_test_seq)
+    assert trans_text == ['this <unk> <unk> <unk> <unk> <unk>']
+
+
+def test_sequences_to_texts_no_num_words():
+    x_train = ['This text has only known words this text']
+    x_test = ['This text has some unknown words']
+
+    tokenizer = keras.preprocessing.text.Tokenizer(oov_token='<unk>')
+
+    tokenizer.fit_on_texts(x_train)
+    x_test_seq = tokenizer.texts_to_sequences(x_test)
+    trans_text = tokenizer.sequences_to_texts(x_test_seq)
+    assert trans_text == ['this text has <unk> <unk> words']
+
+
+def test_sequences_to_texts_no_oov_token():
+    x_train = ['This text has only known words this text']
+    x_test = ['This text has some unknown words']
+
+    tokenizer = keras.preprocessing.text.Tokenizer(num_words=3)
+
+    tokenizer.fit_on_texts(x_train)
+    x_test_seq = tokenizer.texts_to_sequences(x_test)
+    trans_text = tokenizer.sequences_to_texts(x_test_seq)
+    assert trans_text == ['this text']
+
+
+def test_sequences_to_texts_no_num_words_no_oov_token():
+    x_train = ['This text has only known words this text']
+    x_test = ['This text has some unknown words']
+
+    tokenizer = keras.preprocessing.text.Tokenizer()
+
+    tokenizer.fit_on_texts(x_train)
+    x_test_seq = tokenizer.texts_to_sequences(x_test)
+    trans_text = tokenizer.sequences_to_texts(x_test_seq)
+    assert trans_text == ['this text has words']
+
+
+def test_sequences_to_texts():
+    texts = [
+        'The cat sat on the mat.',
+        'The dog sat on the log.',
+        'Dogs and cats living together.'
+    ]
+    tokenizer = keras.preprocessing.text.Tokenizer(num_words=10,
+                                                   oov_token='<unk>')
+    tokenizer.fit_on_texts(texts)
+    tokenized_text = tokenizer.texts_to_sequences(texts)
+    trans_text = tokenizer.sequences_to_texts(tokenized_text)
+    print (trans_text)
+    assert trans_text == ['the cat sat on the mat',
+                          'the dog sat on the log',
+                          'dogs <unk> <unk> <unk> <unk>']
+
+
 def test_tokenizer_lower_flag():
     """Tests for `lower` flag in text.Tokenizer
     """
