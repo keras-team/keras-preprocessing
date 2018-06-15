@@ -376,7 +376,10 @@ def array_to_img(x, data_format=None, scale=True):
         if x_max != 0:
             x /= x_max
         x *= 255
-    if x.shape[2] == 3:
+    if x.shape[2] == 4:
+        # RGBA
+        return pil_image.fromarray(x.astype('uint8'), 'RGBA')
+    elif x.shape[2] == 3:
         # RGB
         return pil_image.fromarray(x.astype('uint8'), 'RGB')
     elif x.shape[2] == 1:
@@ -475,7 +478,7 @@ def load_img(path, grayscale=False, target_size=None,
         if img.mode != 'L':
             img = img.convert('L')
     else:
-        if img.mode != 'RGB':
+        if img.mode != 'RGB' and img.mode != 'RGBA':
             img = img.convert('RGB')
     if target_size is not None:
         width_height_tuple = (target_size[1], target_size[0])
@@ -795,8 +798,9 @@ class ImageDataGenerator(object):
                 Can be used to feed the model miscellaneous data
                 along with the images.
                 In case of grayscale data, the channels axis of the image array
-                should have value 1, and in case
-                of RGB data, it should have value 3.
+                should have value 1, in case
+                of RGB data, it should have value 3, and in case
+                of RGBA data, it should have value 4.
             y: Labels.
             batch_size: Int (default: 32).
             shuffle: Boolean (default: True).
@@ -860,9 +864,9 @@ class ImageDataGenerator(object):
             target_size: Tuple of integers `(height, width)`,
                 default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
-            color_mode: One of "grayscale", "rbg". Default: "rgb".
+            color_mode: One of "grayscale", "rbg", "rgba". Default: "rgb".
                 Whether the images will be converted to
-                have 1 or 3 color channels.
+                have 1, 3, or 4 channels.
             classes: Optional list of class subdirectories
                 (e.g. `['dogs', 'cats']`). Default: None.
                 If not provided, the list of classes will be automatically
@@ -1156,8 +1160,9 @@ class ImageDataGenerator(object):
         # Arguments
             x: Sample data. Should have rank 4.
              In case of grayscale data,
-             the channels axis should have value 1, and in case
-             of RGB data, it should have value 3.
+             the channels axis should have value 1, in case
+             of RGB data, it should have value 3, and in case
+             of RGBA data, it should have value 4.
             augment: Boolean (default: False).
                 Whether to fit on randomly augmented samples.
             rounds: Int (default: 1).
@@ -1396,7 +1401,7 @@ class NumpyArrayIterator(Iterator):
             warnings.warn('NumpyArrayIterator is set to use the '
                           'data format convention "' + data_format + '" '
                           '(channels on axis ' + str(channels_axis) +
-                          '), i.e. expected either 1, 3 or 4 '
+                          '), i.e. expected either 1, 3, or 4 '
                           'channels on axis ' + str(channels_axis) + '. '
                           'However, it was passed an array with shape ' +
                           str(self.x.shape) + ' (' +
@@ -1582,7 +1587,7 @@ class DirectoryIterator(Iterator):
         image_data_generator: Instance of `ImageDataGenerator`
             to use for random transformations and normalization.
         target_size: tuple of integers, dimensions to resize input images to.
-        color_mode: One of `"rgb"`, `"grayscale"`. Color mode to read images.
+        color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`. Color mode to read images.
         classes: Optional list of strings, names of subdirectories
             containing images from each class (e.g. `["dogs", "cats"]`).
             It will be computed automatically if not set.
@@ -1629,12 +1634,17 @@ class DirectoryIterator(Iterator):
         self.directory = directory
         self.image_data_generator = image_data_generator
         self.target_size = tuple(target_size)
-        if color_mode not in {'rgb', 'grayscale'}:
+        if color_mode not in {'rgb', 'rgba', 'grayscale'}:
             raise ValueError('Invalid color mode:', color_mode,
-                             '; expected "rgb" or "grayscale".')
+                             '; expected "rgb", "rgba", or "grayscale".')
         self.color_mode = color_mode
         self.data_format = data_format
-        if self.color_mode == 'rgb':
+        if self.color_mode == 'rgba':
+            if self.data_format == 'channels_last':
+                self.image_shape = self.target_size + (4,)
+            else:
+                self.image_shape = (4,) + self.target_size
+        elif self.color_mode == 'rgb':
             if self.data_format == 'channels_last':
                 self.image_shape = self.target_size + (3,)
             else:
