@@ -1438,6 +1438,10 @@ class NumpyArrayIterator(Iterator):
                     index=j,
                     hash=np.random.randint(1e4),
                     format=self.save_format)
+
+                if not os.path.exists(self.save_to_dir):
+                    os.mkdir(self.save_to_dir)
+
                 img.save(os.path.join(self.save_to_dir, fname))
         batch_x_miscs = [xx[index_array] for xx in self.x_misc]
         output = (batch_x if batch_x_miscs == []
