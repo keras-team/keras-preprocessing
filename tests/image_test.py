@@ -651,7 +651,7 @@ class TestImage(object):
         assert loaded_im_array.shape == original_rgb_array.shape
         assert np.all(loaded_im_array == original_rgb_array)
 
-        loaded_im = image.load_img(filename_rgba, color_mode='rgba', 
+        loaded_im = image.load_img(filename_rgba, color_mode='rgba',
                                    target_size=(100, 100))
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == original_rgba_array.shape
@@ -669,7 +669,7 @@ class TestImage(object):
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (25, 25, 3)
 
-        loaded_im = image.load_img(filename_rgba, color_mode='rgba', 
+        loaded_im = image.load_img(filename_rgba, color_mode='rgba',
                                    target_size=(25, 25))
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (25, 25, 4)
