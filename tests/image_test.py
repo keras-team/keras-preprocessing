@@ -341,7 +341,7 @@ class TestImage(object):
                                                 color_mode='rgb',
                                                 batch_size=3,
                                                 class_mode='categorical')
-        assert len(dir_seq) == count // 3 + 1
+        assert len(dir_seq) == Math.ceil(count / 3)
         x1, y1 = dir_seq[1]
         assert x1.shape == (3, 26, 26, 3)
         assert y1.shape == (3, num_classes)
@@ -378,9 +378,9 @@ class TestImage(object):
         assert(input_img[0][0][0] != output_img[0][0][0])
 
     @pytest.mark.parametrize('validation_split,num_training', [
-        (0.25, 12),
-        (0.40, 10),
-        (0.50, 8),
+        (0.25, 18),
+        (0.50, 12),
+        (0.75, 6),
     ])
     def test_directory_iterator_with_validation_split(self,
                                                       validation_split,
@@ -617,12 +617,12 @@ class TestImage(object):
         filename_rgba = str(tmpdir / 'rgba_image.png')
 
         original_rgb_array = np.array(255 * np.random.rand(100, 100, 3),
-                                     dtype=np.uint8)
+                                        dtype=np.uint8)
         original_rgb = image.array_to_img(original_rgb_array, scale=False)
         original_rgb.save(filename_rgb)
 
         original_rgba_array = np.array(255 * np.random.rand(100, 100, 4),
-                                     dtype=np.uint8)
+                                        dtype=np.uint8)
         original_rgba = image.array_to_img(original_rgba_array, scale=False)
         original_rgba.save(filename_rgba)
 
