@@ -634,12 +634,12 @@ class TestImage(object):
         assert loaded_im_array.shape == original_rgb_array.shape
         assert np.all(loaded_im_array == original_rgb_array)
 
-        loaded_im = image.load_img(filename_rgba)
+        loaded_im = image.load_img(filename_rgba, color_mode='rgba')
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == original_rgba_array.shape
         assert np.all(loaded_im_array == original_rgba_array)
 
-        loaded_im = image.load_img(filename_rgb, grayscale=True)
+        loaded_im = image.load_img(filename_rgb, color_mode='grayscale')
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (original_rgb_array.shape[0],
                                          original_rgb_array.shape[1], 1)
@@ -651,12 +651,13 @@ class TestImage(object):
         assert loaded_im_array.shape == original_rgb_array.shape
         assert np.all(loaded_im_array == original_rgb_array)
 
-        loaded_im = image.load_img(filename_rgba, target_size=(100, 100))
+        loaded_im = image.load_img(filename_rgba, color_mode='rgba', 
+                                   target_size=(100, 100))
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == original_rgba_array.shape
         assert np.all(loaded_im_array == original_rgba_array)
 
-        loaded_im = image.load_img(filename_rgba, grayscale=True,
+        loaded_im = image.load_img(filename_rgb, color_mode='grayscale',
                                    target_size=(100, 100))
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (original_rgba_array.shape[0],
@@ -668,11 +669,12 @@ class TestImage(object):
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (25, 25, 3)
 
-        loaded_im = image.load_img(filename_rgba, target_size=(25, 25))
+        loaded_im = image.load_img(filename_rgba, color_mode='rgba', 
+                                   target_size=(25, 25))
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (25, 25, 4)
 
-        loaded_im = image.load_img(filename_rgb, grayscale=True,
+        loaded_im = image.load_img(filename_rgb, color_mode='grayscale',
                                    target_size=(25, 25))
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (25, 25, 1)
@@ -685,7 +687,8 @@ class TestImage(object):
         assert loaded_im_array_nearest.shape == (25, 25, 3)
         assert np.any(loaded_im_array_nearest != loaded_im_array)
 
-        loaded_im_nearest = image.load_img(filename_rgba, target_size=(25, 25),
+        loaded_im_nearest = image.load_img(filename_rgba, color_mode='rgba',
+                                           target_size=(25, 25),
                                            interpolation="nearest")
         loaded_im_array_nearest = image.img_to_array(loaded_im_nearest)
         assert loaded_im_array_nearest.shape == (25, 25, 4)
