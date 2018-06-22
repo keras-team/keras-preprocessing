@@ -1638,6 +1638,11 @@ class DirectoryIterator(Iterator):
         if color_mode not in {'rgb', 'rgba', 'grayscale'}:
             raise ValueError('Invalid color mode:', color_mode,
                              '; expected "rgb", "rgba", or "grayscale".')
+        if ((color_mode == 'rgba') and ((save_format == 'jpeg') or
+                                        (save_format == 'jpg'))):
+            warnings.warn('The JPG format does not support '
+                          'RGBA images, converting to RGB.')
+            color_mode = 'rgb'
         self.color_mode = color_mode
         self.data_format = data_format
         if self.color_mode == 'rgba':
