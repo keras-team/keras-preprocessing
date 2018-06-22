@@ -1,5 +1,6 @@
 import pytest
 from PIL import Image
+from math import ceil
 import numpy as np
 import os
 import tempfile
@@ -341,7 +342,7 @@ class TestImage(object):
                                                 color_mode='rgb',
                                                 batch_size=3,
                                                 class_mode='categorical')
-        assert len(dir_seq) == Math.ceil(count / 3)
+        assert len(dir_seq) == ceil(count / 3)
         x1, y1 = dir_seq[1]
         assert x1.shape == (3, 26, 26, 3)
         assert y1.shape == (3, num_classes)
