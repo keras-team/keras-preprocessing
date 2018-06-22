@@ -451,13 +451,14 @@ def save_img(path,
     img.save(path, format=file_format, **kwargs)
 
 
-def load_img(path, grayscale=False, target_size=None,
+def load_img(path, color_mode='rgb', target_size=None,
              interpolation='nearest'):
     """Loads an image into PIL format.
 
     # Arguments
         path: Path to image file.
-        grayscale: Boolean, whether to load the image as grayscale.
+        color_mode: One of "grayscale", "rbg", "rgba". Default: "rgb".
+            The desired image format.
         target_size: Either `None` (default to original size)
             or tuple of ints `(img_height, img_width)`.
         interpolation: Interpolation method used to resample the image if the
@@ -1738,12 +1739,11 @@ class DirectoryIterator(Iterator):
         batch_x = np.zeros(
             (len(index_array),) + self.image_shape,
             dtype=backend.floatx())
-        grayscale = self.color_mode == 'grayscale'
         # build batch of image data
         for i, j in enumerate(index_array):
             fname = self.filenames[j]
             img = load_img(os.path.join(self.directory, fname),
-                           grayscale=grayscale,
+                           color_mode=self.color_mode,
                            target_size=self.target_size,
                            interpolation=self.interpolation)
             x = img_to_array(img, data_format=self.data_format)
