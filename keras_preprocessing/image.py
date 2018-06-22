@@ -479,11 +479,14 @@ def load_img(path, color_mode='rgb', target_size=None,
         raise ImportError('Could not import PIL.Image. '
                           'The use of `array_to_img` requires PIL.')
     img = pil_image.open(path)
-    if grayscale:
+    if color_mode=='grayscale':
         if img.mode != 'L':
             img = img.convert('L')
+    elif color_mode=='rgba':
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
     else:
-        if img.mode != 'RGB' and img.mode != 'RGBA':
+        if img.mode != 'RGB':
             img = img.convert('RGB')
     if target_size is not None:
         width_height_tuple = (target_size[1], target_size[0])
