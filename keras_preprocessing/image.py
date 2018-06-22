@@ -444,6 +444,11 @@ def save_img(path,
         **kwargs: Additional keyword arguments passed to `PIL.Image.save()`.
     """
     img = array_to_img(x, data_format=data_format, scale=scale)
+    if img.mode == 'RGBA' and (file_format == 'jpg' or 
+                               file_format == 'jpeg')
+        warnings.warn('The JPG format does not support '
+                      'RGBA images, converting to RGB.')
+        img = img.convert('RGB')
     img.save(path, format=file_format, **kwargs)
 
 
