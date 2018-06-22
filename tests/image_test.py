@@ -638,7 +638,7 @@ class TestImage(object):
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == original_rgba_array.shape
         assert np.all(loaded_im_array == original_rgba_array)
-        
+
         loaded_im = image.load_img(filename_rgb, grayscale=True)
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (original_rgb_array.shape[0],
