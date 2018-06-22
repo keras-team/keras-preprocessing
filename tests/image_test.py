@@ -304,7 +304,7 @@ class TestImage(object):
                 classpaths = paths[im_class]
                 filename = os.path.join(
                     classpaths[count % len(classpaths)],
-                    'image-{}.jpg'.format(count))
+                    'image-{}.png'.format(count))
                 filenames.append(filename)
                 im.save(str(tmpdir / filename))
                 count += 1
@@ -360,7 +360,7 @@ class TestImage(object):
         for test_images in self.all_test_images:
             for im in test_images:
                 filename = str(
-                    tmpdir / 'class-1' / 'image-{}.jpg'.format(count))
+                    tmpdir / 'class-1' / 'image-{}.png'.format(count))
                 im.save(filename)
                 count += 1
 
@@ -414,7 +414,7 @@ class TestImage(object):
                 classpaths = paths[im_class]
                 filename = os.path.join(
                     classpaths[count % len(classpaths)],
-                    'image-{}.jpg'.format(count))
+                    'image-{}.png'.format(count))
                 filenames.append(filename)
                 im.save(os.path.join(tmp_folder, filename))
                 count += 1
