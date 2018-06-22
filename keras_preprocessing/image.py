@@ -170,7 +170,7 @@ def apply_channel_shift(x, intensity, channel_axis=0):
     x = np.rollaxis(x, channel_axis, 0)
     min_x, max_x = np.min(x), np.max(x)
     channel_images = [
-        np.clip(x_channel + intensity,
+        np.clip(x_channel + np.random.uniform(-intensity, intensity),
                 min_x,
                 max_x)
         for x_channel in x]
@@ -190,7 +190,7 @@ def random_channel_shift(x, intensity_range, channel_axis=0):
     # Returns
         Numpy image tensor.
     """
-    intensity = np.random.uniform(-intensity_range, intensity_range)
+    intensity = intensity_range
     return apply_channel_shift(x, intensity, channel_axis=channel_axis)
 
 
@@ -1049,8 +1049,7 @@ class ImageDataGenerator(object):
 
         channel_shift_intensity = None
         if self.channel_shift_range != 0:
-            channel_shift_intensity = np.random.uniform(-self.channel_shift_range,
-                                                        self.channel_shift_range)
+            channel_shift_intensity = self.channel_shift_range
 
         brightness = None
         if self.brightness_range is not None:
