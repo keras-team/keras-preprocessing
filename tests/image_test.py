@@ -617,12 +617,12 @@ class TestImage(object):
         filename_rgba = str(tmpdir / 'rgba_image.png')
 
         original_rgb_array = np.array(255 * np.random.rand(100, 100, 3),
-                                        dtype=np.uint8)
+                                      dtype=np.uint8)
         original_rgb = image.array_to_img(original_rgb_array, scale=False)
         original_rgb.save(filename_rgb)
 
         original_rgba_array = np.array(255 * np.random.rand(100, 100, 4),
-                                        dtype=np.uint8)
+                                       dtype=np.uint8)
         original_rgba = image.array_to_img(original_rgba_array, scale=False)
         original_rgba.save(filename_rgba)
 
