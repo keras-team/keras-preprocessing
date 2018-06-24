@@ -855,8 +855,7 @@ class ImageDataGenerator(object):
                 inside each of the subdirectories directory tree
                 will be included in the generator.
                 See [this script](
-                    https://gist.github.com/fchollet/
-                    0830affa1f7f19fd47b06d4cf89ed44d)
+                https://gist.github.com/fchollet/0830affa1f7f19fd47b06d4cf89ed44d)
                 for more details.
             target_size: Tuple of integers `(height, width)`,
                 default: `(256, 256)`.
@@ -1733,6 +1732,10 @@ class DirectoryIterator(Iterator):
                            target_size=self.target_size,
                            interpolation=self.interpolation)
             x = img_to_array(img, data_format=self.data_format)
+            # Pillow images should be closed after `load_img`,
+            # but not PIL images.
+            if hasattr(img, 'close'):
+                img.close()
             params = self.image_data_generator.get_random_transform(x.shape)
             x = self.image_data_generator.apply_transform(x, params)
             x = self.image_data_generator.standardize(x)
