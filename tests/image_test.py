@@ -1,6 +1,5 @@
 import pytest
 from PIL import Image
-from math import ceil
 import numpy as np
 import os
 import tempfile
@@ -32,8 +31,6 @@ class TestImage(object):
             im = Image.fromarray(imarray.astype('uint8')).convert('RGB')
             rgb_images.append(im)
 
-            bias = np.random.rand(cls.img_w, cls.img_h, 1) * 64
-            variance = np.random.rand(cls.img_w, cls.img_h, 1) * (255 - 64)
             imarray = np.random.rand(cls.img_w, cls.img_h, 4) * variance + bias
             im = Image.fromarray(imarray.astype('uint8')).convert('RGBA')
             rgba_images.append(im)
@@ -342,7 +339,7 @@ class TestImage(object):
                                                 color_mode='rgb',
                                                 batch_size=3,
                                                 class_mode='categorical')
-        assert len(dir_seq) == ceil(count / 3)
+        assert len(dir_seq) == np.ceil(count / 3)
         x1, y1 = dir_seq[1]
         assert x1.shape == (3, 26, 26, 3)
         assert y1.shape == (3, num_classes)
