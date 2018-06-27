@@ -478,7 +478,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     if grayscale is True:
         warnings.warn('grayscale is deprecated. Please use '
                       'color_mode = "grayscale"')
-        load_img = 'grayscale'
+        color_mode = 'grayscale'
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
                           'The use of `array_to_img` requires PIL.')
