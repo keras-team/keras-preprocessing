@@ -507,6 +507,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
             img = img.resize(width_height_tuple, resample)
     return img
 
+
 def list_pictures(directory, ext='jpg|jpeg|bmp|png|ppm'):
     return [os.path.join(root, f)
             for root, _, files in os.walk(directory) for f in files
