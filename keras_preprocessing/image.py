@@ -493,7 +493,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
         if img.mode != 'RGB':
             img = img.convert('RGB')
     else:
-        raise ValueError('color_mode must be "grayscale", "rbg", "rgba"')
+        raise ValueError('color_mode must be "grayscale", "rbg", or "rgba"')
     if target_size is not None:
         width_height_tuple = (target_size[1], target_size[0])
         if img.size != width_height_tuple:
