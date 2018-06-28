@@ -472,7 +472,7 @@ def load_img(path, grayscale=False, target_size=None,
                           'The use of `array_to_img` requires PIL.')
     img = pil_image.open(path)
     if grayscale:
-        if img.mode != 'L':
+        if img.mode not in ('L', 'I;16'):
             img = img.convert('L')
     else:
         if img.mode != 'RGB':
