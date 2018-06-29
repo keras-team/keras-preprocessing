@@ -22,6 +22,7 @@ class TestImage(object):
     def setup_class(cls):
         cls.img_w = cls.img_h = 20
         rgb_images = []
+        rgba_images = []
         gray_images = []
         for n in range(8):
             bias = np.random.rand(cls.img_w, cls.img_h, 1) * 64
@@ -30,12 +31,16 @@ class TestImage(object):
             im = Image.fromarray(imarray.astype('uint8')).convert('RGB')
             rgb_images.append(im)
 
+            imarray = np.random.rand(cls.img_w, cls.img_h, 4) * variance + bias
+            im = Image.fromarray(imarray.astype('uint8')).convert('RGBA')
+            rgba_images.append(im)
+
             imarray = np.random.rand(cls.img_w, cls.img_h, 1) * variance + bias
             im = Image.fromarray(
                 imarray.astype('uint8').squeeze()).convert('L')
             gray_images.append(im)
 
-        cls.all_test_images = [rgb_images, gray_images]
+        cls.all_test_images = [rgb_images, rgba_images, gray_images]
 
     def teardown_class(cls):
         del cls.all_test_images
@@ -296,7 +301,7 @@ class TestImage(object):
                 classpaths = paths[im_class]
                 filename = os.path.join(
                     classpaths[count % len(classpaths)],
-                    'image-{}.jpg'.format(count))
+                    'image-{}.png'.format(count))
                 filenames.append(filename)
                 im.save(str(tmpdir / filename))
                 count += 1
@@ -334,7 +339,7 @@ class TestImage(object):
                                                 color_mode='rgb',
                                                 batch_size=3,
                                                 class_mode='categorical')
-        assert len(dir_seq) == count // 3 + 1
+        assert len(dir_seq) == np.ceil(count / 3)
         x1, y1 = dir_seq[1]
         assert x1.shape == (3, 26, 26, 3)
         assert y1.shape == (3, num_classes)
@@ -352,7 +357,7 @@ class TestImage(object):
         for test_images in self.all_test_images:
             for im in test_images:
                 filename = str(
-                    tmpdir / 'class-1' / 'image-{}.jpg'.format(count))
+                    tmpdir / 'class-1' / 'image-{}.png'.format(count))
                 im.save(filename)
                 count += 1
 
@@ -371,9 +376,9 @@ class TestImage(object):
         assert(input_img[0][0][0] != output_img[0][0][0])
 
     @pytest.mark.parametrize('validation_split,num_training', [
-        (0.25, 12),
-        (0.40, 10),
-        (0.50, 8),
+        (0.25, 18),
+        (0.50, 12),
+        (0.75, 6),
     ])
     def test_directory_iterator_with_validation_split(self,
                                                       validation_split,
@@ -406,7 +411,7 @@ class TestImage(object):
                 classpaths = paths[im_class]
                 filename = os.path.join(
                     classpaths[count % len(classpaths)],
-                    'image-{}.jpg'.format(count))
+                    'image-{}.png'.format(count))
                 filenames.append(filename)
                 im.save(os.path.join(tmp_folder, filename))
                 count += 1
@@ -436,11 +441,18 @@ class TestImage(object):
         height, width = 10, 8
 
         # Test th data format
+        # Test RGB 3D
         x = np.random.random((3, height, width))
         img = image.array_to_img(x, data_format='channels_first')
         assert img.size == (width, height)
         x = image.img_to_array(img, data_format='channels_first')
         assert x.shape == (3, height, width)
+        # Test RGBA 3D
+        x = np.random.random((4, height, width))
+        img = image.array_to_img(x, data_format='channels_first')
+        assert img.size == (width, height)
+        x = image.img_to_array(img, data_format='channels_first')
+        assert x.shape == (4, height, width)
         # Test 2D
         x = np.random.random((1, height, width))
         img = image.array_to_img(x, data_format='channels_first')
@@ -449,11 +461,18 @@ class TestImage(object):
         assert x.shape == (1, height, width)
 
         # Test tf data format
+        # Test RGB 3D
         x = np.random.random((height, width, 3))
         img = image.array_to_img(x, data_format='channels_last')
         assert img.size == (width, height)
         x = image.img_to_array(img, data_format='channels_last')
         assert x.shape == (height, width, 3)
+        # Test RGBA 3D
+        x = np.random.random((height, width, 4))
+        img = image.array_to_img(x, data_format='channels_last')
+        assert img.size == (width, height)
+        x = image.img_to_array(img, data_format='channels_last')
+        assert x.shape == (height, width, 4)
         # Test 2D
         x = np.random.random((height, width, 1))
         img = image.array_to_img(x, data_format='channels_last')
@@ -470,7 +489,7 @@ class TestImage(object):
             # unknown data_format
             img = image.array_to_img(x, data_format='channels')
         with pytest.raises(ValueError):
-            # neither RGB nor gray-scale
+            # neither RGB, RGBA, or gray-scale
             x = np.random.random((height, width, 5))
             img = image.array_to_img(x, data_format='channels_last')
         with pytest.raises(ValueError):
@@ -478,7 +497,7 @@ class TestImage(object):
             # unknown data_format
             img = image.img_to_array(x, data_format='channels')
         with pytest.raises(ValueError):
-            # neither RGB nor gray-scale
+            # neither RGB, RGBA, or gray-scale
             x = np.random.random((height, width, 5, 3))
             img = image.img_to_array(x, data_format='channels_last')
 
@@ -592,62 +611,91 @@ class TestImage(object):
             transformed = generator.standardize(transformed)
 
     def test_load_img(self, tmpdir):
-        filename = str(tmpdir / 'image.png')
+        filename_rgb = str(tmpdir / 'rgb_image.png')
+        filename_rgba = str(tmpdir / 'rgba_image.png')
 
-        original_im_array = np.array(255 * np.random.rand(100, 100, 3),
-                                     dtype=np.uint8)
-        original_im = image.array_to_img(original_im_array, scale=False)
-        original_im.save(filename)
+        original_rgb_array = np.array(255 * np.random.rand(100, 100, 3),
+                                      dtype=np.uint8)
+        original_rgb = image.array_to_img(original_rgb_array, scale=False)
+        original_rgb.save(filename_rgb)
+
+        original_rgba_array = np.array(255 * np.random.rand(100, 100, 4),
+                                       dtype=np.uint8)
+        original_rgba = image.array_to_img(original_rgba_array, scale=False)
+        original_rgba.save(filename_rgba)
 
         # Test that loaded image is exactly equal to original.
 
-        loaded_im = image.load_img(filename)
+        loaded_im = image.load_img(filename_rgb)
         loaded_im_array = image.img_to_array(loaded_im)
-        assert loaded_im_array.shape == original_im_array.shape
-        assert np.all(loaded_im_array == original_im_array)
+        assert loaded_im_array.shape == original_rgb_array.shape
+        assert np.all(loaded_im_array == original_rgb_array)
 
-        loaded_im = image.load_img(filename, grayscale=True)
+        loaded_im = image.load_img(filename_rgba, color_mode='rgba')
         loaded_im_array = image.img_to_array(loaded_im)
-        assert loaded_im_array.shape == (original_im_array.shape[0],
-                                         original_im_array.shape[1], 1)
+        assert loaded_im_array.shape == original_rgba_array.shape
+        assert np.all(loaded_im_array == original_rgba_array)
+
+        loaded_im = image.load_img(filename_rgb, color_mode='grayscale')
+        loaded_im_array = image.img_to_array(loaded_im)
+        assert loaded_im_array.shape == (original_rgb_array.shape[0],
+                                         original_rgb_array.shape[1], 1)
 
         # Test that nothing is changed when target size is equal to original.
 
-        loaded_im = image.load_img(filename, target_size=(100, 100))
+        loaded_im = image.load_img(filename_rgb, target_size=(100, 100))
         loaded_im_array = image.img_to_array(loaded_im)
-        assert loaded_im_array.shape == original_im_array.shape
-        assert np.all(loaded_im_array == original_im_array)
+        assert loaded_im_array.shape == original_rgb_array.shape
+        assert np.all(loaded_im_array == original_rgb_array)
 
-        loaded_im = image.load_img(filename, grayscale=True,
+        loaded_im = image.load_img(filename_rgba, color_mode='rgba',
                                    target_size=(100, 100))
         loaded_im_array = image.img_to_array(loaded_im)
-        assert loaded_im_array.shape == (original_im_array.shape[0],
-                                         original_im_array.shape[1], 1)
+        assert loaded_im_array.shape == original_rgba_array.shape
+        assert np.all(loaded_im_array == original_rgba_array)
+
+        loaded_im = image.load_img(filename_rgb, color_mode='grayscale',
+                                   target_size=(100, 100))
+        loaded_im_array = image.img_to_array(loaded_im)
+        assert loaded_im_array.shape == (original_rgba_array.shape[0],
+                                         original_rgba_array.shape[1], 1)
 
         # Test down-sampling with bilinear interpolation.
 
-        loaded_im = image.load_img(filename, target_size=(25, 25))
+        loaded_im = image.load_img(filename_rgb, target_size=(25, 25))
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (25, 25, 3)
 
-        loaded_im = image.load_img(filename, grayscale=True,
+        loaded_im = image.load_img(filename_rgba, color_mode='rgba',
+                                   target_size=(25, 25))
+        loaded_im_array = image.img_to_array(loaded_im)
+        assert loaded_im_array.shape == (25, 25, 4)
+
+        loaded_im = image.load_img(filename_rgb, color_mode='grayscale',
                                    target_size=(25, 25))
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (25, 25, 1)
 
         # Test down-sampling with nearest neighbor interpolation.
 
-        loaded_im_nearest = image.load_img(filename, target_size=(25, 25),
+        loaded_im_nearest = image.load_img(filename_rgb, target_size=(25, 25),
                                            interpolation="nearest")
         loaded_im_array_nearest = image.img_to_array(loaded_im_nearest)
         assert loaded_im_array_nearest.shape == (25, 25, 3)
         assert np.any(loaded_im_array_nearest != loaded_im_array)
 
+        loaded_im_nearest = image.load_img(filename_rgba, color_mode='rgba',
+                                           target_size=(25, 25),
+                                           interpolation="nearest")
+        loaded_im_array_nearest = image.img_to_array(loaded_im_nearest)
+        assert loaded_im_array_nearest.shape == (25, 25, 4)
+        assert np.any(loaded_im_array_nearest != loaded_im_array)
+
         # Check that exception is raised if interpolation not supported.
 
-        loaded_im = image.load_img(filename, interpolation="unsupported")
+        loaded_im = image.load_img(filename_rgb, interpolation="unsupported")
         with pytest.raises(ValueError):
-            loaded_im = image.load_img(filename, target_size=(25, 25),
+            loaded_im = image.load_img(filename_rgb, target_size=(25, 25),
                                        interpolation="unsupported")
 
 
