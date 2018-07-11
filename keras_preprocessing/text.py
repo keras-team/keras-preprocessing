@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import inspect
 import string
 import sys
 import warnings
@@ -33,7 +34,8 @@ def text_to_word_sequence(text,
             punctuation. Default: `!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n`,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to convert the input to lowercase.
-        split: str. Separator for word splitting.
+        split: str or func. Either a seperator for python split() or a custom split function
+            The custom split function should accept a string and return an iterable
 
     # Returns
         A list of words (or tokens).
@@ -56,7 +58,10 @@ def text_to_word_sequence(text,
         translate_map = maketrans(translate_dict)
         text = text.translate(translate_map)
 
-    seq = text.split(split)
+    if inspect.isfunction(split):
+        seq = split(text)
+    else:
+        seq = text.split(split)
     return [i for i in seq if i]
 
 
