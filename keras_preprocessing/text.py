@@ -155,7 +155,8 @@ class Tokenizer(object):
             filtered from the texts. The default is all punctuation, plus
             tabs and line breaks, minus the `'` character.
         lower: boolean. Whether to convert the texts to lowercase.
-        split: str. Separator for word splitting.
+        split: str or func. Either a seperator for python split() or a custom split function
+            The custom split function should accept a string and return an iterable
         char_level: if True, every character will be treated as a token.
         oov_token: if given, it will be added to word_index and used to
             replace out-of-vocabulary words during text_to_sequence calls
