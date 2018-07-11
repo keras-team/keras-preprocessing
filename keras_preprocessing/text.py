@@ -35,8 +35,7 @@ def text_to_word_sequence(text,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to convert the input to lowercase.
         split: str or func. Either a seperator for python split() or a custom split function
-            The custom split function should accept a string and return an iterable
-
+            that accepts a string and returns an iterable over tokens
     # Returns
         A list of words (or tokens).
     """
@@ -156,7 +155,7 @@ class Tokenizer(object):
             tabs and line breaks, minus the `'` character.
         lower: boolean. Whether to convert the texts to lowercase.
         split: str or func. Either a seperator for python split() or a custom split function
-            The custom split function should accept a string and return an iterable
+            that accepts a string and returns an iterable over tokens
         char_level: if True, every character will be treated as a token.
         oov_token: if given, it will be added to word_index and used to
             replace out-of-vocabulary words during text_to_sequence calls
