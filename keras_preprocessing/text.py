@@ -42,24 +42,26 @@ def text_to_word_sequence(text,
     if lower:
         text = text.lower()
 
-    if sys.version_info < (3,):
-        if isinstance(text, unicode):
-            translate_map = dict((ord(c), unicode(split)) for c in filters)
-            text = text.translate(translate_map)
-        elif len(split) == 1:
-            translate_map = maketrans(filters, split * len(filters))
-            text = text.translate(translate_map)
-        else:
-            for c in filters:
-                text = text.replace(c, split)
-    else:
-        translate_dict = dict((c, split) for c in filters)
-        translate_map = maketrans(translate_dict)
-        text = text.translate(translate_map)
-
     if callable(split):
         seq = split(text)
+        for c in filters:
+            seq = [s.replace(c, '') for s in seq]
     else:
+        if sys.version_info < (3,):
+            if isinstance(text, unicode):
+                translate_map = dict((ord(c), unicode(split)) for c in filters)
+                text = text.translate(translate_map)
+            elif len(split) == 1:
+                translate_map = maketrans(filters, split * len(filters))
+                text = text.translate(translate_map)
+            else:
+                for c in filters:
+                    text = text.replace(c, split)
+        else:
+            translate_dict = dict((c, split) for c in filters)
+            translate_map = maketrans(translate_dict)
+            text = text.translate(translate_map)
+
         seq = text.split(split)
     return [i for i in seq if i]
 
