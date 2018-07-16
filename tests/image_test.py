@@ -69,7 +69,8 @@ class TestImage(object):
                 fill_mode='nearest',
                 cval=0.5,
                 horizontal_flip=True,
-                vertical_flip=True)
+                vertical_flip=True,
+                interpolation_order=1)
             generator.fit(images, augment=True)
 
             for x, y in generator.flow(images, np.arange(images.shape[0]),
@@ -192,6 +193,19 @@ class TestImage(object):
             seq.on_epoch_end()
             x2, y2 = seq[0]
             assert list(y) != list(y2)
+
+        # test order_interpolation
+        labels = np.array([[2, 2, 0, 2, 2],
+                           [1, 3, 2, 3, 1],
+                           [2, 1, 0, 1, 2],
+                           [3, 1, 0, 2, 0],
+                           [3, 1, 3, 2, 1]])
+
+        label_generator = image.ImageDataGenerator(rotation_range=90.,
+                                                   interpolation_order=0)
+        labels_gen = label_generator.flow(x=labels[np.newaxis, ..., np.newaxis],
+                                          seed=123)
+        assert (np.unique(labels) == np.unique(next(labels_gen))).all()
 
     def test_image_data_generator_with_validation_split(self):
         for test_images in self.all_test_images:
