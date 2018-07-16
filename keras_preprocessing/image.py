@@ -548,6 +548,8 @@ class ImageDataGenerator(object):
                 same as with `height_shift_range=[-1, 0, +1]`,
                 while with `height_shift_range=1.0` possible values are floats
                 in the interval [-1.0, +1.0).
+        brightness_range: Tuple or list of two floats. Range for picking
+            a brightness shift value from.
         shear_range: Float. Shear Intensity
             (Shear angle in counter-clockwise direction in degrees)
         zoom_range: Float or [lower, upper]. Range for random zoom.
