@@ -626,7 +626,7 @@ class TestImage(object):
         original_rgba.save(filename_rgba)
         
         original_gray_16bits_array = np.array(65535 * np.random.rand(100, 100, 1),
-                                     dtype=np.uint16)
+                                              dtype=np.uint16)
         original_gray_16bits = image.array_to_img(original_gray_16bits_array, 
                                                   scale=False)
         original_gray_16bits.save(filename_gray_16bits)
