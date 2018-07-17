@@ -485,7 +485,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     img = pil_image.open(path)
 
     if color_mode == 'grayscale':
-        if img.mode != 'L':
+        if img.mode not in ('L', 'I;16'):
             img = img.convert('L')
     elif color_mode == 'rgba':
         if img.mode != 'RGBA':
