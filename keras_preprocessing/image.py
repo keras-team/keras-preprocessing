@@ -384,7 +384,10 @@ def array_to_img(x, data_format=None, scale=True):
         return pil_image.fromarray(x.astype('uint8'), 'RGB')
     elif x.shape[2] == 1:
         # grayscale
-        return pil_image.fromarray(x[:, :, 0].astype('uint8'), 'L')
+        if np.all(x < 255):
+            return pil_image.fromarray(x[:, :, 0].astype('uint8'), 'L')
+        else:
+            return pil_image.fromarray(x[:, :, 0].astype('uint16'), 'I;16')
     else:
         raise ValueError('Unsupported channel number: ', x.shape[2])
 
