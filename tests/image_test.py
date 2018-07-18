@@ -651,7 +651,7 @@ class TestImage(object):
         loaded_im = image.load_img(filename_gray_16bits, color_mode='grayscale')
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == original_gray_16bits_array.shape
-        assert np.all(loaded_im_array == original_gray_16bits)
+        assert np.all(loaded_im_array == original_gray_16bits_array)
 
         # Test that nothing is changed when target size is equal to original.
 
