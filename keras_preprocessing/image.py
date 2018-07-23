@@ -1115,7 +1115,7 @@ class ImageDataGenerator(object):
                 - `'brightness'`: Float. Brightness shift intensity.
 
         # Returns
-            A ransformed version of the input (same shape).
+            A transformed version of the input (same shape).
         """
         # x is a single image, so it doesn't have image number at index 0
         img_row_axis = self.row_axis - 1
