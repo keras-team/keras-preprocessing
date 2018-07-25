@@ -6,8 +6,6 @@ from __future__ import print_function
 
 import numpy as np
 import re
-from scipy import linalg
-import scipy.ndimage as ndi
 from six.moves import range
 import os
 import threading
@@ -25,6 +23,12 @@ try:
     from PIL import Image as pil_image
 except ImportError:
     pil_image = None
+    ImageEnhance = None
+
+try:
+    import scipy
+except ImportError:
+    scipy = None
 
 if pil_image is not None:
     _PIL_INTERPOLATION_METHODS = {
@@ -208,6 +212,9 @@ def apply_brightness_shift(x, brightness):
     # Raises
         ValueError if `brightness_range` isn't a tuple.
     """
+    if ImageEnhance is None:
+        raise ImportError('Using brightness shifts requires PIL. '
+                          'Install PIL or Pillow.')
     x = array_to_img(x)
     x = imgenhancer_Brightness = ImageEnhance.Brightness(x)
     x = imgenhancer_Brightness.enhance(brightness)
@@ -272,6 +279,9 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
     # Returns
         The transformed version of the input.
     """
+    if scipy is None:
+        raise ImportError('Image transformations require SciPy. '
+                          'Install SciPy.')
     transform_matrix = None
     if theta != 0:
         theta = np.deg2rad(theta)
@@ -316,7 +326,7 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
         final_affine_matrix = transform_matrix[:2, :2]
         final_offset = transform_matrix[:2, 2]
 
-        channel_images = [ndi.interpolation.affine_transform(
+        channel_images = [scipy.ndimage.interpolation.affine_transform(
             x_channel,
             final_affine_matrix,
             final_offset,
@@ -1230,10 +1240,13 @@ class ImageDataGenerator(object):
             x /= (self.std + backend.epsilon())
 
         if self.zca_whitening:
+            if scipy is None:
+                raise ImportError('Using zca_whitening requires SciPy. '
+                                  'Install SciPy.')
             flat_x = np.reshape(
                 x, (x.shape[0], x.shape[1] * x.shape[2] * x.shape[3]))
             sigma = np.dot(flat_x.T, flat_x) / flat_x.shape[0]
-            u, s, _ = linalg.svd(sigma)
+            u, s, _ = scipy.linalg.svd(sigma)
             s_inv = 1. / np.sqrt(s[np.newaxis] + self.zca_epsilon)
             self.principal_components = (u * s_inv).dot(u.T)
 
