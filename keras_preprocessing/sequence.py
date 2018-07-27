@@ -323,7 +323,8 @@ class TimeseriesGenerator(keras_utils.Sequence):
                  reverse=False,
                  batch_size=128):
 
-        assert len(data) == len(targets), ('Data and targets have to be' +
+        if len(data) != len(targets): 
+            raise ValueError('Data and targets have to be' +
                ' of same length. Data length is {}'.format(len(data)) +
                ' while target length is {}'.format(len(targets)))
         
@@ -449,4 +450,4 @@ def timeseries_generator_from_json(json_string):
     targets = json.loads(config.pop('targets'))
     config['targets'] = targets
 
-    return TimeseriesGenerator(config)
+    return TimeseriesGenerator(**config)
