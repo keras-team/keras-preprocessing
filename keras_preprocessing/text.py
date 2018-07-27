@@ -11,6 +11,7 @@ import warnings
 from collections import OrderedDict
 from collections import defaultdict
 from hashlib import md5
+import json
 
 import numpy as np
 from six.moves import range
@@ -169,6 +170,7 @@ class Tokenizer(object):
                  split=' ',
                  char_level=False,
                  oov_token=None,
+                 document_count = 0,
                  **kwargs):
         # Legacy support
         if 'nb_words' in kwargs:
@@ -184,7 +186,7 @@ class Tokenizer(object):
         self.split = split
         self.lower = lower
         self.num_words = num_words
-        self.document_count = 0
+        self.document_count = document_count
         self.char_level = char_level
         self.oov_token = oov_token
         self.index_docs = defaultdict(int)
@@ -429,3 +431,73 @@ class Tokenizer(object):
                 else:
                     raise ValueError('Unknown vectorization mode:', mode)
         return x
+
+    def get_config(self):
+        '''Returns the tokenizer configuration as Python dictionary.
+        The word count dictionaries used by the tokenizer get serialized
+        into plain JSON, so that the configuration can be read by other
+        projects.
+
+        # Returns
+            A Python dictionary with the tokenizer configuration.
+        '''
+        json_word_counts = json.dumps(self.word_counts)
+        json_word_docs = json.dumps(self.word_docs)
+        json_index_docs = json.dumps(self.index_docs)
+
+        return {
+            'num_words': self.num_words,
+            'filters': self.filters,
+            'lower': self.lower,
+            'split': self.split,
+            'char_level': self.char_level,
+            'oov_token': self.oov_token,
+            'document_count': self.document_count,
+            'word_counts': json_word_counts,
+            'word_docs': json_word_docs,
+            'index_docs': json_index_docs
+        }
+
+    def to_json(self):
+        """Returns a JSON string containing the tokenizer configuration.
+        To load a tokenizer from a JSON string, use
+        `keras.preprocessing.text.tokenizer_from_json(json_string)`.
+
+        # Arguments
+            **kwargs: Additional keyword arguments
+                to be passed to `json.dumps()`.
+
+        # Returns
+            A JSON string containing the tokenizer configuration.
+        """
+        config = self.get_config()
+        tokenizer_config = {
+            'class_name': self.__class__.__name__,
+            'config': config
+        }
+        return json.dumps(tokenizer_config)
+
+
+def tokenizer_from_json(json_string):
+    """Parses a JSON tokenizer configuration file and returns a 
+    tokenizer instance.
+
+    # Arguments
+        json_string: JSON string encoding a tokenizer configuration.
+
+    # Returns
+        A Keras Tokenizer instance
+    """
+    tokenizer_config = json.loads(json_string)
+    config = tokenizer_config.get('config')
+
+    word_counts = json.loads(config.pop('word_counts'))
+    word_docs = json.loads(config.pop('word_docs'))
+    index_docs = json.loads(config.pop('index_docs'))
+
+    tokenizer = Tokenizer(config)
+    tokenizer.word_counts = word_counts
+    tokenizer.word_docs = word_docs
+    tokenizer.index_docs = index_docs
+
+    return tokenizer
