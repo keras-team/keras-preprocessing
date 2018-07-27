@@ -57,6 +57,22 @@ def test_tokenizer():
         matrix = tokenizer.texts_to_matrix(sample_texts, mode)
 
 
+def test_tokenizer_serde():
+    sample_texts = [
+        'There was a time that the pieces fit, but I watched them fall away',
+        'Mildewed and smoldering, strangled by our coveting',
+        'I\'ve done the math enough to know the dangers of our second guessing']
+    tokenizer = text.Tokenizer(num_words=100)
+    tokenizer.fit_on_texts(sample_texts)
+
+    seq_generator = tokenizer.texts_to_sequences_generator(sample_texts)
+    sequences = [seq for seq in seq_generator]
+    tokenizer.fit_on_sequences(sequences)
+
+    tokenizer_json = tokenizer.to_json()
+    recovered_tokenizer =text.tokenizer_from_json(tokenizer_json)
+
+
 def test_sequential_fit():
     texts = ['The cat sat on the mat.',
              'The dog sat on the log.',
