@@ -458,7 +458,7 @@ class Tokenizer(object):
             'index_docs': json_index_docs
         }
 
-    def to_json(self):
+    def to_json(self, **kwargs):
         """Returns a JSON string containing the tokenizer configuration.
         To load a tokenizer from a JSON string, use
         `keras.preprocessing.text.tokenizer_from_json(json_string)`.
@@ -475,7 +475,7 @@ class Tokenizer(object):
             'class_name': self.__class__.__name__,
             'config': config
         }
-        return json.dumps(tokenizer_config)
+        return json.dumps(tokenizer_config, **kwargs)
 
 
 def tokenizer_from_json(json_string):
