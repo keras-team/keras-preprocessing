@@ -214,7 +214,7 @@ def skipgrams(sequence, vocabulary_size,
         random.shuffle(words)
 
         couples += [[words[i % len(words)],
-                    random.randint(1, vocabulary_size - 1)]
+                     random.randint(1, vocabulary_size - 1)]
                     for i in range(num_negative_samples)]
         if categorical:
             labels += [[1, 0]] * num_negative_samples
@@ -323,11 +323,11 @@ class TimeseriesGenerator(keras_utils.Sequence):
                  reverse=False,
                  batch_size=128):
 
-        if len(data) != len(targets): 
+        if len(data) != len(targets):
             raise ValueError('Data and targets have to be' +
-               ' of same length. Data length is {}'.format(len(data)) +
-               ' while target length is {}'.format(len(targets)))
-        
+                             ' of same length. Data length is {}'.format(len(data)) +
+                             ' while target length is {}'.format(len(targets)))
+
         self.data = data
         self.targets = targets
         self.length = length

@@ -70,7 +70,7 @@ def test_tokenizer_serde():
     tokenizer.fit_on_sequences(sequences)
 
     tokenizer_json = tokenizer.to_json()
-    recovered_tokenizer =text.tokenizer_from_json(tokenizer_json)
+    recovered_tokenizer = text.tokenizer_from_json(tokenizer_json)
 
 
 def test_sequential_fit():
@@ -229,7 +229,7 @@ def test_sequences_to_texts():
     tokenizer.fit_on_texts(texts)
     tokenized_text = tokenizer.texts_to_sequences(texts)
     trans_text = tokenizer.sequences_to_texts(tokenized_text)
-    print (trans_text)
+    print(trans_text)
     assert trans_text == ['the cat sat on the mat',
                           'the dog sat on the log',
                           'dogs <unk> <unk> <unk> <unk>']
@@ -274,6 +274,7 @@ def test_tokenizer_lower_flag():
                                         ('g', 5), ('l', 2), ('i', 2), ('v', 1),
                                         ('r', 1)])
     assert char_tokenizer.word_counts == expected_word_counts
+
 
 if __name__ == '__main__':
     pytest.main([__file__])
