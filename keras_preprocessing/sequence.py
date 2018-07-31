@@ -412,7 +412,7 @@ class TimeseriesGenerator(keras_utils.Sequence):
         }
 
     def to_json(self, **kwargs):
-        """Returns a JSON string containing the timeseries generator 
+        """Returns a JSON string containing the timeseries generator
         configuration. To load a generator from a JSON string, use
         `keras.preprocessing.sequence.timeseries_generator_from_json(json_string)`.
 
@@ -432,11 +432,11 @@ class TimeseriesGenerator(keras_utils.Sequence):
 
 
 def timeseries_generator_from_json(json_string):
-    """Parses a JSON timeseries generator configuration file and 
+    """Parses a JSON timeseries generator configuration file and
     returns a timeseries generator instance.
 
     # Arguments
-        json_string: JSON string encoding a timeseries 
+        json_string: JSON string encoding a timeseries
             generator configuration.
 
     # Returns

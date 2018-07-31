@@ -479,7 +479,7 @@ class Tokenizer(object):
 
 
 def tokenizer_from_json(json_string):
-    """Parses a JSON tokenizer configuration file and returns a 
+    """Parses a JSON tokenizer configuration file and returns a
     tokenizer instance.
 
     # Arguments
