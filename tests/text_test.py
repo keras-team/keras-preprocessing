@@ -56,6 +56,7 @@ def test_tokenizer():
     for mode in ['binary', 'count', 'tfidf', 'freq']:
         matrix = tokenizer.texts_to_matrix(sample_texts, mode)
 
+
 def test_tokenizer_serde_no_fitting():
     tokenizer = text.Tokenizer(num_words=100)
 
@@ -69,7 +70,6 @@ def test_tokenizer_serde_no_fitting():
     assert tokenizer.word_index == recovered.word_index
     assert tokenizer.index_word == recovered.index_word
     assert tokenizer.index_docs == recovered.index_docs
-
 
 
 def test_tokenizer_serde_fitting():

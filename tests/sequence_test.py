@@ -123,7 +123,6 @@ def test_TimeseriesGenerator_serde():
     assert data_gen.start_index == data_gen.start_index
     assert data_gen.stride == data_gen.stride
 
-
     assert (data_gen.data == recovered_gen.data).all()
     assert (data_gen.targets == recovered_gen.targets).all()
 
