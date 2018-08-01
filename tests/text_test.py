@@ -70,7 +70,14 @@ def test_tokenizer_serde():
     tokenizer.fit_on_sequences(sequences)
 
     tokenizer_json = tokenizer.to_json()
-    recovered_tokenizer = text.tokenizer_from_json(tokenizer_json)
+    recovered = text.tokenizer_from_json(tokenizer_json)
+
+    assert tokenizer.char_level == recovered.char_level
+    assert tokenizer.document_count == recovered.document_count
+    assert tokenizer.filters == recovered.filters
+    assert tokenizer.lower == recovered.lower
+    assert tokenizer.num_words == recovered.num_words
+    assert tokenizer.oov_token == recovered.oov_token
 
 
 def test_sequential_fit():

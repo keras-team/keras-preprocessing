@@ -190,6 +190,8 @@ class Tokenizer(object):
         self.char_level = char_level
         self.oov_token = oov_token
         self.index_docs = defaultdict(int)
+        self.word_index = dict()
+        self.index_word = dict()
 
     def fit_on_texts(self, texts):
         """Updates internal vocabulary based on a list of texts.
@@ -444,6 +446,8 @@ class Tokenizer(object):
         json_word_counts = json.dumps(self.word_counts)
         json_word_docs = json.dumps(self.word_docs)
         json_index_docs = json.dumps(self.index_docs)
+        json_word_index = json.dumps(self.word_index)
+        json_index_word = json.dumps(self.index_word)
 
         return {
             'num_words': self.num_words,
@@ -455,7 +459,9 @@ class Tokenizer(object):
             'document_count': self.document_count,
             'word_counts': json_word_counts,
             'word_docs': json_word_docs,
-            'index_docs': json_index_docs
+            'index_docs': json_index_docs,
+            'index_word': json_index_word,
+            'word_index': json_word_index
         }
 
     def to_json(self, **kwargs):
@@ -494,10 +500,14 @@ def tokenizer_from_json(json_string):
     word_counts = json.loads(config.pop('word_counts'))
     word_docs = json.loads(config.pop('word_docs'))
     index_docs = json.loads(config.pop('index_docs'))
+    index_word = json.loads(config.pop('index_word'))
+    word_index = json.loads(config.pop('word_index'))
 
-    tokenizer = Tokenizer(config)
+    tokenizer = Tokenizer(**config)
     tokenizer.word_counts = word_counts
     tokenizer.word_docs = word_docs
     tokenizer.index_docs = index_docs
+    tokenizer.word_index = word_index
+    tokenizer.index_word = index_word
 
     return tokenizer
