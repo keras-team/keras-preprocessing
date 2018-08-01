@@ -103,6 +103,30 @@ def test_remove_long_seq():
     assert new_label == ['a']
 
 
+def test_TimeseriesGenerator_serde():
+    data = np.array([[i] for i in range(50)])
+    targets = np.array([[i] for i in range(50)])
+
+    data_gen = sequence.TimeseriesGenerator(data, targets,
+                                            length=10,
+                                            sampling_rate=2,
+                                            batch_size=2)
+    json_gen = data_gen.to_json()
+    recovered_gen = sequence.timeseries_generator_from_json(json_gen)
+
+    assert data_gen.batch_size == recovered_gen.batch_size
+    assert data_gen.end_index == recovered_gen.end_index
+    assert data_gen.length == recovered_gen.length
+    assert data_gen.reverse == recovered_gen.reverse
+    assert data_gen.sampling_rate == recovered_gen.sampling_rate
+    assert data_gen.shuffle == recovered_gen.shuffle
+    assert data_gen.start_index == data_gen.start_index
+    assert data_gen.stride == data_gen.stride
+
+    assert (data_gen.data == recovered_gen.data).all()
+    assert (data_gen.targets == recovered_gen.targets).all()
+
+
 def test_TimeseriesGenerator():
     data = np.array([[i] for i in range(50)])
     targets = np.array([[i] for i in range(50)])

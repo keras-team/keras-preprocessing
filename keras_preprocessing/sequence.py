@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import numpy as np
 import random
+import json
 from six.moves import range
 
 from . import get_keras_submodule
@@ -213,7 +214,7 @@ def skipgrams(sequence, vocabulary_size,
         random.shuffle(words)
 
         couples += [[words[i % len(words)],
-                    random.randint(1, vocabulary_size - 1)]
+                     random.randint(1, vocabulary_size - 1)]
                     for i in range(num_negative_samples)]
         if categorical:
             labels += [[1, 0]] * num_negative_samples
@@ -321,6 +322,12 @@ class TimeseriesGenerator(keras_utils.Sequence):
                  shuffle=False,
                  reverse=False,
                  batch_size=128):
+
+        if len(data) != len(targets):
+            raise ValueError('Data and targets have to be' +
+                             ' of same length. Data length is {}'.format(len(data)) +
+                             ' while target length is {}'.format(len(targets)))
+
         self.data = data
         self.targets = targets
         self.length = length
@@ -368,3 +375,79 @@ class TimeseriesGenerator(keras_utils.Sequence):
         if self.reverse:
             return samples[:, ::-1, ...], targets
         return samples, targets
+
+    def get_config(self):
+        '''Returns the TimeseriesGenerator configuration as Python dictionary.
+
+        # Returns
+            A Python dictionary with the TimeseriesGenerator configuration.
+        '''
+        data = self.data
+        if type(self.data).__module__ == np.__name__:
+            data = self.data.tolist()
+        try:
+            json_data = json.dumps(data)
+        except:
+            raise TypeError('Data not JSON Serializable:', data)
+
+        targets = self.targets
+        if type(self.targets).__module__ == np.__name__:
+            targets = self.targets.tolist()
+        try:
+            json_targets = json.dumps(targets)
+        except:
+            raise TypeError('Targets not JSON Serializable:', targets)
+
+        return {
+            'data': json_data,
+            'targets': json_targets,
+            'length': self.length,
+            'sampling_rate': self.sampling_rate,
+            'stride': self.stride,
+            'start_index': self.start_index,
+            'end_index': self.end_index,
+            'shuffle': self.shuffle,
+            'reverse': self.reverse,
+            'batch_size': self.batch_size
+        }
+
+    def to_json(self, **kwargs):
+        """Returns a JSON string containing the timeseries generator
+        configuration. To load a generator from a JSON string, use
+        `keras.preprocessing.sequence.timeseries_generator_from_json(json_string)`.
+
+        # Arguments
+            **kwargs: Additional keyword arguments
+                to be passed to `json.dumps()`.
+
+        # Returns
+            A JSON string containing the tokenizer configuration.
+        """
+        config = self.get_config()
+        timeseries_generator_config = {
+            'class_name': self.__class__.__name__,
+            'config': config
+        }
+        return json.dumps(timeseries_generator_config, **kwargs)
+
+
+def timeseries_generator_from_json(json_string):
+    """Parses a JSON timeseries generator configuration file and
+    returns a timeseries generator instance.
+
+    # Arguments
+        json_string: JSON string encoding a timeseries
+            generator configuration.
+
+    # Returns
+        A Keras TimeseriesGenerator instance
+    """
+    full_config = json.loads(json_string)
+    config = full_config.get('config')
+
+    data = json.loads(config.pop('data'))
+    config['data'] = data
+    targets = json.loads(config.pop('targets'))
+    config['targets'] = targets
+
+    return TimeseriesGenerator(**config)
