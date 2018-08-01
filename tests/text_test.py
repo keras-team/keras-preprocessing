@@ -56,8 +56,28 @@ def test_tokenizer():
     for mode in ['binary', 'count', 'tfidf', 'freq']:
         matrix = tokenizer.texts_to_matrix(sample_texts, mode)
 
+def test_tokenizer_serde_no_fitting():
+    tokenizer = text.Tokenizer(num_words=100)
 
-def test_tokenizer_serde():
+    tokenizer_json = tokenizer.to_json()
+    recovered = text.tokenizer_from_json(tokenizer_json)
+
+    assert tokenizer.char_level == recovered.char_level
+    assert tokenizer.document_count == recovered.document_count
+    assert tokenizer.filters == recovered.filters
+    assert tokenizer.lower == recovered.lower
+    assert tokenizer.num_words == recovered.num_words
+    assert tokenizer.oov_token == recovered.oov_token
+
+    assert tokenizer.word_docs == recovered.word_docs
+    assert tokenizer.word_counts == recovered.word_counts
+    assert tokenizer.word_index == recovered.word_index
+    assert tokenizer.index_word == recovered.index_word
+    assert tokenizer.index_docs == recovered.index_docs
+
+
+
+def test_tokenizer_serde_fitting():
     sample_texts = [
         'There was a time that the pieces fit, but I watched them fall away',
         'Mildewed and smoldering, strangled by our coveting',
@@ -78,6 +98,12 @@ def test_tokenizer_serde():
     assert tokenizer.lower == recovered.lower
     assert tokenizer.num_words == recovered.num_words
     assert tokenizer.oov_token == recovered.oov_token
+
+    assert tokenizer.word_docs == recovered.word_docs
+    assert tokenizer.word_counts == recovered.word_counts
+    assert tokenizer.word_index == recovered.word_index
+    assert tokenizer.index_word == recovered.index_word
+    assert tokenizer.index_docs == recovered.index_docs
 
 
 def test_sequential_fit():
