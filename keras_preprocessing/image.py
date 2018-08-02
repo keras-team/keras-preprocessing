@@ -27,6 +27,10 @@ except ImportError:
 
 try:
     import scipy
+    # scipy.linalg cannot be accessed until explicitly imported
+    from scipy import linalg
+    # scipy.ndimage cannot be accessed until explicitly imported
+    from scipy import ndimage
 except ImportError:
     scipy = None
 
@@ -148,7 +152,7 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
     """
     if len(zoom_range) != 2:
         raise ValueError('`zoom_range` should be a tuple or list of two'
-                         ' floats. Received: ', (zoom_range,))
+                         ' floats. Received: %s' % (zoom_range,))
 
     if zoom_range[0] == 1 and zoom_range[1] == 1:
         zx, zy = 1, 1
@@ -368,12 +372,12 @@ def array_to_img(x, data_format=None, scale=True):
     x = np.asarray(x, dtype=backend.floatx())
     if x.ndim != 3:
         raise ValueError('Expected image array to have rank 3 (single image). '
-                         'Got array with shape:', x.shape)
+                         'Got array with shape: %s' % (x.shape,))
 
     if data_format is None:
         data_format = backend.image_data_format()
     if data_format not in {'channels_first', 'channels_last'}:
-        raise ValueError('Invalid data_format:', data_format)
+        raise ValueError('Invalid data_format: %s' % data_format)
 
     # Original Numpy array x has format (height, width, channel)
     # or (channel, height, width)
@@ -396,7 +400,7 @@ def array_to_img(x, data_format=None, scale=True):
         # grayscale
         return pil_image.fromarray(x[:, :, 0].astype('uint8'), 'L')
     else:
-        raise ValueError('Unsupported channel number: ', x.shape[2])
+        raise ValueError('Unsupported channel number: %s' % (x.shape[2],))
 
 
 def img_to_array(img, data_format=None):
@@ -416,7 +420,7 @@ def img_to_array(img, data_format=None):
     if data_format is None:
         data_format = backend.image_data_format()
     if data_format not in {'channels_first', 'channels_last'}:
-        raise ValueError('Unknown data_format: ', data_format)
+        raise ValueError('Unknown data_format: %s' % data_format)
     # Numpy array x has format (height, width, channel)
     # or (channel, height, width)
     # but original PIL image has format (width, height, channel)
@@ -430,7 +434,7 @@ def img_to_array(img, data_format=None):
         else:
             x = x.reshape((x.shape[0], x.shape[1], 1))
     else:
-        raise ValueError('Unsupported image shape: ', x.shape)
+        raise ValueError('Unsupported image shape: %s' % (x.shape,))
     return x
 
 
@@ -1138,9 +1142,11 @@ class ImageDataGenerator(object):
                                    transform_parameters.get('shear', 0),
                                    transform_parameters.get('zx', 1),
                                    transform_parameters.get('zy', 1),
-                                   row_axis=img_row_axis, col_axis=img_col_axis,
+                                   row_axis=img_row_axis,
+                                   col_axis=img_col_axis,
                                    channel_axis=img_channel_axis,
-                                   fill_mode=self.fill_mode, cval=self.cval)
+                                   fill_mode=self.fill_mode,
+                                   cval=self.cval)
 
         if transform_parameters.get('channel_shift_intensity') is not None:
             x = apply_channel_shift(x,
@@ -1704,8 +1710,9 @@ class DirectoryIterator(Iterator):
             elif subset == 'training':
                 split = (validation_split, 1)
             else:
-                raise ValueError('Invalid subset name: ', subset,
-                                 '; expected "training" or "validation"')
+                raise ValueError(
+                    'Invalid subset name: %s;'
+                    'expected "training" or "validation"' % (subset,))
         else:
             split = None
         self.subset = subset
