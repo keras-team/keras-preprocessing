@@ -613,6 +613,7 @@ class TestImage(object):
     def test_load_img(self, tmpdir):
         filename_rgb = str(tmpdir / 'rgb_image.png')
         filename_rgba = str(tmpdir / 'rgba_image.png')
+        filename_gray_16bits = str(tmpdir / 'gray16bits_image.tif')
 
         original_rgb_array = np.array(255 * np.random.rand(100, 100, 3),
                                       dtype=np.uint8)
@@ -623,6 +624,12 @@ class TestImage(object):
                                        dtype=np.uint8)
         original_rgba = image.array_to_img(original_rgba_array, scale=False)
         original_rgba.save(filename_rgba)
+        
+        original_gray_16bits_array = np.array(65535 * np.random.rand(100, 100, 1),
+                                              dtype=np.uint16)
+        original_gray_16bits = image.array_to_img(original_gray_16bits_array, 
+                                                  scale=False)
+        original_gray_16bits.save(filename_gray_16bits)
 
         # Test that loaded image is exactly equal to original.
 
@@ -640,6 +647,11 @@ class TestImage(object):
         loaded_im_array = image.img_to_array(loaded_im)
         assert loaded_im_array.shape == (original_rgb_array.shape[0],
                                          original_rgb_array.shape[1], 1)
+        
+        loaded_im = image.load_img(filename_gray_16bits, color_mode='grayscale')
+        loaded_im_array = image.img_to_array(loaded_im)
+        assert loaded_im_array.shape == original_gray_16bits_array.shape
+        assert np.all(loaded_im_array == original_gray_16bits_array)
 
         # Test that nothing is changed when target size is equal to original.
 

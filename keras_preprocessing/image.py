@@ -398,7 +398,10 @@ def array_to_img(x, data_format=None, scale=True):
         return pil_image.fromarray(x.astype('uint8'), 'RGB')
     elif x.shape[2] == 1:
         # grayscale
-        return pil_image.fromarray(x[:, :, 0].astype('uint8'), 'L')
+        if np.all(x < 255):
+            return pil_image.fromarray(x[:, :, 0].astype('uint8'), 'L')
+        else:
+            return pil_image.fromarray(x[:, :, 0].astype('uint16'), 'I;16')
     else:
         raise ValueError('Unsupported channel number: %s' % (x.shape[2],))
 
@@ -497,8 +500,9 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
         raise ImportError('Could not import PIL.Image. '
                           'The use of `array_to_img` requires PIL.')
     img = pil_image.open(path)
+
     if color_mode == 'grayscale':
-        if img.mode != 'L':
+        if img.mode not in ('L', 'I;16'):
             img = img.convert('L')
     elif color_mode == 'rgba':
         if img.mode != 'RGBA':
