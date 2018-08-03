@@ -843,7 +843,7 @@ class ImageDataGenerator(object):
             save_prefix: Str (default: `''`).
                 Prefix to use for filenames of saved pictures
                 (only relevant if `save_to_dir` is set).
-                save_format: one of "png", "jpeg"
+            save_format: one of "png", "jpeg"
                 (only relevant if `save_to_dir` is set). Default: "png".
             subset: Subset of data (`"training"` or `"validation"`) if
                 `validation_split` is set in `ImageDataGenerator`.
