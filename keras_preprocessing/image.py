@@ -949,13 +949,14 @@ class ImageDataGenerator(object):
                 By default, `"nearest"` is used.
 
         # Returns
-            A `DirectoryIterator` yielding tuples of `(x, y)`
+            A `ImageFileIterator` yielding tuples of `(x, y)`
                 where `x` is a numpy array containing a batch
                 of images with shape `(batch_size, *target_size, channels)`
                 and `y` is a numpy array of corresponding labels.
         """
-        return DirectoryIterator(
-            directory, self,
+        return ImageFileIterator(self,dataframe=None,
+            directory=directory,
+            x_col=None, y_col=None, has_ext=None,
             target_size=target_size, color_mode=color_mode,
             classes=classes, class_mode=class_mode,
             data_format=self.data_format,
@@ -964,6 +965,75 @@ class ImageDataGenerator(object):
             save_prefix=save_prefix,
             save_format=save_format,
             follow_links=follow_links,
+            subset=subset,
+            interpolation=interpolation)
+
+    def flow_from_dataframe(self, dataframe, directory,
+                            x_col="filename", y_col="class", has_ext=True,
+                            target_size=(256, 256), color_mode='rgb',
+                            classes=None, class_mode='categorical',
+                            batch_size=32, shuffle=True, seed=None,
+                            save_to_dir=None,
+                            save_prefix='',
+                            save_format='png',
+                            subset=None,
+                            interpolation='nearest'):
+        """Takes the dataframe and the path to a directory, and generates batches of augmented/normalized data.
+
+        # Arguments
+                dataframe: pandas like dataframe.
+                directory: string,path to the target directory that contains all the images mapped in the dataframe.
+                x_col: string,column in the dataframe that contains the filenames of the target images.
+                y_col: string or list of strings,columns in the dataframe that will be the target data.
+                has_ext: bool, True if filenames in dataframe[x_col] has filename extensions,else False.
+                target_size: tuple of integers `(height, width)`, default: `(256, 256)`.
+                 The dimensions to which all images found will be resized.
+                color_mode: one of "grayscale", "rbg". Default: "rgb".
+                 Whether the images will be converted to have 1 or 3 color channels.
+                classes: optional list of class subdirectories (e.g. `['dogs', 'cats']`). Default: None.
+                 If not provided, the list of classes will be automatically
+                 inferred from the subdirectory names/structure under `directory`,
+                 where each subdirectory will be treated as a different class
+                 (and the order of the classes, which will map to the label indices, will be alphanumeric).
+                 The dictionary containing the mapping from class names to class
+                 indices can be obtained via the attribute `class_indices`.
+                class_mode: one of "categorical", "binary", "sparse", "input" or None. Default: "categorical".
+                 Determines the type of label arrays that are returned: "categorical" will be 2D one-hot encoded labels,
+                 "binary" will be 1D binary labels, "sparse" will be 1D integer labels, "input" will be images identical
+                 to input images (mainly used to work with autoencoders).
+                 If None, no labels are returned (the generator will only yield batches of image data, which is useful to use
+                 `model.predict_generator()`, `model.evaluate_generator()`, etc.).
+                batch_size: size of the batches of data (default: 32).
+                shuffle: whether to shuffle the data (default: True)
+                seed: optional random seed for shuffling and transformations.
+                save_to_dir: None or str (default: None). This allows you to optionally specify a directory to which to save
+                 the augmented pictures being generated (useful for visualizing what you are doing).
+                save_prefix: str. Prefix to use for filenames of saved pictures (only relevant if `save_to_dir` is set).
+                save_format: one of "png", "jpeg" (only relevant if `save_to_dir` is set). Default: "png".
+                follow_links: whether to follow symlinks inside class subdirectories (default: False).
+                subset: Subset of data (`"training"` or `"validation"`) if
+                 `validation_split` is set in `ImageDataGenerator`.
+                interpolation: Interpolation method used to resample the image if the
+                 target size is different from that of the loaded image.
+                 Supported methods are `"nearest"`, `"bilinear"`, and `"bicubic"`.
+                 If PIL version 1.1.3 or newer is installed, `"lanczos"` is also
+                 supported. If PIL version 3.4.0 or newer is installed, `"box"` and
+                 `"hamming"` are also supported. By default, `"nearest"` is used.
+
+        # Returns
+            A DataframeIterator yielding tuples of `(x, y)` where `x` is a numpy array containing a batch
+            of images with shape `(batch_size, *target_size, channels)` and `y` is a numpy array of corresponding labels.
+        """
+        return ImageFileIterator(self,
+            dataframe, directory,
+            x_col=x_col, y_col=y_col, has_ext=has_ext,
+            target_size=target_size, color_mode=color_mode,
+            classes=classes, class_mode=class_mode,
+            data_format=self.data_format,
+            batch_size=batch_size, shuffle=shuffle, seed=seed,
+            save_to_dir=save_to_dir,
+            save_prefix=save_prefix,
+            save_format=save_format,
             subset=subset,
             interpolation=interpolation)
 
@@ -1563,7 +1633,7 @@ def _count_valid_files_in_directory(directory,
 
 
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,
-                                       class_indices, follow_links):
+                                       class_indices, follow_links, df=False):
     """Lists paths of files in `subdir` with extensions in `white_list_formats`.
 
     # Arguments
@@ -1586,17 +1656,34 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             the filenames will be
             `["class1/file1.jpg", "class1/file2.jpg", ...]`).
     """
-    dirname = os.path.basename(directory)
+    if not df:
+        dirname = os.path.basename(directory)
+        if (class_indices is None) or (follow_links is None):
+            raise ValueError('Neither class_indices or follow_links can '
+                             'be set "None" if df is set to False')
     if split:
-        num_files = len(list(
-            _iter_valid_files(directory, white_list_formats, follow_links)))
+        if df:
+            num_files = len(list(
+                _iter_valid_files(directory, white_list_formats, follow_links=False)))
+        else:
+            num_files = len(list(
+                _iter_valid_files(directory, white_list_formats, follow_links)))
         start, stop = int(split[0] * num_files), int(split[1] * num_files)
         valid_files = list(
             _iter_valid_files(
                 directory, white_list_formats, follow_links))[start: stop]
     else:
-        valid_files = _iter_valid_files(
-            directory, white_list_formats, follow_links)
+        if df:
+            valid_files = _iter_valid_files(
+                directory, white_list_formats, follow_links=False)
+        else:
+            valid_files = _iter_valid_files(
+                directory, white_list_formats, follow_links)
+    if df:
+        filenames = []
+        for root, fname in valid_files:
+            filenames.append(os.path.basename(fname))
+        return filenames
 
     classes = []
     filenames = []
@@ -1610,7 +1697,7 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     return classes, filenames
 
 
-class DirectoryIterator(Iterator):
+class ImageFileIterator(Iterator):
     """Iterator capable of reading images from a directory on disk.
 
     # Arguments
@@ -1656,7 +1743,8 @@ class DirectoryIterator(Iterator):
             "hamming" are also supported. By default, "nearest" is used.
     """
 
-    def __init__(self, directory, image_data_generator,
+    def __init__(self,  image_data_generator, dataframe, directory,
+                 x_col="filenames", y_col="class", has_ext=True,
                  target_size=(256, 256), color_mode='rgb',
                  classes=None, class_mode='categorical',
                  batch_size=32, shuffle=True, seed=None,
@@ -1665,6 +1753,9 @@ class DirectoryIterator(Iterator):
                  follow_links=False,
                  subset=None,
                  interpolation='nearest'):
+        if dataframe is not None:
+            self.df = dataframe
+            self.df[x_col] = self.df[x_col].astype(str)
         if data_format is None:
             data_format = backend.image_data_format()
         self.directory = directory
@@ -1692,11 +1783,11 @@ class DirectoryIterator(Iterator):
                 self.image_shape = (1,) + self.target_size
         self.classes = classes
         if class_mode not in {'categorical', 'binary', 'sparse',
-                              'input', None}:
+                              'input', 'other', None}:
             raise ValueError('Invalid class_mode:', class_mode,
                              '; expected one of "categorical", '
                              '"binary", "sparse", "input"'
-                             ' or None.')
+                             '"other" or None.')
         self.class_mode = class_mode
         self.save_to_dir = save_to_dir
         self.save_prefix = save_prefix
@@ -1720,48 +1811,104 @@ class DirectoryIterator(Iterator):
         white_list_formats = {'png', 'jpg', 'jpeg', 'bmp',
                               'ppm', 'tif', 'tiff'}
         # First, count the number of samples and classes.
-        self.samples = 0
+        if dataframe is not None:
+            self.samples = self.df.shape[0]
+            if (class_mode!="input") and ((x_col is None) or (y_col is None)):
+                raise ValueError('Both x column and y column should be specified')
+            elif (class_mode=="input") and ((x_col is None) or (y_col is not None)):
+                raise ValueError('x_col should be specified and y_col should be None.')
+            if type(has_ext) != bool:
+                 raise ValueError('has_ext should be True if x_col has file extensions else False.')
+        else:
+            self.samples = 0
 
-        if not classes:
+        if (classes is None) and (dataframe is None):
             classes = []
             for subdir in sorted(os.listdir(directory)):
                 if os.path.isdir(os.path.join(directory, subdir)):
                     classes.append(subdir)
-        self.num_classes = len(classes)
-        self.class_indices = dict(zip(classes, range(len(classes))))
+            self.num_classes = len(classes)
+            self.class_indices = dict(zip(classes, range(len(classes))))
 
-        pool = multiprocessing.pool.ThreadPool()
-        function_partial = partial(_count_valid_files_in_directory,
-                                   white_list_formats=white_list_formats,
-                                   follow_links=follow_links,
-                                   split=split)
-        self.samples = sum(pool.map(function_partial,
-                                    (os.path.join(directory, subdir)
-                                     for subdir in classes)))
+            pool = multiprocessing.pool.ThreadPool()
+            function_partial = partial(_count_valid_files_in_directory,
+                                       white_list_formats=white_list_formats,
+                                       follow_links=follow_links,
+                                       split=split)
+            self.samples = sum(pool.map(function_partial,
+                                        (os.path.join(directory, subdir)
+                                         for subdir in classes)))
+            print('Found %d images belonging to %d classes.' %
+                  (self.samples, self.num_classes))
+        elif (classes is None) and (dataframe is not None):
+            if class_mode != "other" and class_mode != "input":
+                if type(y_col) == str:
+                    classes = sorted(self.df[y_col].unique())
+                elif type(y_col) == list:
+                    if len(y_col) == 1:
+                        classes = sorted(self.df[y_col[0]].unique())
+                    else:
+                        raise ValueError('y_col must be a string or list of length 1'
+                                         'if class_mode is not set to either "other"'
+                                         'or None')
 
-        print('Found %d images belonging to %d classes.' %
-              (self.samples, self.num_classes))
+                self.num_classes = len(classes)
+                self.class_indices = dict(zip(classes, range(len(classes))))
+                # second, build an index of the images
+                self.classes = self.df[y_col].apply(lambda x: self.class_indices[x])
+                self.classes = self.classes.values.reshape((self.samples,))
+            elif class_mode == "other":
+                self.data = self.df[y_col].values
+        elif classes is not None:
+            if class_mode != "other" and class_mode != "input":
+                self.num_classes = len(classes)
+                self.class_indices = dict(zip(classes, range(len(classes))))
+            else:
+                raise ValueError('If class_mode is set to "other" or "input", '
+                 'classes cannot be set.')
 
         # Second, build an index of the images
         # in the different class subfolders.
-        results = []
-        self.filenames = []
-        self.classes = np.zeros((self.samples,), dtype='int32')
-        i = 0
-        for dirpath in (os.path.join(directory, subdir) for subdir in classes):
-            results.append(
-                pool.apply_async(_list_valid_filenames_in_directory,
-                                 (dirpath, white_list_formats, split,
-                                  self.class_indices, follow_links)))
-        for res in results:
-            classes, filenames = res.get()
-            self.classes[i:i + len(classes)] = classes
-            self.filenames += filenames
-            i += len(classes)
-
-        pool.close()
-        pool.join()
-        super(DirectoryIterator, self).__init__(self.samples,
+        if dataframe is None:
+            results = []
+            self.filenames = []
+            self.classes = np.zeros((self.samples,), dtype='int32')
+            i = 0
+            for dirpath in (os.path.join(directory, subdir) for subdir in classes):
+                results.append(
+                    pool.apply_async(_list_valid_filenames_in_directory,
+                                     (dirpath, white_list_formats, split,
+                                      self.class_indices, follow_links)))
+            for res in results:
+                classes, filenames = res.get()
+                self.classes[i:i + len(classes)] = classes
+                self.filenames += filenames
+                i += len(classes)
+            pool.close()
+            pool.join()
+        else:
+            if has_ext:
+                ext_exist=False
+                self.filenames = self.df[x_col].values
+                for ext in white_list_formats:
+                    if "."+ext in self.filenames[0]:
+                        ext_exist=True
+                        break
+                if not ext_exist:
+                    raise ValueError('has_ext is set to True but extension not found in x_col')
+            else:
+                filenames = _list_valid_filenames_in_directory(directory,
+                                                               white_list_formats,
+                                                               split,
+                                                               class_indices=None,
+                                                               follow_links=None,
+                                                               df=True
+                                                               )
+                self.filenames = filenames
+                self.df = self.df.set_index(x_col)
+                basenames = [os.path.splitext(base)[0] for base in filenames]
+                self.df = self.df.loc[basenames, :]
+        super(ImageFileIterator, self).__init__(self.samples,
                                                 batch_size,
                                                 shuffle,
                                                 seed)
@@ -1809,6 +1956,8 @@ class DirectoryIterator(Iterator):
                 dtype=backend.floatx())
             for i, label in enumerate(self.classes[index_array]):
                 batch_y[i, label] = 1.
+        elif self.class_mode == 'other':
+            batch_y = self.data[index_array]
         else:
             return batch_x
         return batch_x, batch_y
