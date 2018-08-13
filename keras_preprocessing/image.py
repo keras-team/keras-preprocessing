@@ -2036,6 +2036,6 @@ class ImageFileIterator(Iterator):
         # so it can be done in parallel
         return self._get_batches_of_transformed_samples(index_array)
 
-#TODO Remove the below code when image.py in keras is updated with
+# TODO Remove the below code when image.py in keras is updated with
 # image.ImageFileIterator = ImageFileIterator
 DirectoryIterator = ImageFileIterator
