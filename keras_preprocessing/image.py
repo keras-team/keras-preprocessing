@@ -1893,12 +1893,12 @@ class ImageFileIterator(Iterator):
                     if os.path.isdir(os.path.join(directory, subdir)):
                         classes.append(subdir)
             else:
-                if class_mode not in ["other", "input"]:
+                if class_mode not in ["other", "input", None]:
                     classes = list(self.df[y_col].unique())
         else:
-            if class_mode in ["other", "input"]:
+            if class_mode in ["other", "input", None]:
                 raise ValueError('classes cannot be set if class_mode'
-                                 ' is either "other" or "input"')
+                                 ' is either "other" or "input" or None.')
         self.num_classes = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
 
@@ -1947,7 +1947,7 @@ class ImageFileIterator(Iterator):
                 class_indices=self.class_indices,
                 follow_links=follow_links,
                 df=True)
-            if class_mode not in ["other", "input"]:
+            if class_mode not in ["other", "input", None]:
                 if has_ext:
                     ext_exist = False
                     for ext in white_list_formats:
