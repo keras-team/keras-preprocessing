@@ -1957,7 +1957,7 @@ class ImageFileIterator(Iterator):
                     if not ext_exist:
                         raise ValueError('has_ext is set to True but'
                                          ' extension not found in x_col')
-                    temp_df = pd.DataFrame({x_col: filenames},dtype=str)
+                    temp_df = pd.DataFrame({x_col: filenames}, dtype=str)
                     temp_df = self.df.merge(temp_df, how='right', on=x_col)
                     temp_df = temp_df.set_index(x_col)
                     temp_df = temp_df.reindex(filenames)
@@ -1965,7 +1965,7 @@ class ImageFileIterator(Iterator):
                 else:
                     filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
                                              for f in filenames]
-                    temp_df = pd.DataFrame({x_col: filenames_without_ext},dtype=str)
+                    temp_df = pd.DataFrame({x_col: filenames_without_ext}, dtype=str)
                     temp_df = self.df.merge(temp_df, how='right', on=x_col)
                     temp_df = temp_df.set_index(x_col)
                     temp_df = temp_df.reindex(filenames_without_ext)
@@ -1973,7 +1973,7 @@ class ImageFileIterator(Iterator):
                 self.data = temp_df[y_col]
                 self.df = temp_df.copy()
                 self.classes = np.array([self.class_indices[cls] for cls in classes])
-                self.filenames = filenames
+            self.filenames = filenames
 
         pool.close()
         pool.join()
