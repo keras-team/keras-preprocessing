@@ -434,7 +434,8 @@ class TestImage(object):
         # check number of classes and images
         assert len(train_iterator.class_indices) == num_classes
         assert len(train_iterator.classes) == num_training
-        assert len(set(train_iterator.filenames) & set(filenames)) == num_training
+        assert len(set(train_iterator.filenames) &
+                   set(filenames)) == num_training
 
         shutil.rmtree(tmp_folder)
 
@@ -459,23 +460,26 @@ class TestImage(object):
 
         # create iterator
         generator = image.ImageDataGenerator()
-        df_iterator = generator.flow_from_dataframe(df, str(tmpdir), has_ext=True)
+        df_iterator = generator.flow_from_dataframe(
+            df, str(tmpdir), has_ext=True)
 
         df_without_ext = pd.DataFrame({"filename": filenames_without,
-                           "class": [random.randint(0, 1) for _ in filenames_without]})
-        df_without_ext_iterator = generator.flow_from_dataframe(df_without_ext, str(tmpdir),
-                                                                has_ext=False)
+                                       "class": [random.randint(0, 1)
+                                                 for _ in filenames_without]})
+        df_without_ext_iterator = generator.flow_from_dataframe(
+            df_without_ext, str(tmpdir),
+            has_ext=False)
         df_regression = pd.DataFrame({"filename": filenames,
-                           "col1": [random.randrange(0, 1) for _ in filenames],
-                           "col2": [random.randrange(0, 1) for _ in filenames]})
-        df_multiple_y_iterator = generator.flow_from_dataframe(df_regression, str(tmpdir),
-                                                               y_col=["col1","col2"],
-                                                               has_ext=True,
-                                                               class_mode="other")
-        df_regression_iterator = generator.flow_from_dataframe(df_regression, str(tmpdir),
-                                                               y_col="col1",
-                                                               has_ext=True,
-                                                               class_mode="other")
+                                      "col1": [random.randrange(0, 1)
+                                               for _ in filenames],
+                                      "col2": [random.randrange(0, 1)
+                                               for _ in filenames]})
+        df_multiple_y_iterator = generator.flow_from_dataframe(
+            df_regression, str(tmpdir), y_col=["col1", "col2"],
+            has_ext=True, class_mode="other")
+        df_regression_iterator = generator.flow_from_dataframe(
+            df_regression, str(tmpdir), y_col="col1",
+            has_ext=True, class_mode="other")
 
         # check number of classes and images
         assert len(df_iterator.class_indices) == num_classes
@@ -495,6 +499,7 @@ class TestImage(object):
         with pytest.raises(ValueError):
             generator.flow_from_dataframe(df_without_ext, str(tmpdir),
                                           has_ext=True)
+
         def preprocessing_function(x):
             """This will fail if not provided by a Numpy array.
             Note: This is made to enforce backward compatibility.
@@ -508,7 +513,7 @@ class TestImage(object):
         # Test usage as Sequence
         generator = image.ImageDataGenerator(
             preprocessing_function=preprocessing_function)
-        dir_seq = generator.flow_from_dataframe(df,str(tmpdir),
+        dir_seq = generator.flow_from_dataframe(df, str(tmpdir),
                                                 target_size=(26, 26),
                                                 color_mode='rgb',
                                                 batch_size=3,
@@ -527,7 +532,7 @@ class TestImage(object):
     def test_dataframe_iterator_class_mode_input(self, tmpdir):
         # save the images in the paths
         count = 0
-        filenames=[]
+        filenames = []
         for test_images in self.all_test_images:
             for im in test_images:
                 filename = str(
@@ -545,8 +550,24 @@ class TestImage(object):
 
         batch = next(df_autoencoder_iterator)
 
-        # check if input and output have the same shape
-        assert(batch[0].shape == batch[1].shape)
+        # check if input and output have the same shape and they're the same
+        assert(batch[0].all() == batch[1].all())
+        # check if the input and output images are not the same numpy array
+        input_img = batch[0][0]
+        output_img = batch[1][0]
+        output_img[0][0][0] += 1
+        assert(input_img[0][0][0] != output_img[0][0][0])
+
+        df_autoencoder_iterator = generator.flow_from_dataframe(df, str(tmpdir),
+                                                                x_col="filename",
+                                                                y_col="class",
+                                                                has_ext=True,
+                                                                class_mode="input")
+
+        batch = next(df_autoencoder_iterator)
+
+        # check if input and output have the same shape and they're the same
+        assert(batch[0].all() == batch[1].all())
         # check if the input and output images are not the same numpy array
         input_img = batch[0][0]
         output_img = batch[1][0]
@@ -558,62 +579,63 @@ class TestImage(object):
         (0.50, 12),
         (0.75, 6),
     ])
-    def test_directory_iterator_with_validation_split(self,
+    def test_dataframe_iterator_with_validation_split(self,
                                                       validation_split,
-                                                      num_training):
+                                                      num_training, tmpdir):
         num_classes = 2
-        tmp_folder = tempfile.mkdtemp(prefix='test_images')
 
-        # create folders and subfolders
-        paths = []
-        for cl in range(num_classes):
-            class_directory = 'class-{}'.format(cl)
-            classpaths = [
-                class_directory,
-                os.path.join(class_directory, 'subfolder-1'),
-                os.path.join(class_directory, 'subfolder-2'),
-                os.path.join(class_directory, 'subfolder-1', 'sub-subfolder')
-            ]
-            for path in classpaths:
-                os.mkdir(os.path.join(tmp_folder, path))
-            paths.append(classpaths)
-
-        # save the images in the paths
+        # save the images in the tmpdir
         count = 0
         filenames = []
+        filenames_without = []
         for test_images in self.all_test_images:
             for im in test_images:
-                # rotate image class
-                im_class = count % num_classes
-                # rotate subfolders
-                classpaths = paths[im_class]
-                filename = os.path.join(
-                    classpaths[count % len(classpaths)],
-                    'image-{}.png'.format(count))
+                filename = "image-{}.png".format(count)
+                filename_without = "image-{}".format(count)
                 filenames.append(filename)
-                im.save(os.path.join(tmp_folder, filename))
+                filenames_without.append(filename_without)
+                im.save(str(tmpdir / filename))
                 count += 1
 
+        df = pd.DataFrame({"filename": filenames,
+                           "class": [random.randint(0, 1) for _ in filenames]})
+        df_without_ext = pd.DataFrame({"filename": filenames_without,
+                                       "class": [random.randint(0, 1)
+                                                 for _ in filenames_without]})
         # create iterator
         generator = image.ImageDataGenerator(validation_split=validation_split)
 
         with pytest.raises(ValueError):
-            generator.flow_from_directory(tmp_folder, subset='foo')
+            generator.flow_from_dataframe(
+                df, tmpdir, has_ext=True, subset='foo')
 
-        train_iterator = generator.flow_from_directory(tmp_folder,
+        train_iterator = generator.flow_from_dataframe(df, str(tmpdir), has_ext=True,
                                                        subset='training')
         assert train_iterator.samples == num_training
 
-        valid_iterator = generator.flow_from_directory(tmp_folder,
+        valid_iterator = generator.flow_from_dataframe(df, str(tmpdir), has_ext=True,
                                                        subset='validation')
         assert valid_iterator.samples == count - num_training
+
+        train_iterator_without = generator.flow_from_dataframe(
+            df_without_ext, str(tmpdir),
+            has_ext=False,
+            subset='training')
+        assert train_iterator_without.samples == num_training
+
+        valid_iterator_without = generator.flow_from_dataframe(
+            df_without_ext, str(tmpdir),
+            has_ext=False,
+            subset='validation')
+        assert valid_iterator_without.samples == count - num_training
 
         # check number of classes and images
         assert len(train_iterator.class_indices) == num_classes
         assert len(train_iterator.classes) == num_training
-        assert len(set(train_iterator.filenames) & set(filenames)) == num_training
-
-        shutil.rmtree(tmp_folder)
+        assert len(set(train_iterator.filenames) &
+                   set(filenames)) == num_training
+        intersection = set(train_iterator_without.filenames) & set(filenames)
+        assert len(intersection) == num_training
 
     def test_img_utils(self):
         height, width = 10, 8
