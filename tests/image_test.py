@@ -462,7 +462,11 @@ class TestImage(object):
         generator = image.ImageDataGenerator()
         df_iterator = generator.flow_from_dataframe(
             df, str(tmpdir), has_ext=True)
-
+        df_sparse_iterator = generator.flow_from_dataframe(df, str(tmpdir),
+                                                           has_ext=True,
+                                                           class_mode="sparse")
+        if np.isnan(df_sparse_iterator.classes).any():
+            raise ValueError('Invalid values.')
         df_without_ext = pd.DataFrame({"filename": filenames_without,
                                        "class": [random.randint(0, 1)
                                                  for _ in filenames_without]})
@@ -604,6 +608,12 @@ class TestImage(object):
                                                  for _ in filenames_without]})
         # create iterator
         generator = image.ImageDataGenerator(validation_split=validation_split)
+        df_sparse_iterator = generator.flow_from_dataframe(df,
+                                                           str(tmpdir),
+                                                           has_ext=True,
+                                                           class_mode="sparse")
+        if np.isnan(next(df_sparse_iterator)[:][1]).any():
+            raise ValueError('Invalid values.')
 
         with pytest.raises(ValueError):
             generator.flow_from_dataframe(

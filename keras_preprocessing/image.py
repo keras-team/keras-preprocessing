@@ -1960,12 +1960,13 @@ class ImageFileIterator(Iterator):
                     temp_df = pd.DataFrame({x_col: filenames})
                     temp_df = self.df.merge(temp_df, how='right', on=x_col)
                 else:
-                    filenames_without_ext = [f[:-1 * len(f.split(".")[-1]) + 1]
+                    filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
                                              for f in filenames]
                     temp_df = pd.DataFrame({x_col: filenames_without_ext})
                     temp_df = self.df.merge(temp_df, how='right', on=x_col)
                 self.data = temp_df[y_col]
-                self.classes = temp_df[y_col].values
+                classes = temp_df[y_col].values
+            self.classes = np.array([self.class_indices[cls] for cls in classes])
             self.filenames = filenames
 
         pool.close()
