@@ -2035,3 +2035,7 @@ class ImageFileIterator(Iterator):
         # The transformation of images is not under thread lock
         # so it can be done in parallel
         return self._get_batches_of_transformed_samples(index_array)
+
+#TODO Remove the below code when image.py in keras is updated with
+# image.ImageFileIterator = ImageFileIterator
+DirectoryIterator = ImageFileIterator
