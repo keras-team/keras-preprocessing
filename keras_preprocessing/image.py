@@ -1023,8 +1023,10 @@ class ImageDataGenerator(object):
         """Takes the dataframe and the path to a directory
          and generates batches of augmented/normalized data.
 
+        # A simple tutorial can be found at: http://bit.ly/keras_flow_from_dataframe
+
         # Arguments
-                dataframe: pandas like dataframe.
+                dataframe: Pandas dataframe.
                 directory: string,path to the target directory that contains all
                            the images mapped in the dataframe.
                 x_col: string,column in the dataframe that contains
@@ -1040,12 +1042,10 @@ class ImageDataGenerator(object):
                 color_mode: one of "grayscale", "rbg". Default: "rgb".
                             Whether the images will be converted to have
                             1 or 3 color channels.
-                classes: optional list of class subdirectories
+                classes: optional list of classes
                 (e.g. `['dogs', 'cats']`). Default: None.
                  If not provided, the list of classes will be automatically
-                 inferred from the subdirectory names/structure under `directory`,
-                 where each subdirectory will be treated as a different class
-                 (and the order of the classes,
+                 inferred from the y_col,
                  which will map to the label indices, will be alphanumeric).
                  The dictionary containing the mapping from class names to class
                  indices can be obtained via the attribute `class_indices`.
@@ -1770,8 +1770,8 @@ class ImageFileIterator(Iterator):
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
             Color mode to read images.
-        classes: Optional list of strings, names of subdirectories
-            containing images from each class (e.g. `["dogs", "cats"]`).
+        classes: Optional list of strings, names of
+            each class (e.g. `["dogs", "cats"]`).
             It will be computed automatically if not set.
         class_mode: Mode for yielding the targets:
             `"binary"`: binary targets (if there are only two classes),
