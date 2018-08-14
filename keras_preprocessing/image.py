@@ -992,27 +992,23 @@ class ImageDataGenerator(object):
                 By default, `"nearest"` is used.
 
         # Returns
-            A `ImageFileIterator` yielding tuples of `(x, y)`
+            A `DirectoryIterator` yielding tuples of `(x, y)`
                 where `x` is a numpy array containing a batch
                 of images with shape `(batch_size, *target_size, channels)`
                 and `y` is a numpy array of corresponding labels.
         """
-        return ImageFileIterator(self, dataframe=None,
-                                 directory=directory,
-                                 x_col=None, y_col=None, has_ext=None,
-                                 target_size=target_size,
-                                 color_mode=color_mode,
-                                 classes=classes,
-                                 class_mode=class_mode,
-                                 data_format=self.data_format,
-                                 batch_size=batch_size,
-                                 shuffle=shuffle, seed=seed,
-                                 save_to_dir=save_to_dir,
-                                 save_prefix=save_prefix,
-                                 save_format=save_format,
-                                 follow_links=follow_links,
-                                 subset=subset,
-                                 interpolation=interpolation)
+        return DirectoryIterator(
+            directory, self,
+            target_size=target_size, color_mode=color_mode,
+            classes=classes, class_mode=class_mode,
+            data_format=self.data_format,
+            batch_size=batch_size, shuffle=shuffle, seed=seed,
+            save_to_dir=save_to_dir,
+            save_prefix=save_prefix,
+            save_format=save_format,
+            follow_links=follow_links,
+            subset=subset,
+            interpolation=interpolation)
 
     def flow_from_dataframe(self, dataframe, directory,
                             x_col="filename", y_col="class", has_ext=True,
@@ -1088,7 +1084,7 @@ class ImageDataGenerator(object):
                  `"hamming"` are also supported. By default, `"nearest"` is used.
 
         # Returns
-            A DataframeIterator yielding tuples of `(x, y)`
+            A ImageFileIterator yielding tuples of `(x, y)`
             where `x` is a numpy array containing a batch
             of images with shape `(batch_size, *target_size, channels)`
              and `y` is a numpy array of corresponding labels.
@@ -2043,6 +2039,79 @@ class ImageFileIterator(Iterator):
         # so it can be done in parallel
         return self._get_batches_of_transformed_samples(index_array)
 
-# TODO Remove the below code when image.py in keras is updated with
-# image.ImageFileIterator = ImageFileIterator
-DirectoryIterator = ImageFileIterator
+
+class DirectoryIterator(ImageFileIterator):
+    """Iterator capable of reading images from a directory on disk.
+
+    # Arguments
+        directory: Path to the directory to read images from.
+            Each subdirectory in this directory will be
+            considered to contain images from one class,
+            or alternatively you could specify class subdirectories
+            via the `classes` argument.
+        image_data_generator: Instance of `ImageDataGenerator`
+            to use for random transformations and normalization.
+        target_size: tuple of integers, dimensions to resize input images to.
+        color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
+            Color mode to read images.
+        classes: Optional list of strings, names of subdirectories
+            containing images from each class (e.g. `["dogs", "cats"]`).
+            It will be computed automatically if not set.
+        class_mode: Mode for yielding the targets:
+            `"binary"`: binary targets (if there are only two classes),
+            `"categorical"`: categorical targets,
+            `"sparse"`: integer targets,
+            `"input"`: targets are images identical to input images (mainly
+                used to work with autoencoders),
+            `None`: no targets get yielded (only input images are yielded).
+        batch_size: Integer, size of a batch.
+        shuffle: Boolean, whether to shuffle the data between epochs.
+        seed: Random seed for data shuffling.
+        data_format: String, one of `channels_first`, `channels_last`.
+        save_to_dir: Optional directory where to save the pictures
+            being yielded, in a viewable format. This is useful
+            for visualizing the random transformations being
+            applied, for debugging purposes.
+        save_prefix: String prefix to use for saving sample
+            images (if `save_to_dir` is set).
+        save_format: Format to use for saving sample images
+            (if `save_to_dir` is set).
+        subset: Subset of data (`"training"` or `"validation"`) if
+            validation_split is set in ImageDataGenerator.
+        interpolation: Interpolation method used to resample the image if the
+            target size is different from that of the loaded image.
+            Supported methods are "nearest", "bilinear", and "bicubic".
+            If PIL version 1.1.3 or newer is installed, "lanczos" is also
+            supported. If PIL version 3.4.0 or newer is installed, "box" and
+            "hamming" are also supported. By default, "nearest" is used.
+    """
+    def __init__(self, directory, image_data_generator,
+                 target_size=(256, 256), color_mode='rgb',
+                 classes=None, class_mode='categorical',
+                 batch_size=32, shuffle=True, seed=None,
+                 data_format=None,
+                 save_to_dir=None, save_prefix='', save_format='png',
+                 follow_links=False,
+                 subset=None,
+                 interpolation='nearest'):
+        super(DirectoryIterator, self).__init__(image_data_generator,
+                                                dataframe=None,
+                                                directory=directory,
+                                                x_col=None, y_col=None, has_ext=None,
+                                                target_size=target_size,
+                                                color_mode=color_mode,
+                                                classes=classes,
+                                                class_mode=class_mode,
+                                                data_format=data_format,
+                                                batch_size=batch_size,
+                                                shuffle=shuffle, seed=seed,
+                                                save_to_dir=save_to_dir,
+                                                save_prefix=save_prefix,
+                                                save_format=save_format,
+                                                follow_links=follow_links,
+                                                subset=subset,
+                                                interpolation=interpolation)
+        super(ImageFileIterator, self).__init__(self.samples,
+                                                batch_size,
+                                                shuffle,
+                                                seed)
