@@ -39,12 +39,13 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
         sequences: List of lists, where each element is a sequence.
         maxlen: Int, maximum length of all sequences.
         dtype: Type of the output sequences.
+            To pad sequences with variable length strings, you can use `object`.
         padding: String, 'pre' or 'post':
             pad either before or after each sequence.
         truncating: String, 'pre' or 'post':
             remove values from sequences larger than
             `maxlen`, either at the beginning or at the end of the sequences.
-        value: Float, padding value.
+        value: Float or String, padding value.
 
     # Returns
         x: Numpy array with shape `(len(sequences), maxlen)`
@@ -74,7 +75,7 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
             sample_shape = np.asarray(s).shape[1:]
             break
 
-    x = (np.ones((num_samples, maxlen) + sample_shape) * value).astype(dtype)
+    x = np.full((num_samples, maxlen) + sample_shape, value, dtype=dtype)
     for idx, s in enumerate(sequences):
         if not len(s):
             continue  # empty list/array was found
