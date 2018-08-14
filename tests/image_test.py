@@ -482,10 +482,11 @@ class TestImage(object):
             df_regression, str(tmpdir), y_col=["col1", "col2"],
             has_ext=True, class_mode="other")
         df_regression = pd.DataFrame({"filename": filenames,
-                              "col1": [random.randrange(0, 1)
-                                       for _ in filenames],
-                              "col2": [random.randrange(0, 1)
-                                       for _ in filenames]},dtype=str)
+                                      "col1": [random.randrange(0, 1)
+                                               for _ in filenames],
+                                      "col2": [random.randrange(0, 1)
+                                               for _ in filenames]},
+                                     dtype=str)
         batch_x, batch_y = next(df_multiple_y_iterator)
         with pytest.raises(TypeError):
             df_multiple_y_iterator = generator.flow_from_dataframe(
