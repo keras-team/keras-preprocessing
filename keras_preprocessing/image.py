@@ -1966,9 +1966,12 @@ class ImageFileIterator(Iterator):
                     temp_df = temp_df.set_index(x_col)
                     temp_df = temp_df.reindex(filenames_without_ext)
                     classes = temp_df[y_col].values
-                self.data = temp_df[y_col]
                 self.df = temp_df.copy()
                 self.classes = np.array([self.class_indices[cls] for cls in classes])
+            elif class_mode == "other":
+                self.data = self.df[y_col].values
+                if "object" in list(self.df[y_col].dtypes):
+                    raise TypeError("y_col column/s must be numeric datatypes.")
             self.filenames = filenames
 
         pool.close()

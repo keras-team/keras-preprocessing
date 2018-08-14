@@ -481,10 +481,16 @@ class TestImage(object):
         df_multiple_y_iterator = generator.flow_from_dataframe(
             df_regression, str(tmpdir), y_col=["col1", "col2"],
             has_ext=True, class_mode="other")
-        df_regression_iterator = generator.flow_from_dataframe(
-            df_regression, str(tmpdir), y_col="col1",
-            has_ext=True, class_mode="other")
-
+        df_regression = pd.DataFrame({"filename": filenames,
+                              "col1": [random.randrange(0, 1)
+                                       for _ in filenames],
+                              "col2": [random.randrange(0, 1)
+                                       for _ in filenames]},dtype=str)
+        batch_x, batch_y = next(df_multiple_y_iterator)
+        with pytest.raises(TypeError):
+            df_multiple_y_iterator = generator.flow_from_dataframe(
+                df_regression, str(tmpdir), y_col=["col1", "col2"],
+                has_ext=True, class_mode="other")
         # check number of classes and images
         assert len(df_iterator.class_indices) == num_classes
         assert len(df_iterator.classes) == count
@@ -492,7 +498,7 @@ class TestImage(object):
         assert len(df_without_ext_iterator.class_indices) == num_classes
         assert len(df_without_ext_iterator.classes) == count
         assert set(df_without_ext_iterator.filenames) == set(filenames)
-
+        assert batch_y.shape[1] == 2
         # Test invalid use cases
         with pytest.raises(ValueError):
             generator.flow_from_dataframe(df, str(tmpdir), color_mode='cmyk',
