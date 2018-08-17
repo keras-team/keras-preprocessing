@@ -9,6 +9,8 @@ import numpy as np
 import random
 import json
 from six.moves import range
+import six
+import warnings
 
 from . import get_keras_submodule
 
@@ -74,6 +76,13 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
         if len(s) > 0:
             sample_shape = np.asarray(s).shape[1:]
             break
+
+    if isinstance(value, six.string_types) and dtype != object \
+            and not np.issubdtype(dtype, np.str_) \
+            and not np.issubdtype(dtype, np.unicode_):
+        warnings.warn("`dtype` {} is not compatible with `value`'s type: {}\n"
+                      "You should set `dtype=object` for variable length strings."
+                      .format(dtype, type(value)))
 
     x = np.full((num_samples, maxlen) + sample_shape, value, dtype=dtype)
     for idx, s in enumerate(sequences):
