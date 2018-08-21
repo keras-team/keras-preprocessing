@@ -38,3 +38,5 @@ def get_keras_submodule(name):
         return _KERAS_BACKEND
     elif name == 'utils':
         return _KERAS_UTILS
+
+__version__ = '1.0.3'
