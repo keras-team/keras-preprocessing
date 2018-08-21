@@ -9,6 +9,7 @@ _KERAS_UTILS = None
 
 
 def set_keras_submodules(backend, utils):
+    # Deprecated, will be removed in the future.
     global _KERAS_BACKEND
     global _KERAS_UTILS
     _KERAS_BACKEND = backend
@@ -16,6 +17,7 @@ def set_keras_submodules(backend, utils):
 
 
 def get_keras_submodule(name):
+    # Deprecated, will be removed in the future.
     if name not in {'backend', 'utils'}:
         raise ImportError(
             'Can only retrieve "backend" and "utils". '
@@ -36,3 +38,5 @@ def get_keras_submodule(name):
         return _KERAS_BACKEND
     elif name == 'utils':
         return _KERAS_UTILS
+
+__version__ = '1.0.3'
