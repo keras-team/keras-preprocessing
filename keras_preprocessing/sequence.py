@@ -10,10 +10,6 @@ import random
 import json
 from six.moves import range
 
-from . import get_keras_submodule
-
-keras_utils = get_keras_submodule('utils')
-
 
 def pad_sequences(sequences, maxlen=None, dtype='int32',
                   padding='pre', truncating='pre', value=0.):
@@ -251,7 +247,7 @@ def _remove_long_seq(maxlen, seq, label):
     return new_seq, new_label
 
 
-class TimeseriesGenerator(keras_utils.Sequence):
+class TimeseriesGenerator(object):
     """Utility class for generating batches of temporal data.
 
     This class takes in a sequence of data-points gathered at
@@ -325,7 +321,8 @@ class TimeseriesGenerator(keras_utils.Sequence):
 
         if len(data) != len(targets):
             raise ValueError('Data and targets have to be' +
-                             ' of same length. Data length is {}'.format(len(data)) +
+                             ' of same length. '
+                             'Data length is {}'.format(len(data)) +
                              ' while target length is {}'.format(len(targets)))
 
         self.data = data
