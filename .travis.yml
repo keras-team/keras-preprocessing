@@ -6,15 +6,11 @@ matrix:
         - python: 2.7
           env: TEST_MODE=PEP8
         - python: 2.7
-          env: TEST_MODE=INTEGRATION_TESTS
-        - python: 2.7
           env: KERAS_HEAD=true
         - python: 3.6
           env: KERAS_HEAD=true
         - python: 2.7
         - python: 3.6
-        - python: 3.6
-          env: TEST_MODE=INTEGRATION_TESTS
 install:
   # code below is taken from http://conda.pydata.org/docs/travis.html
   # We do this conditionally because it saves us some downloading if the
@@ -57,8 +53,6 @@ install:
 script:
   - if [[ "$TEST_MODE" == "PEP8" ]]; then
       PYTHONPATH=$PWD:$PYTHONPATH py.test --pep8 -m pep8 -n0;
-    elif [[ "$TEST_MODE" == "INTEGRATION_TESTS" ]]; then
-      PYTHONPATH=$PWD:$PYTHONPATH py.test tests/integration_test.py;
     else
-      PYTHONPATH=$PWD:$PYTHONPATH py.test tests/ --cov-config .coveragerc --cov=keras_preprocessing tests/ --ignore=tests/integration_test.py;
+      PYTHONPATH=$PWD:$PYTHONPATH py.test tests/ --cov-config .coveragerc --cov=keras_preprocessing tests/;
     fi
