@@ -53,14 +53,8 @@ def test_pad_sequences_str():
                                dtype='<U3')
     assert_equal(b, [['pad', '1'], ['1', '2'], ['1', '2']])
 
-    try:
+    with pytest.raises(ValueError, match="`dtype` int32 is not compatible with ")
         sequence.pad_sequences(a, maxlen=2, truncating='post', value='pad')
-        raise Exception("Should throw an exception about invalid dtype.")
-    except ValueError as err:
-        assert err.args == ("`dtype` int32 is not compatible with"
-                            " `value`'s type: <class 'str'>"
-                            "\nYou should set `dtype=object`"
-                            " for variable length strings.",)
 
 
 def test_pad_sequences_vector():
