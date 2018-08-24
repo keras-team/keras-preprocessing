@@ -9,6 +9,7 @@ import numpy as np
 import random
 import json
 from six.moves import range
+import six
 
 
 def pad_sequences(sequences, maxlen=None, dtype='int32',
@@ -35,12 +36,13 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
         sequences: List of lists, where each element is a sequence.
         maxlen: Int, maximum length of all sequences.
         dtype: Type of the output sequences.
+            To pad sequences with variable length strings, you can use `object`.
         padding: String, 'pre' or 'post':
             pad either before or after each sequence.
         truncating: String, 'pre' or 'post':
             remove values from sequences larger than
             `maxlen`, either at the beginning or at the end of the sequences.
-        value: Float, padding value.
+        value: Float or String, padding value.
 
     # Returns
         x: Numpy array with shape `(len(sequences), maxlen)`
@@ -70,7 +72,13 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
             sample_shape = np.asarray(s).shape[1:]
             break
 
-    x = (np.ones((num_samples, maxlen) + sample_shape) * value).astype(dtype)
+    is_dtype_str = np.issubdtype(dtype, np.str_) or np.issubdtype(dtype, np.unicode_)
+    if isinstance(value, six.string_types) and dtype != object and not is_dtype_str:
+        raise ValueError("`dtype` {} is not compatible with `value`'s type: {}\n"
+                         "You should set `dtype=object` for variable length strings."
+                         .format(dtype, type(value)))
+
+    x = np.full((num_samples, maxlen) + sample_shape, value, dtype=dtype)
     for idx, s in enumerate(sequences):
         if not len(s):
             continue  # empty list/array was found
