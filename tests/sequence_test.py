@@ -53,7 +53,7 @@ def test_pad_sequences_str():
                                dtype='<U3')
     assert_equal(b, [['pad', '1'], ['1', '2'], ['1', '2']])
 
-    with pytest.raises(ValueError, match="`dtype` int32 is not compatible with ")
+    with pytest.raises(ValueError, match="`dtype` int32 is not compatible with "):
         sequence.pad_sequences(a, maxlen=2, truncating='post', value='pad')
 
 
