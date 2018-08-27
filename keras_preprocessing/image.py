@@ -123,13 +123,14 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
     return x
 
 
-def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
+def random_zoom(x, zoom_range, uniform_zoom=False, row_axis=1, col_axis=2, channel_axis=0,
                 fill_mode='nearest', cval=0.):
     """Performs a random spatial zoom of a Numpy image tensor.
 
     # Arguments
         x: Input tensor. Must be 3D.
         zoom_range: Tuple of floats; zoom range for width and height.
+        uniform_zoom: Boolean. Apply same zoom amount on both axes.
         row_axis: Index of axis for rows in the input tensor.
         col_axis: Index of axis for columns in the input tensor.
         channel_axis: Index of axis for channels in the input tensor.
@@ -151,6 +152,9 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
 
     if zoom_range[0] == 1 and zoom_range[1] == 1:
         zx, zy = 1, 1
+    elif uniform_zoom:
+        zx = np.random.uniform(zoom_range[0], zoom_range[1])
+        zy = zy
     else:
         zx, zy = np.random.uniform(zoom_range[0], zoom_range[1], 2)
     x = apply_affine_transform(x, zx=zx, zy=zy, channel_axis=channel_axis,
@@ -562,6 +566,7 @@ class ImageDataGenerator(object):
             (Shear angle in counter-clockwise direction in degrees)
         zoom_range: Float or [lower, upper]. Range for random zoom.
             If a float, `[lower, upper] = [1-zoom_range, 1+zoom_range]`.
+        uniform_zoom: Boolean. Apply same zoom amount on both axes.
         channel_shift_range: Float. Range for random channel shifts.
         fill_mode: One of {"constant", "nearest", "reflect" or "wrap"}.
             Default is 'nearest'.
@@ -738,6 +743,7 @@ class ImageDataGenerator(object):
         self.brightness_range = brightness_range
         self.shear_range = shear_range
         self.zoom_range = zoom_range
+        self.uniform_zoom = uniform_zoom
         self.channel_shift_range = channel_shift_range
         self.fill_mode = fill_mode
         self.cval = cval
@@ -1067,6 +1073,11 @@ class ImageDataGenerator(object):
 
         if self.zoom_range[0] == 1 and self.zoom_range[1] == 1:
             zx, zy = 1, 1
+        elif self.uniform_zoom:
+            zx = np.random.uniform(
+                self.zoom_range[0],
+                self.zoom_range[1])
+            zy = zx
         else:
             zx, zy = np.random.uniform(
                 self.zoom_range[0],
