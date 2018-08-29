@@ -2049,12 +2049,6 @@ class DataFrameIterator(Iterator):
                                  ' is either "other" or "input" or None.')
         self.num_classes = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
-
-        pool = multiprocessing.pool.ThreadPool()
-        function_partial = partial(_count_valid_files_in_directory,
-                                   white_list_formats=white_list_formats,
-                                   follow_links=follow_links,
-                                   split=self.split)
         self.samples = _count_valid_files_in_directory(
             directory,
             white_list_formats=white_list_formats,
@@ -2065,9 +2059,8 @@ class DataFrameIterator(Iterator):
                   (self.samples, self.num_classes))
         else:
             print('Found %d images.' % self.samples)
-        # Second, build an index of the images
-        # in the different class subfolders.
-        results = []
+
+        # Second, build an index of the images.
         self.filenames = []
         self.classes = np.zeros((self.samples,), dtype='int32')
         filenames = _list_valid_filenames_in_directory(
@@ -2108,8 +2101,6 @@ class DataFrameIterator(Iterator):
                 raise TypeError("y_col column/s must be numeric datatypes.")
         self.filenames = filenames
 
-        pool.close()
-        pool.join()
         super(DataFrameIterator, self).__init__(self.samples,
                                                 batch_size,
                                                 shuffle,
