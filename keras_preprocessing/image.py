@@ -2070,56 +2070,43 @@ class DataFrameIterator(Iterator):
         results = []
         self.filenames = []
         self.classes = np.zeros((self.samples,), dtype='int32')
-        if dataframe is None:
-            i = 0
-            for dirpath in (os.path.join(directory, subdir) for subdir in classes):
-                results.append(
-                    pool.apply_async(_list_valid_filenames_in_directory,
-                                     (dirpath, white_list_formats, self.split,
-                                      self.class_indices, follow_links)))
-            for res in results:
-                classes, filenames = res.get()
-                self.classes[i:i + len(classes)] = classes
-                self.filenames += filenames
-                i += len(classes)
-        else:
-            filenames = _list_valid_filenames_in_directory(
-                directory,
-                white_list_formats,
-                self.split,
-                class_indices=self.class_indices,
-                follow_links=follow_links,
-                df=True)
-            if class_mode not in ["other", "input", None]:
-                if has_ext:
-                    ext_exist = False
-                    for ext in white_list_formats:
-                        if self.df.loc[0, x_col].endswith("." + ext):
-                            ext_exist = True
-                            break
-                    if not ext_exist:
-                        raise ValueError('has_ext is set to True but'
-                                         ' extension not found in x_col')
-                    temp_df = pd.DataFrame({x_col: filenames}, dtype=str)
-                    temp_df = self.df.merge(temp_df, how='right', on=x_col)
-                    temp_df = temp_df.set_index(x_col)
-                    temp_df = temp_df.reindex(filenames)
-                    classes = temp_df[y_col].values
-                else:
-                    filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
-                                             for f in filenames]
-                    temp_df = pd.DataFrame({x_col: filenames_without_ext}, dtype=str)
-                    temp_df = self.df.merge(temp_df, how='right', on=x_col)
-                    temp_df = temp_df.set_index(x_col)
-                    temp_df = temp_df.reindex(filenames_without_ext)
-                    classes = temp_df[y_col].values
-                self.df = temp_df.copy()
-                self.classes = np.array([self.class_indices[cls] for cls in classes])
-            elif class_mode == "other":
-                self.data = self.df[y_col].values
-                if "object" in list(self.df[y_col].dtypes):
-                    raise TypeError("y_col column/s must be numeric datatypes.")
-            self.filenames = filenames
+        filenames = _list_valid_filenames_in_directory(
+            directory,
+            white_list_formats,
+            self.split,
+            class_indices=self.class_indices,
+            follow_links=follow_links,
+            df=True)
+        if class_mode not in ["other", "input", None]:
+            if has_ext:
+                ext_exist = False
+                for ext in white_list_formats:
+                    if self.df.loc[0, x_col].endswith("." + ext):
+                        ext_exist = True
+                        break
+                if not ext_exist:
+                    raise ValueError('has_ext is set to True but'
+                                     ' extension not found in x_col')
+                temp_df = pd.DataFrame({x_col: filenames}, dtype=str)
+                temp_df = self.df.merge(temp_df, how='right', on=x_col)
+                temp_df = temp_df.set_index(x_col)
+                temp_df = temp_df.reindex(filenames)
+                classes = temp_df[y_col].values
+            else:
+                filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
+                                         for f in filenames]
+                temp_df = pd.DataFrame({x_col: filenames_without_ext}, dtype=str)
+                temp_df = self.df.merge(temp_df, how='right', on=x_col)
+                temp_df = temp_df.set_index(x_col)
+                temp_df = temp_df.reindex(filenames_without_ext)
+                classes = temp_df[y_col].values
+            self.df = temp_df.copy()
+            self.classes = np.array([self.class_indices[cls] for cls in classes])
+        elif class_mode == "other":
+            self.data = self.df[y_col].values
+            if "object" in list(self.df[y_col].dtypes):
+                raise TypeError("y_col column/s must be numeric datatypes.")
+        self.filenames = filenames
 
         pool.close()
         pool.join()
