@@ -4,8 +4,9 @@ import numpy as np
 import os
 import tempfile
 import shutil
-
 import keras
+import pandas as pd
+import random
 
 # TODO: remove the 3 lines below once the Keras release
 # is configured to use keras_preprocessing
@@ -433,9 +434,225 @@ class TestImage(object):
         # check number of classes and images
         assert len(train_iterator.class_indices) == num_classes
         assert len(train_iterator.classes) == num_training
-        assert len(set(train_iterator.filenames) & set(filenames)) == num_training
+        assert len(set(train_iterator.filenames) &
+                   set(filenames)) == num_training
 
         shutil.rmtree(tmp_folder)
+
+    def test_dataframe_iterator(self, tmpdir):
+        num_classes = 2
+
+        # save the images in the tmpdir
+        count = 0
+        filenames = []
+        filenames_without = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = "image-{}.png".format(count)
+                filename_without = "image-{}".format(count)
+                filenames.append(filename)
+                filenames_without.append(filename_without)
+                im.save(str(tmpdir / filename))
+                count += 1
+
+        df = pd.DataFrame({"filename": filenames,
+                           "class": [random.randint(0, 1) for _ in filenames]})
+
+        # create iterator
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(
+            df, str(tmpdir), has_ext=True)
+        df_sparse_iterator = generator.flow_from_dataframe(df, str(tmpdir),
+                                                           has_ext=True,
+                                                           class_mode="sparse")
+        if np.isnan(df_sparse_iterator.classes).any():
+            raise ValueError('Invalid values.')
+        df_without_ext = pd.DataFrame({"filename": filenames_without,
+                                       "class": [random.randint(0, 1)
+                                                 for _ in filenames_without]})
+        df_without_ext_iterator = generator.flow_from_dataframe(
+            df_without_ext, str(tmpdir),
+            has_ext=False)
+        df_regression = pd.DataFrame({"filename": filenames,
+                                      "col1": [random.randrange(0, 1)
+                                               for _ in filenames],
+                                      "col2": [random.randrange(0, 1)
+                                               for _ in filenames]})
+        df_multiple_y_iterator = generator.flow_from_dataframe(
+            df_regression, str(tmpdir), y_col=["col1", "col2"],
+            has_ext=True, class_mode="other")
+        df_regression = pd.DataFrame({"filename": filenames,
+                                      "col1": [random.randrange(0, 1)
+                                               for _ in filenames],
+                                      "col2": [random.randrange(0, 1)
+                                               for _ in filenames]},
+                                     dtype=str)
+        batch_x, batch_y = next(df_multiple_y_iterator)
+        with pytest.raises(TypeError):
+            df_multiple_y_iterator = generator.flow_from_dataframe(
+                df_regression, str(tmpdir), y_col=["col1", "col2"],
+                has_ext=True, class_mode="other")
+        # check number of classes and images
+        assert len(df_iterator.class_indices) == num_classes
+        assert len(df_iterator.classes) == count
+        assert set(df_iterator.filenames) == set(filenames)
+        assert len(df_without_ext_iterator.class_indices) == num_classes
+        assert len(df_without_ext_iterator.classes) == count
+        assert set(df_without_ext_iterator.filenames) == set(filenames)
+        assert batch_y.shape[1] == 2
+        # Test invalid use cases
+        with pytest.raises(ValueError):
+            generator.flow_from_dataframe(df, str(tmpdir), color_mode='cmyk',
+                                          has_ext=True)
+        with pytest.raises(ValueError):
+            generator.flow_from_dataframe(df, str(tmpdir), class_mode='output',
+                                          has_ext=True)
+        with pytest.raises(ValueError):
+            generator.flow_from_dataframe(df_without_ext, str(tmpdir),
+                                          has_ext=True)
+
+        def preprocessing_function(x):
+            """This will fail if not provided by a Numpy array.
+            Note: This is made to enforce backward compatibility.
+            """
+
+            assert x.shape == (26, 26, 3)
+            assert type(x) is np.ndarray
+
+            return np.zeros_like(x)
+
+        # Test usage as Sequence
+        generator = image.ImageDataGenerator(
+            preprocessing_function=preprocessing_function)
+        dir_seq = generator.flow_from_dataframe(df, str(tmpdir),
+                                                target_size=(26, 26),
+                                                color_mode='rgb',
+                                                batch_size=3,
+                                                class_mode='categorical',
+                                                has_ext=True)
+        assert len(dir_seq) == np.ceil(count / 3)
+        x1, y1 = dir_seq[1]
+        assert x1.shape == (3, 26, 26, 3)
+        assert y1.shape == (3, num_classes)
+        x1, y1 = dir_seq[5]
+        assert (x1 == 0).all()
+
+        with pytest.raises(ValueError):
+            x1, y1 = dir_seq[9]
+
+    def test_dataframe_iterator_class_mode_input(self, tmpdir):
+        # save the images in the paths
+        count = 0
+        filenames = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = str(
+                    tmpdir / 'image-{}.png'.format(count))
+                im.save(filename)
+                filenames.append(filename)
+                count += 1
+        df = pd.DataFrame({"filename": filenames})
+        generator = image.ImageDataGenerator()
+        df_autoencoder_iterator = generator.flow_from_dataframe(df, str(tmpdir),
+                                                                x_col="filename",
+                                                                y_col=None,
+                                                                has_ext=True,
+                                                                class_mode="input")
+
+        batch = next(df_autoencoder_iterator)
+
+        # check if input and output have the same shape and they're the same
+        assert(batch[0].all() == batch[1].all())
+        # check if the input and output images are not the same numpy array
+        input_img = batch[0][0]
+        output_img = batch[1][0]
+        output_img[0][0][0] += 1
+        assert(input_img[0][0][0] != output_img[0][0][0])
+
+        df_autoencoder_iterator = generator.flow_from_dataframe(df, str(tmpdir),
+                                                                x_col="filename",
+                                                                y_col="class",
+                                                                has_ext=True,
+                                                                class_mode="input")
+
+        batch = next(df_autoencoder_iterator)
+
+        # check if input and output have the same shape and they're the same
+        assert(batch[0].all() == batch[1].all())
+        # check if the input and output images are not the same numpy array
+        input_img = batch[0][0]
+        output_img = batch[1][0]
+        output_img[0][0][0] += 1
+        assert(input_img[0][0][0] != output_img[0][0][0])
+
+    @pytest.mark.parametrize('validation_split,num_training', [
+        (0.25, 18),
+        (0.50, 12),
+        (0.75, 6),
+    ])
+    def test_dataframe_iterator_with_validation_split(self,
+                                                      validation_split,
+                                                      num_training, tmpdir):
+        num_classes = 2
+
+        # save the images in the tmpdir
+        count = 0
+        filenames = []
+        filenames_without = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = "image-{}.png".format(count)
+                filename_without = "image-{}".format(count)
+                filenames.append(filename)
+                filenames_without.append(filename_without)
+                im.save(str(tmpdir / filename))
+                count += 1
+
+        df = pd.DataFrame({"filename": filenames,
+                           "class": [random.randint(0, 1) for _ in filenames]})
+        df_without_ext = pd.DataFrame({"filename": filenames_without,
+                                       "class": [random.randint(0, 1)
+                                                 for _ in filenames_without]})
+        # create iterator
+        generator = image.ImageDataGenerator(validation_split=validation_split)
+        df_sparse_iterator = generator.flow_from_dataframe(df,
+                                                           str(tmpdir),
+                                                           has_ext=True,
+                                                           class_mode="sparse")
+        if np.isnan(next(df_sparse_iterator)[:][1]).any():
+            raise ValueError('Invalid values.')
+
+        with pytest.raises(ValueError):
+            generator.flow_from_dataframe(
+                df, tmpdir, has_ext=True, subset='foo')
+
+        train_iterator = generator.flow_from_dataframe(df, str(tmpdir), has_ext=True,
+                                                       subset='training')
+        assert train_iterator.samples == num_training
+
+        valid_iterator = generator.flow_from_dataframe(df, str(tmpdir), has_ext=True,
+                                                       subset='validation')
+        assert valid_iterator.samples == count - num_training
+
+        train_iterator_without = generator.flow_from_dataframe(
+            df_without_ext, str(tmpdir),
+            has_ext=False,
+            subset='training')
+        assert train_iterator_without.samples == num_training
+
+        valid_iterator_without = generator.flow_from_dataframe(
+            df_without_ext, str(tmpdir),
+            has_ext=False,
+            subset='validation')
+        assert valid_iterator_without.samples == count - num_training
+
+        # check number of classes and images
+        assert len(train_iterator.class_indices) == num_classes
+        assert len(train_iterator.classes) == num_training
+        assert len(set(train_iterator.filenames) &
+                   set(filenames)) == num_training
+        intersection = set(train_iterator_without.filenames) & set(filenames)
+        assert len(intersection) == num_training
 
     def test_img_utils(self):
         height, width = 10, 8
