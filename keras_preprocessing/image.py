@@ -1554,6 +1554,13 @@ class NumpyArrayIterator(Iterator):
                 raise ValueError('Invalid subset name:', subset,
                                  '; expected "training" or "validation".')
             split_idx = int(len(x) * image_data_generator._validation_split)
+
+            # in case the numpy arrays are sorted by class, we need to shuffle them,
+            # to ensure that both training and test set will get a stratified sample
+            permutation_idx = np.random.permutation(len(x))
+            x = x[permutation_idx]
+            y = y[permutation_idx]
+
             if subset == 'validation':
                 x = x[:split_idx]
                 x_misc = [np.asarray(xx[:split_idx]) for xx in x_misc]

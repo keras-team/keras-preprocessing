@@ -199,18 +199,19 @@ class TestImage(object):
             for im in test_images:
                 img_list.append(image.img_to_array(im)[None, ...])
 
-            images = np.vstack(img_list)
+            images = np.repeat(np.vstack(img_list), 1000, 0)
+            labels = np.concatenate([np.zeros((len(images)/2,)), np.ones((len(images)/2,))])
             generator = image.ImageDataGenerator(validation_split=0.5)
-            seq = generator.flow(images, np.arange(images.shape[0]),
-                                 shuffle=False, batch_size=3,
+            seq = generator.flow(images, labels,
+                                 shuffle=False, batch_size=100,
                                  subset='validation')
             x, y = seq[0]
-            assert list(y) == [0, 1, 2]
-            seq = generator.flow(images, np.arange(images.shape[0]),
-                                 shuffle=False, batch_size=3,
+            assert 40 <= sum(y) <= 60   # ideally 50%
+            seq = generator.flow(images, labels,
+                                 shuffle=False, batch_size=100,
                                  subset='training')
             x2, y2 = seq[0]
-            assert list(y2) == [4, 5, 6]
+            assert 40 <= sum(y2) <= 60  # ideally 50%
 
             with pytest.raises(ValueError):
                 generator.flow(images, np.arange(images.shape[0]),
@@ -914,7 +915,6 @@ class TestImage(object):
         with pytest.raises(ValueError):
             loaded_im = image.load_img(filename_rgb, target_size=(25, 25),
                                        interpolation="unsupported")
-
 
 if __name__ == '__main__':
     pytest.main([__file__])
