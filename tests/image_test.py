@@ -200,7 +200,9 @@ class TestImage(object):
                 img_list.append(image.img_to_array(im)[None, ...])
 
             images = np.repeat(np.vstack(img_list), 1000, 0)
-            labels = np.concatenate([np.zeros((len(images)/2,)), np.ones((len(images)/2,))])
+            labels = np.concatenate([
+                np.zeros((int(len(images) / 2),)),
+                np.ones((int(len(images) / 2),))])
             generator = image.ImageDataGenerator(validation_split=0.5)
             seq = generator.flow(images, labels,
                                  shuffle=False, batch_size=100,
