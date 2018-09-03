@@ -208,12 +208,12 @@ class TestImage(object):
                                  shuffle=False, batch_size=100,
                                  subset='validation')
             x, y = seq[0]
-            assert 40 <= sum(y) <= 60   # ideally 50%
+            assert 30 <= sum(y) <= 70   # ideally 50%
             seq = generator.flow(images, labels,
                                  shuffle=False, batch_size=100,
                                  subset='training')
             x2, y2 = seq[0]
-            assert 40 <= sum(y2) <= 60  # ideally 50%
+            assert 30 <= sum(y2) <= 70  # ideally 50%
 
             with pytest.raises(ValueError):
                 generator.flow(images, np.arange(images.shape[0]),
