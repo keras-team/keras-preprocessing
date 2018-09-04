@@ -1557,6 +1557,8 @@ class NumpyArrayIterator(Iterator):
 
             # in case the numpy arrays are sorted by class, we need to shuffle them,
             # to ensure that both training and test set will get a stratified sample
+            if seed is not None:
+                np.random.seed(seed)
             permutation_idx = np.random.permutation(len(x))
             x = x[permutation_idx]
             y = y[permutation_idx]

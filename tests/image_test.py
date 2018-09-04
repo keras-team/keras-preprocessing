@@ -206,14 +206,18 @@ class TestImage(object):
             generator = image.ImageDataGenerator(validation_split=0.5)
             seq = generator.flow(images, labels,
                                  shuffle=False, batch_size=100,
+                                 seed = 42,
                                  subset='validation')
             x, y = seq[0]
-            assert 30 <= sum(y) <= 70   # ideally 50%
+            assert 0 < sum(y) < 100     # ideally 50%
+            assert list(y[0:10]) == [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0] # checking seed
             seq = generator.flow(images, labels,
                                  shuffle=False, batch_size=100,
+                                 seed = 42,
                                  subset='training')
             x2, y2 = seq[0]
-            assert 30 <= sum(y2) <= 70  # ideally 50%
+            assert 0 < sum(y2) < 100   # ideally 50%
+            assert list(y2[0:10]) == [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0] # checking seed
 
             with pytest.raises(ValueError):
                 generator.flow(images, np.arange(images.shape[0]),
