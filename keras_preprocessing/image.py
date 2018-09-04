@@ -702,9 +702,9 @@ class ImageDataGenerator(object):
         epochs=50)
     ```
 
-    Example of using `.flow_from_dataframe(dataframe, directory,
+    Example of using ```.flow_from_dataframe(dataframe, directory,
                                             x_col, y_col,
-                                            has_ext)`:
+                                            has_ext)```:
 
     ```python
 
