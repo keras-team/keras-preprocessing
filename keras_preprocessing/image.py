@@ -701,6 +701,51 @@ class ImageDataGenerator(object):
         steps_per_epoch=2000,
         epochs=50)
     ```
+
+    Example of using ```.flow_from_dataframe(dataframe, directory,
+                                            x_col, y_col,
+                                            has_ext)```:
+
+    ```python
+
+    train_df = pandas.read_csv("./train.csv")
+    valid_df = pandas.read_csv("./valid.csv")
+
+    train_datagen = ImageDataGenerator(
+            rescale=1./255,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True)
+
+    test_datagen = ImageDataGenerator(rescale=1./255)
+
+    train_generator = train_datagen.flow_from_dataframe(
+            dataframe=train_df,
+            directory='data/train',
+            x_col="filename",
+            y_col="class",
+            has_ext=True,
+            target_size=(150, 150),
+            batch_size=32,
+            class_mode='binary')
+
+    validation_generator = test_datagen.flow_from_dataframe(
+            dataframe=valid_df,
+            directory='data/validation',
+            x_col="filename",
+            y_col="class",
+            has_ext=True,
+            target_size=(150, 150),
+            batch_size=32,
+            class_mode='binary')
+
+    model.fit_generator(
+            train_generator,
+            steps_per_epoch=2000,
+            epochs=50,
+            validation_data=validation_generator,
+            validation_steps=800)
+    ```
     """
 
     def __init__(self,
@@ -1038,7 +1083,7 @@ class ImageDataGenerator(object):
                  `"hamming"` are also supported. By default, `"nearest"` is used.
 
         # Returns
-            A ImageFileIterator yielding tuples of `(x, y)`
+            A DataFrameIterator yielding tuples of `(x, y)`
             where `x` is a numpy array containing a batch
             of images with shape `(batch_size, *target_size, channels)`
              and `y` is a numpy array of corresponding labels.
@@ -1717,13 +1762,18 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             of images in each directory.
         class_indices: dictionary mapping a class name to its index.
         follow_links: boolean.
+        df: boolean
 
     # Returns
-        classes: a list of class indices
-        filenames: the path of valid files in `directory`, relative from
-            `directory`'s parent (e.g., if `directory` is "dataset/class1",
-            the filenames will be
+        classes: a list of class indices(returns only if `df=False`)
+        filenames: if `df=False`,returns the path of valid files in `directory`,
+            relative from `directory`'s parent (e.g., if `directory` is
+            "dataset/class1", the filenames will be
             `["class1/file1.jpg", "class1/file2.jpg", ...]`).
+            if `df=True`, returns only the filenames that are found inside the
+             provided directory (e.g., if `directory` is
+            "dataset/", the filenames will be
+            `["file1.jpg", "file2.jpg", ...]`).
     """
     dirname = os.path.basename(directory)
     if split:
@@ -1939,7 +1989,8 @@ class DirectoryIterator(Iterator):
 
 
 class DataFrameIterator(Iterator):
-    """Iterator capable of reading images from a directory on disk.
+    """Iterator capable of reading images from a directory on disk
+        through a dataframe.
 
     # Arguments
         dataframe: Pandas dataframe containing the filenames of the
