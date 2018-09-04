@@ -702,7 +702,9 @@ class ImageDataGenerator(object):
         epochs=50)
     ```
 
-    Example of using `.flow_from_dataframe(dataframe, directory)`:
+    Example of using `.flow_from_dataframe(dataframe, directory,
+                                            x_col, y_col,
+                                            has_ext)`:
 
     ```python
 
@@ -1763,12 +1765,12 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
         df: boolean
 
     # Returns
-        classes: a list of class indices(returns only if df=False)
-        filenames: if df=False,returns the path of valid files in `directory`,
+        classes: a list of class indices(returns only if `df=False`)
+        filenames: if `df=False`,returns the path of valid files in `directory`,
             relative from `directory`'s parent (e.g., if `directory` is
             "dataset/class1", the filenames will be
             `["class1/file1.jpg", "class1/file2.jpg", ...]`).
-            if df=True, returns only the filenames that are found inside the
+            if `df=True`, returns only the filenames that are found inside the
              provided directory (e.g., if `directory` is
             "dataset/", the filenames will be
             `["file1.jpg", "file2.jpg", ...]`).
