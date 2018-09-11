@@ -199,27 +199,36 @@ class TestImage(object):
             for im in test_images:
                 img_list.append(image.img_to_array(im)[None, ...])
 
-            images = np.repeat(np.vstack(img_list), 1000, 0)
+            images = np.vstack(img_list)
             labels = np.concatenate([
                 np.zeros((int(len(images) / 2),)),
                 np.ones((int(len(images) / 2),))])
             generator = image.ImageDataGenerator(validation_split=0.5)
+
+            # training and validation sets would have different
+            # number of classes, because labels are sorted
+            with pytest.raises(ValueError):
+                generator.flow(images, labels,
+                               shuffle=False, batch_size=10,
+                               subset='validation')
+
+            # shuffle numpy arrays to solve the problem above
+            perm_idx = np.random.permutation(len(images))
+            images = images[perm_idx]
+            labels = labels[perm_idx]
+
             seq = generator.flow(images, labels,
-                                 shuffle=False, batch_size=100,
-                                 seed=42,
+                                 shuffle=False, batch_size=10,
                                  subset='validation')
+
             x, y = seq[0]
-            assert 0 < sum(y) < 100     # ideally 50%
-            assert list(y[0:10]) == [0.0, 0.0, 0.0, 0.0, 1.0,
-                                     0.0, 0.0, 0.0, 1.0, 0.0]    # checking seed
+            assert 2 == len(np.unique(y))
+
             seq = generator.flow(images, labels,
-                                 shuffle=False, batch_size=100,
-                                 seed=42,
+                                 shuffle=False, batch_size=10,
                                  subset='training')
             x2, y2 = seq[0]
-            assert 0 < sum(y2) < 100   # ideally 50%
-            assert list(y2[0:10]) == [0.0, 0.0, 0.0, 1.0, 0.0,
-                                      0.0, 1.0, 0.0, 1.0, 0.0]   # checking seed
+            assert 2 == len(np.unique(y2))
 
             with pytest.raises(ValueError):
                 generator.flow(images, np.arange(images.shape[0]),

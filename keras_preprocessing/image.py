@@ -1555,13 +1555,13 @@ class NumpyArrayIterator(Iterator):
                                  '; expected "training" or "validation".')
             split_idx = int(len(x) * image_data_generator._validation_split)
 
-            # in case the numpy arrays are sorted by class, we need to shuffle them,
-            # to ensure that both training and test set will get a stratified sample
-            if seed is not None:
-                np.random.seed(seed)
-            permutation_idx = np.random.permutation(len(x))
-            x = x[permutation_idx]
-            y = y[permutation_idx]
+            if len(np.unique(y)) != len(np.unique(y[:split_idx])) or \
+                    len(np.unique(y)) != len(np.unique(y[split_idx:])):
+                raise ValueError('Training and validation subsets would '
+                                 'have different number of classes after '
+                                 'the split. If your numpy arrays are '
+                                 'sorted by the label, you might want '
+                                 'to shuffle them.')
 
             if subset == 'validation':
                 x = x[:split_idx]
@@ -1573,6 +1573,7 @@ class NumpyArrayIterator(Iterator):
                 x_misc = [np.asarray(xx[split_idx:]) for xx in x_misc]
                 if y is not None:
                     y = y[split_idx:]
+
         self.x = np.asarray(x, dtype=self.dtype)
         self.x_misc = x_misc
         if self.x.ndim != 4:
