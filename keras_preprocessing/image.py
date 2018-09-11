@@ -12,6 +12,12 @@ import threading
 import warnings
 import multiprocessing.pool
 from functools import partial
+from keras_preprocessing import get_keras_submodule
+
+try:
+    IteratorType = get_keras_submodule('utils').Sequence
+except ImportError:
+    IteratorType = object
 
 try:
     from PIL import ImageEnhance
@@ -1391,7 +1397,7 @@ class ImageDataGenerator(object):
             self.principal_components = (u * s_inv).dot(u.T)
 
 
-class Iterator(object):
+class Iterator(IteratorType):
     """Base class for image data iterators.
 
     Every `Iterator` must implement the `_get_batches_of_transformed_samples`
