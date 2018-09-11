@@ -200,17 +200,40 @@ class TestImage(object):
                 img_list.append(image.img_to_array(im)[None, ...])
 
             images = np.vstack(img_list)
+            labels = np.concatenate([
+                np.zeros((int(len(images) / 2),)),
+                np.ones((int(len(images) / 2),))])
             generator = image.ImageDataGenerator(validation_split=0.5)
-            seq = generator.flow(images, np.arange(images.shape[0]),
-                                 shuffle=False, batch_size=3,
+
+            # training and validation sets would have different
+            # number of classes, because labels are sorted
+            with pytest.raises(ValueError,
+                               match='Training and validation subsets '
+                                     'have different number of classes after '
+                                     'the split.*'):
+                generator.flow(images, labels,
+                               shuffle=False, batch_size=10,
+                               subset='validation')
+
+            labels = np.concatenate([
+                np.zeros((int(len(images) / 4),)),
+                np.ones((int(len(images) / 4),)),
+                np.zeros((int(len(images) / 4),)),
+                np.ones((int(len(images) / 4),))
+            ])
+
+            seq = generator.flow(images, labels,
+                                 shuffle=False, batch_size=10,
                                  subset='validation')
+
             x, y = seq[0]
-            assert list(y) == [0, 1, 2]
-            seq = generator.flow(images, np.arange(images.shape[0]),
-                                 shuffle=False, batch_size=3,
+            assert 2 == len(np.unique(y))
+
+            seq = generator.flow(images, labels,
+                                 shuffle=False, batch_size=10,
                                  subset='training')
             x2, y2 = seq[0]
-            assert list(y2) == [4, 5, 6]
+            assert 2 == len(np.unique(y2))
 
             with pytest.raises(ValueError):
                 generator.flow(images, np.arange(images.shape[0]),
@@ -914,7 +937,6 @@ class TestImage(object):
         with pytest.raises(ValueError):
             loaded_im = image.load_img(filename_rgb, target_size=(25, 25),
                                        interpolation="unsupported")
-
 
 if __name__ == '__main__':
     pytest.main([__file__])
