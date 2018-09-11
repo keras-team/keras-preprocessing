@@ -1555,9 +1555,10 @@ class NumpyArrayIterator(Iterator):
                                  '; expected "training" or "validation".')
             split_idx = int(len(x) * image_data_generator._validation_split)
 
-            if len(np.unique(y)) != len(np.unique(y[:split_idx])) or \
-                    len(np.unique(y)) != len(np.unique(y[split_idx:])):
-                raise ValueError('Training and validation subsets would '
+            if not np.array_equal(
+                    np.unique(y[:split_idx]),
+                    np.unique(y[split_idx:])):
+                raise ValueError('Training and validation subsets '
                                  'have different number of classes after '
                                  'the split. If your numpy arrays are '
                                  'sorted by the label, you might want '

@@ -207,7 +207,10 @@ class TestImage(object):
 
             # training and validation sets would have different
             # number of classes, because labels are sorted
-            with pytest.raises(ValueError):
+            with pytest.raises(ValueError,
+                               match='Training and validation subsets '
+                                     'have different number of classes after '
+                                     'the split.*'):
                 generator.flow(images, labels,
                                shuffle=False, batch_size=10,
                                subset='validation')
