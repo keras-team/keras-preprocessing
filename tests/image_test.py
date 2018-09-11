@@ -212,10 +212,12 @@ class TestImage(object):
                                shuffle=False, batch_size=10,
                                subset='validation')
 
-            # shuffle numpy arrays to solve the problem above
-            perm_idx = np.random.permutation(len(images))
-            images = images[perm_idx]
-            labels = labels[perm_idx]
+            labels = np.concatenate([
+                np.zeros((int(len(images) / 4),)),
+                np.ones((int(len(images) / 4),)),
+                np.zeros((int(len(images) / 4),)),
+                np.ones((int(len(images) / 4),))
+            ])
 
             seq = generator.flow(images, labels,
                                  shuffle=False, batch_size=10,
