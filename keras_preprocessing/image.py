@@ -2165,6 +2165,8 @@ class DataFrameIterator(Iterator):
             self.classes = np.array([self.class_indices[cls] for cls in classes])
         elif class_mode == "other":
             self.data = self.df[y_col].values
+            if type(y_col) == str:
+                y_col = [y_col]
             if "object" in list(self.df[y_col].dtypes):
                 raise TypeError("y_col column/s must be numeric datatypes.")
         self.filenames = filenames

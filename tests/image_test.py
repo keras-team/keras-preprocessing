@@ -515,6 +515,10 @@ class TestImage(object):
             df_multiple_y_iterator = generator.flow_from_dataframe(
                 df_regression, str(tmpdir), y_col=["col1", "col2"],
                 has_ext=True, class_mode="other")
+        with pytest.raises(TypeError):
+            df_single_y_iterator = generator.flow_from_dataframe(
+                df_regression, str(tmpdir), y_col="col1",
+                has_ext=True, class_mode="other")
         # check number of classes and images
         assert len(df_iterator.class_indices) == num_classes
         assert len(df_iterator.classes) == count
