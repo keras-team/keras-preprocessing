@@ -48,7 +48,7 @@ def test_tokenizer():
     sequences = []
     for seq in tokenizer.texts_to_sequences_generator(sample_texts):
         sequences.append(seq)
-    assert np.max(np.max(sequences)) < 10
+    assert np.max(np.max(sequences)) <= 10
     assert np.min(np.min(sequences)) == 1
 
     tokenizer.fit_on_sequences(sequences)
@@ -181,7 +181,7 @@ def test_tokenizer_oov_flag_and_num_words():
     x_test_seq = tokenizer.texts_to_sequences(x_test)
     trans_text = ' '.join(tokenizer.index_word[t] for t in x_test_seq[0])
     assert len(x_test_seq[0]) == 6
-    assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
+    assert trans_text == 'this text <unk> <unk> <unk> <unk>'
 
 
 def test_tokenizer_oov_flag_and_num_words():
@@ -194,7 +194,7 @@ def test_tokenizer_oov_flag_and_num_words():
     x_test_seq = tokenizer.texts_to_sequences(x_test)
     trans_text = ' '.join(tokenizer.index_word[t] for t in x_test_seq[0])
     assert len(x_test_seq[0]) == 6
-    assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
+    assert trans_text == 'this text <unk> <unk> <unk> <unk>'
 
 
 def test_sequences_to_texts_with_num_words_and_oov_token():
