@@ -1733,36 +1733,6 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
                     yield root, fname
 
 
-def _count_valid_files_in_directory(directory,
-                                    white_list_formats,
-                                    split,
-                                    follow_links):
-    """Counts files with extension in `white_list_formats` contained in `directory`.
-
-    # Arguments
-        directory: absolute path to the directory
-            containing files to be counted
-        white_list_formats: set of strings containing allowed extensions for
-            the files to be counted.
-        split: tuple of floats (e.g. `(0.2, 0.6)`) to only take into
-            account a certain fraction of files in each directory.
-            E.g.: `segment=(0.6, 1.0)` would only account for last 40 percent
-            of images in each directory.
-        follow_links: boolean.
-
-    # Returns
-        the count of files with extension in `white_list_formats` contained in
-        the directory.
-    """
-    num_files = len(list(
-        _iter_valid_files(directory, white_list_formats, follow_links)))
-    if split:
-        start, stop = int(split[0] * num_files), int(split[1] * num_files)
-    else:
-        start, stop = 0, num_files
-    return stop - start
-
-
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,
                                        class_indices, follow_links, df=False):
     """Lists paths of files in `subdir` with extensions in `white_list_formats`.
@@ -1910,34 +1880,30 @@ class DirectoryIterator(Iterator):
         self.class_indices = dict(zip(classes, range(len(classes))))
 
         pool = multiprocessing.pool.ThreadPool()
-        function_partial = partial(_count_valid_files_in_directory,
-                                   white_list_formats=white_list_formats,
-                                   follow_links=follow_links,
-                                   split=self.split)
-        self.samples = sum(pool.map(function_partial,
-                                    (os.path.join(directory, subdir)
-                                     for subdir in classes)))
-
-        print('Found %d images belonging to %d classes.' %
-              (self.samples, self.num_classes))
 
         # Second, build an index of the images
         # in the different class subfolders.
         results = []
         self.filenames = []
-        self.classes = np.zeros((self.samples,), dtype='int32')
         i = 0
         for dirpath in (os.path.join(directory, subdir) for subdir in classes):
             results.append(
                 pool.apply_async(_list_valid_filenames_in_directory,
                                  (dirpath, white_list_formats, self.split,
                                   self.class_indices, follow_links)))
+        classes_list = []
         for res in results:
             classes, filenames = res.get()
-            self.classes[i:i + len(classes)] = classes
+            classes_list.append(classes)
             self.filenames += filenames
+        self.samples = len(self.filenames)
+        self.classes = np.zeros((self.samples,), dtype='int32')
+        for classes in classes_list:
+            self.classes[i:i + len(classes)] = classes
             i += len(classes)
 
+        print('Found %d images belonging to %d classes.' %
+              (self.samples, self.num_classes))
         pool.close()
         pool.join()
         super(DirectoryIterator, self).__init__(self.samples,
@@ -2117,16 +2083,6 @@ class DataFrameIterator(Iterator):
                                  ' is either "other" or "input" or None.')
         self.num_classes = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
-        self.samples = _count_valid_files_in_directory(
-            directory,
-            white_list_formats=white_list_formats,
-            follow_links=follow_links,
-            split=self.split)
-        if self.num_classes > 0:
-            print('Found %d images belonging to %d classes.' %
-                  (self.samples, self.num_classes))
-        else:
-            print('Found %d images.' % self.samples)
 
         # Second, build an index of the images.
         self.filenames = []
@@ -2170,6 +2126,12 @@ class DataFrameIterator(Iterator):
             if "object" in list(self.df[y_col].dtypes):
                 raise TypeError("y_col column/s must be numeric datatypes.")
         self.filenames = filenames
+        self.samples = len(self.filenames)
+        if self.num_classes > 0:
+            print('Found %d images belonging to %d classes.' %
+                  (self.samples, self.num_classes))
+        else:
+            print('Found %d images.' % self.samples)
 
         super(DataFrameIterator, self).__init__(self.samples,
                                                 batch_size,
