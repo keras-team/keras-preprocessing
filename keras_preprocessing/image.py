@@ -11,6 +11,12 @@ import os
 import threading
 import warnings
 import multiprocessing.pool
+from keras_preprocessing import get_keras_submodule
+
+try:
+    IteratorType = get_keras_submodule('utils').Sequence
+except ImportError:
+    IteratorType = object
 
 try:
     from PIL import ImageEnhance
@@ -1390,7 +1396,7 @@ class ImageDataGenerator(object):
             self.principal_components = (u * s_inv).dot(u.T)
 
 
-class Iterator(object):
+class Iterator(IteratorType):
     """Base class for image data iterators.
 
     Every `Iterator` must implement the `_get_batches_of_transformed_samples`
@@ -1598,6 +1604,16 @@ class NumpyArrayIterator(Iterator):
                 raise ValueError('Invalid subset name:', subset,
                                  '; expected "training" or "validation".')
             split_idx = int(len(x) * image_data_generator._validation_split)
+
+            if not np.array_equal(
+                    np.unique(y[:split_idx]),
+                    np.unique(y[split_idx:])):
+                raise ValueError('Training and validation subsets '
+                                 'have different number of classes after '
+                                 'the split. If your numpy arrays are '
+                                 'sorted by the label, you might want '
+                                 'to shuffle them.')
+
             if subset == 'validation':
                 x = x[:split_idx]
                 x_misc = [np.asarray(xx[:split_idx]) for xx in x_misc]
@@ -1608,6 +1624,7 @@ class NumpyArrayIterator(Iterator):
                 x_misc = [np.asarray(xx[split_idx:]) for xx in x_misc]
                 if y is not None:
                     y = y[split_idx:]
+
         self.x = np.asarray(x, dtype=self.dtype)
         self.x_misc = x_misc
         if self.x.ndim != 4:
