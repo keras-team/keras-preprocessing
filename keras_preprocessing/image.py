@@ -11,7 +11,6 @@ import os
 import threading
 import warnings
 import multiprocessing.pool
-from functools import partial
 from keras_preprocessing import get_keras_submodule
 
 try:
@@ -2094,30 +2093,35 @@ class DataFrameIterator(Iterator):
             class_indices=self.class_indices,
             follow_links=follow_links,
             df=True)
+        if has_ext:
+            ext_exist = False
+            for ext in white_list_formats:
+                if self.df.loc[0, x_col].endswith("." + ext):
+                    ext_exist = True
+                    break
+            if not ext_exist:
+                raise ValueError('has_ext is set to True but'
+                                 ' extension not found in x_col')
+            temp_df = pd.DataFrame({x_col: filenames}, dtype=str)
+            temp_df = self.df.merge(temp_df, how='right', on=x_col)
+            temp_df = temp_df.set_index(x_col)
+            temp_df = temp_df.reindex(filenames)
+            temp_df = temp_df.dropna()
+            self.filenames = list(temp_df.index)
+        else:
+            without_ext_with = {f[:-1 * (len(f.split(".")[-1]) + 1)]: f
+                                for f in filenames}
+            filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
+                                     for f in filenames]
+            temp_df = pd.DataFrame({x_col: filenames_without_ext}, dtype=str)
+            temp_df = self.df.merge(temp_df, how='right', on=x_col)
+            temp_df = temp_df.set_index(x_col)
+            temp_df = temp_df.reindex(filenames_without_ext)
+            temp_df = temp_df.dropna()
+            self.filenames = [without_ext_with[f] for f in temp_df.index]
+        self.df = temp_df.copy()
         if class_mode not in ["other", "input", None]:
-            if has_ext:
-                ext_exist = False
-                for ext in white_list_formats:
-                    if self.df.loc[0, x_col].endswith("." + ext):
-                        ext_exist = True
-                        break
-                if not ext_exist:
-                    raise ValueError('has_ext is set to True but'
-                                     ' extension not found in x_col')
-                temp_df = pd.DataFrame({x_col: filenames}, dtype=str)
-                temp_df = self.df.merge(temp_df, how='right', on=x_col)
-                temp_df = temp_df.set_index(x_col)
-                temp_df = temp_df.reindex(filenames)
-                classes = temp_df[y_col].values
-            else:
-                filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
-                                         for f in filenames]
-                temp_df = pd.DataFrame({x_col: filenames_without_ext}, dtype=str)
-                temp_df = self.df.merge(temp_df, how='right', on=x_col)
-                temp_df = temp_df.set_index(x_col)
-                temp_df = temp_df.reindex(filenames_without_ext)
-                classes = temp_df[y_col].values
-            self.df = temp_df.copy()
+            classes = temp_df[y_col].values
             self.classes = np.array([self.class_indices[cls] for cls in classes])
         elif class_mode == "other":
             self.data = self.df[y_col].values
@@ -2125,7 +2129,6 @@ class DataFrameIterator(Iterator):
                 y_col = [y_col]
             if "object" in list(self.df[y_col].dtypes):
                 raise TypeError("y_col column/s must be numeric datatypes.")
-        self.filenames = filenames
         self.samples = len(self.filenames)
         if self.num_classes > 0:
             print('Found %d images belonging to %d classes.' %
