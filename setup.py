@@ -21,14 +21,14 @@ and is distributed under the MIT license.
 '''
 
 setup(name='Keras_Preprocessing',
-      version='1.0.4',
+      version='1.0.5',
       description='Easy data preprocessing and data augmentation '
                   'for deep learning models',
       long_description=long_description,
       author='Keras Team',
       url='https://github.com/keras-team/keras-preprocessing',
       download_url='https://github.com/keras-team/'
-                   'keras-preprocessing/tarball/1.0.4',
+                   'keras-preprocessing/tarball/1.0.5',
       license='MIT',
       install_requires=['numpy>=1.9.1',
                         'six>=1.9.0'],
