@@ -30,8 +30,7 @@ setup(name='Keras_Preprocessing',
       download_url='https://github.com/keras-team/'
                    'keras-preprocessing/tarball/1.0.3',
       license='MIT',
-      install_requires=['keras>=2.1.6',
-                        'numpy>=1.9.1',
+      install_requires=['numpy>=1.9.1',
                         'scipy>=0.14',
                         'six>=1.9.0'],
       extras_require={
