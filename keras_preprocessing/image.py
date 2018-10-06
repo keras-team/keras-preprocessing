@@ -349,6 +349,34 @@ def flip_axis(x, axis):
     return x
 
 
+def add_gaussian_noise(x, noise_sigma):
+    """ Converts a 3D Numpy array to an image, applies noise and returns tensor.
+    
+    # Arguments
+        x: Input Numpy array.
+        noise_sigma: float value of the amount of noise to add.
+            You want a value greater than 3 to visually see the difference
+    # Returns
+        numpy array with noise applied
+    """
+    x = array_to_img(x)
+    temp_image = np.float64(np.copy(x))
+
+    h = temp_image.shape[0]
+    w = temp_image.shape[1]
+    noise = np.random.randn(h, w) * noise_sigma
+
+    noisy_image = np.zeros(temp_image.shape, np.float64)
+    if len(temp_image.shape) == 2:
+        noisy_image = temp_image + noise
+    else:
+        noisy_image[:,:,0] = temp_image[:,:,0] + noise
+        noisy_image[:,:,1] = temp_image[:,:,1] + noise
+        noisy_image[:,:,2] = temp_image[:,:,2] + noise
+
+    x = img_to_array(noisy_image)
+    return x
+
 def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     """Converts a 3D Numpy array to a PIL Image instance.
 
