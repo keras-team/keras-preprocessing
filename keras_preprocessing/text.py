@@ -31,7 +31,7 @@ def text_to_word_sequence(text,
     # Arguments
         text: Input text (string).
         filters: list (or concatenation) of characters to filter out, such as
-            punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n``,
+            punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\\t\\n``,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to convert the input to lowercase.
         split: str. Separator for word splitting.
@@ -74,7 +74,7 @@ def one_hot(text, n,
         text: Input text (string).
         n: int. Size of vocabulary.
         filters: list (or concatenation) of characters to filter out, such as
-            punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n``,
+            punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\\t\\n``,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to set the text to lowercase.
         split: str. Separator for word splitting.
@@ -106,7 +106,7 @@ def hashing_trick(text, n,
             it is not consistent across different runs, while 'md5'
             is a stable hashing function.
         filters: list (or concatenation) of characters to filter out, such as
-            punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n``,
+            punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\\t\\n``,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to set the text to lowercase.
         split: str. Separator for word splitting.
