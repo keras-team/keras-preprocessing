@@ -480,7 +480,7 @@ class TestImage(object):
 
         df = pd.DataFrame({"filename": filenames,
                            "class": [random.randint(0, 1) for _ in filenames]},
-                           index=np.arange(1,len(filenames)+1))
+                          index=np.arange(1, len(filenames) + 1))
 
         # create iterator
         generator = image.ImageDataGenerator()
