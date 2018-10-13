@@ -2096,7 +2096,7 @@ class DataFrameIterator(Iterator):
         if has_ext:
             ext_exist = False
             for ext in white_list_formats:
-                if self.df.loc[0, x_col].endswith("." + ext):
+                if self.df[x_col].values[0].endswith("." + ext):
                     ext_exist = True
                     break
             if not ext_exist:
