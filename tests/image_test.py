@@ -479,8 +479,7 @@ class TestImage(object):
                 count += 1
 
         df = pd.DataFrame({"filename": filenames,
-                           "class": [random.randint(0, 1) for _ in filenames]},
-                          index=np.arange(1, len(filenames) + 1))
+                           "class": [random.randint(0, 1) for _ in filenames]})
 
         # create iterator
         generator = image.ImageDataGenerator()
@@ -681,6 +680,50 @@ class TestImage(object):
                    set(filenames)) == num_training
         intersection = set(train_iterator_without.filenames) & set(filenames)
         assert len(intersection) == num_training
+
+    def test_dataframe_iterator_with_custom_indexed_dataframe(self, tmpdir):
+        num_classes = 2
+
+        # save the images in the tmpdir
+        count = 0
+        filenames = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = "image-{}.png".format(count)
+                filenames.append(filename)
+                im.save(str(tmpdir / filename))
+                count += 1
+
+        # create dataframes
+        classes = np.random.randint(num_classes, size=len(filenames))
+        df = pd.DataFrame({"filename": filenames,
+                           "class": classes})
+        df2 = pd.DataFrame({"filename": filenames,
+                            "class": classes},
+                           index=np.arange(1, len(filenames) + 1))
+        df3 = pd.DataFrame({"filename": filenames,
+                            "class": classes},
+                           index=filenames)
+
+        # create iterators
+        seed = 1
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(
+            df, str(tmpdir), has_ext=True, seed=seed)
+        df2_iterator = generator.flow_from_dataframe(
+            df2, str(tmpdir), has_ext=True, seed=seed)
+        df3_iterator = generator.flow_from_dataframe(
+            df3, str(tmpdir), has_ext=True, seed=seed)
+
+        # Test all iterators return same pairs of arrays
+        for _ in range(len(filenames)):
+            a1, c1 = next(df_iterator)
+            a2, c2 = next(df2_iterator)
+            a3, c3 = next(df3_iterator)
+            assert np.array_equal(a1, a2)
+            assert np.array_equal(a1, a3)
+            assert np.array_equal(c1, c2)
+            assert np.array_equal(c1, c3)
 
     def test_img_utils(self):
         height, width = 10, 8
