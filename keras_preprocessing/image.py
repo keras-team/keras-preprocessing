@@ -785,7 +785,6 @@ class ImageDataGenerator(object):
         self.rotation_range = rotation_range
         self.width_shift_range = width_shift_range
         self.height_shift_range = height_shift_range
-        self.brightness_range = brightness_range
         self.shear_range = shear_range
         self.zoom_range = zoom_range
         self.channel_shift_range = channel_shift_range
@@ -856,6 +855,13 @@ class ImageDataGenerator(object):
                               '`samplewise_std_normalization`, '
                               'which overrides setting of '
                               '`samplewise_center`.')
+        if brightness_range is not None:
+            if (not isinstance(brightness_range, (tuple, list))
+                    or len(brightness_range) != 2):
+                raise ValueError(
+                    '`brightness_range should be tuple or list of two floats. '
+                    'Received: %s' % (brightness_range,))
+        self.brightness_range = brightness_range
 
     def flow(self, x,
              y=None, batch_size=32, shuffle=True,
@@ -1227,10 +1233,6 @@ class ImageDataGenerator(object):
 
         brightness = None
         if self.brightness_range is not None:
-            if len(self.brightness_range) != 2:
-                raise ValueError(
-                    '`brightness_range should be tuple or list of two floats. '
-                    'Received: %s' % (self.brightness_range,))
             brightness = np.random.uniform(self.brightness_range[0],
                                            self.brightness_range[1])
 
