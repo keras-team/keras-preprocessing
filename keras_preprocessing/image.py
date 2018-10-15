@@ -856,8 +856,8 @@ class ImageDataGenerator(object):
                               'which overrides setting of '
                               '`samplewise_center`.')
         if brightness_range is not None:
-            if (not isinstance(brightness_range, (tuple, list))
-                    or len(brightness_range) != 2):
+            if (not isinstance(brightness_range, (tuple, list)) or
+                    len(brightness_range) != 2):
                 raise ValueError(
                     '`brightness_range should be tuple or list of two floats. '
                     'Received: %s' % (brightness_range,))
