@@ -567,6 +567,10 @@ class TestImage(object):
         with pytest.raises(ValueError):
             x1, y1 = dir_seq[9]
 
+    def test_valid_args(self):
+        with pytest.raises(ValueError):
+            dt = image.ImageDataGenerator(brightness_range=0.1)
+
     def test_dataframe_iterator_class_mode_input(self, tmpdir):
         # save the images in the paths
         count = 0
