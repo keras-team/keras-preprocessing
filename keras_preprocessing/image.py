@@ -2102,26 +2102,17 @@ class DataFrameIterator(Iterator):
             if not ext_exist:
                 raise ValueError('has_ext is set to True but'
                                  ' extension not found in x_col')
-            temp_df = pd.DataFrame({x_col: filenames}, dtype=str)
-            temp_df = self.df.merge(temp_df, how='right', on=x_col)
-            temp_df = temp_df.set_index(x_col)
-            temp_df = temp_df.reindex(filenames)
-            temp_df = temp_df.dropna()
-            self.filenames = list(temp_df.index)
+            self.df = self.df[self.df[x_col].isin(filenames)]
+            self.filenames = list(self.df[x_col])
         else:
             without_ext_with = {f[:-1 * (len(f.split(".")[-1]) + 1)]: f
                                 for f in filenames}
             filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
                                      for f in filenames]
-            temp_df = pd.DataFrame({x_col: filenames_without_ext}, dtype=str)
-            temp_df = self.df.merge(temp_df, how='right', on=x_col)
-            temp_df = temp_df.set_index(x_col)
-            temp_df = temp_df.reindex(filenames_without_ext)
-            temp_df = temp_df.dropna()
-            self.filenames = [without_ext_with[f] for f in temp_df.index]
-        self.df = temp_df.copy()
+            self.df = self.df[self.df[x_col].isin(filenames_without_ext)]
+            self.filenames = [without_ext_with[f] for f in list(self.df[x_col])]
         if class_mode not in ["other", "input", None]:
-            classes = temp_df[y_col].values
+            classes = self.df[y_col].values
             self.classes = np.array([self.class_indices[cls] for cls in classes])
         elif class_mode == "other":
             self.data = self.df[y_col].values
