@@ -2102,14 +2102,15 @@ class DataFrameIterator(Iterator):
             if not ext_exist:
                 raise ValueError('has_ext is set to True but'
                                  ' extension not found in x_col')
-            self.df = self.df[self.df[x_col].isin(filenames)]
+            self.df = self.df[self.df[x_col].isin(filenames)].sort_values(by=x_col)
             self.filenames = list(self.df[x_col])
         else:
             without_ext_with = {f[:-1 * (len(f.split(".")[-1]) + 1)]: f
                                 for f in filenames}
             filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
                                      for f in filenames]
-            self.df = self.df[self.df[x_col].isin(filenames_without_ext)]
+            self.df = (self.df[self.df[x_col].isin(filenames_without_ext)]
+                       .sort_values(by=x_col))
             self.filenames = [without_ext_with[f] for f in list(self.df[x_col])]
         if class_mode not in ["other", "input", None]:
             classes = self.df[y_col].values
