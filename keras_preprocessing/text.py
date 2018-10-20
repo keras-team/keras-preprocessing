@@ -311,7 +311,7 @@ class Tokenizer(object):
             for w in seq:
                 i = self.word_index.get(w)
                 if i is not None:
-                    if num_words and i >= num_words:
+                    if num_words and i > num_words:
                         if oov_token_index is not None:
                             vect.append(oov_token_index)
                     else:
@@ -356,7 +356,7 @@ class Tokenizer(object):
             for num in seq:
                 word = self.index_word.get(num)
                 if word is not None:
-                    if num_words and num >= num_words:
+                    if num_words and num > num_words:
                         if oov_token_index is not None:
                             vect.append(self.index_word[oov_token_index])
                     else:
@@ -396,7 +396,7 @@ class Tokenizer(object):
         """
         if not self.num_words:
             if self.word_index:
-                num_words = len(self.word_index) + 1
+                num_words = len(self.word_index)
             else:
                 raise ValueError('Specify a dimension (num_words argument), '
                                  'or fit on some text data first.')
@@ -413,7 +413,7 @@ class Tokenizer(object):
                 continue
             counts = defaultdict(int)
             for j in seq:
-                if j >= num_words:
+                if j > num_words:
                     continue
                 counts[j] += 1
             for j, c in list(counts.items()):
