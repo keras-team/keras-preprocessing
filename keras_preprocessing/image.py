@@ -470,7 +470,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
 
     # Arguments
         path: Path to image file.
-        color_mode: One of "grayscale", "rbg", "rgba". Default: "rgb".
+        color_mode: One of "grayscale", "rgb", "rgba". Default: "rgb".
             The desired image format.
         target_size: Either `None` (default to original size)
             or tuple of ints `(img_height, img_width)`.
@@ -506,7 +506,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
         if img.mode != 'RGB':
             img = img.convert('RGB')
     else:
-        raise ValueError('color_mode must be "grayscale", "rbg", or "rgba"')
+        raise ValueError('color_mode must be "grayscale", "rgb", or "rgba"')
     if target_size is not None:
         width_height_tuple = (target_size[1], target_size[0])
         if img.size != width_height_tuple:
@@ -945,7 +945,7 @@ class ImageDataGenerator(object):
             target_size: Tuple of integers `(height, width)`,
                 default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
-            color_mode: One of "grayscale", "rbg", "rgba". Default: "rgb".
+            color_mode: One of "grayscale", "rgb", "rgba". Default: "rgb".
                 Whether the images will be converted to
                 have 1, 3, or 4 channels.
             classes: Optional list of class subdirectories
@@ -1049,7 +1049,7 @@ class ImageDataGenerator(object):
                              default: `(256, 256)`.
                              The dimensions to which all images
                              found will be resized.
-                color_mode: one of "grayscale", "rbg". Default: "rgb".
+                color_mode: one of "grayscale", "rgb". Default: "rgb".
                             Whether the images will be converted to have
                             1 or 3 color channels.
                 classes: optional list of classes
