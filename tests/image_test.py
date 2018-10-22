@@ -577,9 +577,8 @@ class TestImage(object):
         filenames = []
         for test_images in self.all_test_images:
             for im in test_images:
-                filename = str(
-                    tmpdir / 'image-{}.png'.format(count))
-                im.save(filename)
+                filename = 'image-{}.png'.format(count)
+                im.save(str(tmpdir / filename))
                 filenames.append(filename)
                 count += 1
         df = pd.DataFrame({"filename": filenames})
@@ -728,6 +727,39 @@ class TestImage(object):
             assert np.array_equal(a1, a3)
             assert np.array_equal(c1, c2)
             assert np.array_equal(c1, c3)
+
+    def test_dataframe_iterator_n(self, tmpdir):
+
+        # save the images in the tmpdir
+        count = 0
+        filenames = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = "image-{}.png".format(count)
+                filenames.append(filename)
+                im.save(str(tmpdir / filename))
+                count += 1
+
+        # exclude first two items
+        n_files = len(filenames)
+        input_filenames = filenames[2:]
+
+        # create dataframes
+        classes = np.random.randint(2, size=len(input_filenames))
+        df = pd.DataFrame({"filename": input_filenames})
+        df2 = pd.DataFrame({"filename": input_filenames,
+                            "class": classes})
+
+        # create iterators
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(
+            df, str(tmpdir), has_ext=True, class_mode=None)
+        df2_iterator = generator.flow_from_dataframe(
+            df2, str(tmpdir), has_ext=True, class_mode='binary')
+
+        # Test the number of items in iterators
+        assert df_iterator.n == n_files - 2
+        assert df2_iterator.n == n_files - 2
 
     def test_img_utils(self):
         height, width = 10, 8
