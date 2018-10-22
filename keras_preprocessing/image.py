@@ -1034,70 +1034,66 @@ class ImageDataGenerator(object):
         # A simple tutorial can be found at: http://bit.ly/keras_flow_from_dataframe
 
         # Arguments
-                dataframe: Pandas dataframe containing the filenames of the
-                           images in a column and classes in another or column/s
-                           that can be fed as raw target data.
-                directory: string, path to the target directory that contains all
-                           the images mapped in the dataframe.
-                x_col: string, column in the dataframe that contains
-                       the filenames of the target images.
-                y_col: string or list of strings,columns in
-                       the dataframe that will be the target data.
-                has_ext: bool, True if filenames in dataframe[x_col]
-                        has filename extensions,else False.
-                target_size: tuple of integers `(height, width)`,
-                             default: `(256, 256)`.
-                             The dimensions to which all images
-                             found will be resized.
-                color_mode: one of "grayscale", "rbg". Default: "rgb".
-                            Whether the images will be converted to have
-                            1 or 3 color channels.
-                classes: optional list of classes
-                (e.g. `['dogs', 'cats']`). Default: None.
-                 If not provided, the list of classes will be automatically
-                 inferred from the y_col,
-                 which will map to the label indices, will be alphanumeric).
-                 The dictionary containing the mapping from class names to class
-                 indices can be obtained via the attribute `class_indices`.
-                class_mode: one of "categorical", "binary", "sparse",
-                  "input", "other" or None. Default: "categorical".
-                 Determines the type of label arrays that are returned:
-                 - `"categorical"` will be 2D one-hot encoded labels,
-                 - `"binary"` will be 1D binary labels,
-                 - `"sparse"` will be 1D integer labels,
-                 - `"input"` will be images identical
-                 to input images (mainly used to work with autoencoders).
-                - `"other"` will be numpy array of y_col data
-                 - None, no labels are returned (the generator will only
-                         yield batches of image data, which is useful to use
-                 `model.predict_generator()`, `model.evaluate_generator()`, etc.).
-                batch_size: size of the batches of data (default: 32).
-                shuffle: whether to shuffle the data (default: True)
-                seed: optional random seed for shuffling and transformations.
-                save_to_dir: None or str (default: None).
-                             This allows you to optionally specify a directory
-                             to which to save the augmented pictures being generated
-                             (useful for visualizing what you are doing).
-                save_prefix: str. Prefix to use for filenames of saved pictures
+            dataframe: Pandas dataframe containing the filenames of the
+                images in a column and classes in another or column/s
+                that can be fed as raw target data.
+            directory: string, path to the target directory that contains all
+                the images mapped in the dataframe.
+            x_col: string, column in the dataframe that contains
+                the filenames of the target images.
+            y_col: string or list of strings,columns in
+                the dataframe that will be the target data.
+            has_ext: bool, True if filenames in dataframe[x_col]
+                has filename extensions,else False.
+            target_size: tuple of integers `(height, width)`, default: `(256, 256)`.
+                The dimensions to which all images found will be resized.
+            color_mode: one of "grayscale", "rbg". Default: "rgb".
+                Whether the images will be converted to have 1 or 3 color channels.
+            classes: optional list of classes (e.g. `['dogs', 'cats']`).
+                Default: None. If not provided, the list of classes will be
+                automatically inferred from the `y_col`,
+                which will map to the label indices, will be alphanumeric).
+                The dictionary containing the mapping from class names to class
+                indices can be obtained via the attribute `class_indices`.
+            class_mode: one of "categorical", "binary", "sparse",
+                "input", "other" or None. Default: "categorical".
+                Determines the type of label arrays that are returned:
+                - `"categorical"` will be 2D one-hot encoded labels,
+                - `"binary"` will be 1D binary labels,
+                - `"sparse"` will be 1D integer labels,
+                - `"input"` will be images identical
+                    to input images (mainly used to work with autoencoders).
+                - `"other"` will be numpy array of `y_col` data
+                - None, no labels are returned (the generator will only
+                    yield batches of image data, which is useful to use
+                `model.predict_generator()`, `model.evaluate_generator()`, etc.).
+            batch_size: size of the batches of data (default: 32).
+            shuffle: whether to shuffle the data (default: True)
+            seed: optional random seed for shuffling and transformations.
+            save_to_dir: None or str (default: None).
+                This allows you to optionally specify a directory
+                to which to save the augmented pictures being generated
+                (useful for visualizing what you are doing).
+            save_prefix: str. Prefix to use for filenames of saved pictures
                 (only relevant if `save_to_dir` is set).
-                save_format: one of "png", "jpeg"
+            save_format: one of "png", "jpeg"
                 (only relevant if `save_to_dir` is set). Default: "png".
-                follow_links: whether to follow symlinks inside class subdirectories
+            follow_links: whether to follow symlinks inside class subdirectories
                 (default: False).
-                subset: Subset of data (`"training"` or `"validation"`) if
-                 `validation_split` is set in `ImageDataGenerator`.
-                interpolation: Interpolation method used to resample the image if the
-                 target size is different from that of the loaded image.
-                 Supported methods are `"nearest"`, `"bilinear"`, and `"bicubic"`.
-                 If PIL version 1.1.3 or newer is installed, `"lanczos"` is also
-                 supported. If PIL version 3.4.0 or newer is installed, `"box"` and
-                 `"hamming"` are also supported. By default, `"nearest"` is used.
+            subset: Subset of data (`"training"` or `"validation"`) if
+                `validation_split` is set in `ImageDataGenerator`.
+            interpolation: Interpolation method used to resample the image if the
+                target size is different from that of the loaded image.
+                Supported methods are `"nearest"`, `"bilinear"`, and `"bicubic"`.
+                If PIL version 1.1.3 or newer is installed, `"lanczos"` is also
+                supported. If PIL version 3.4.0 or newer is installed, `"box"` and
+                `"hamming"` are also supported. By default, `"nearest"` is used.
 
         # Returns
             A DataFrameIterator yielding tuples of `(x, y)`
             where `x` is a numpy array containing a batch
             of images with shape `(batch_size, *target_size, channels)`
-             and `y` is a numpy array of corresponding labels.
+            and `y` is a numpy array of corresponding labels.
         """
 
         return DataFrameIterator(dataframe, directory, self,
