@@ -396,7 +396,7 @@ class Tokenizer(object):
         """
         if not self.num_words:
             if self.word_index:
-                num_words = len(self.word_index) + 1
+                num_words = len(self.word_index)
             else:
                 raise ValueError('Specify a dimension (num_words argument), '
                                  'or fit on some text data first.')
