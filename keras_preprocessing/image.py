@@ -51,7 +51,7 @@ if pil_image is not None:
 
 
 def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
-                    fill_mode='nearest', cval=0., interpolation_order=3):
+                    fill_mode='nearest', cval=0., interpolation_order=1):
     """Performs a random rotation of a Numpy image tensor.
 
     # Arguments
@@ -78,7 +78,7 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
 
 
 def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
-                 fill_mode='nearest', cval=0., interpolation_order=3):
+                 fill_mode='nearest', cval=0., interpolation_order=1):
     """Performs a random spatial shift of a Numpy image tensor.
 
     # Arguments
@@ -108,7 +108,7 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
 
 
 def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
-                 fill_mode='nearest', cval=0., interpolation_order=3):
+                 fill_mode='nearest', cval=0., interpolation_order=1):
     """Performs a random spatial shear of a Numpy image tensor.
 
     # Arguments
@@ -135,7 +135,7 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
 
 
 def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
-                fill_mode='nearest', cval=0., interpolation_order=3):
+                fill_mode='nearest', cval=0., interpolation_order=1):
     """Performs a random spatial zoom of a Numpy image tensor.
 
     # Arguments
@@ -807,7 +807,7 @@ class ImageDataGenerator(object):
         self.rescale = rescale
         self.preprocessing_function = preprocessing_function
         self.dtype = dtype
-        self.interpolation_order= interpolation_order
+        self.interpolation_order = interpolation_order
 
         if data_format not in {'channels_last', 'channels_first'}:
             raise ValueError(
