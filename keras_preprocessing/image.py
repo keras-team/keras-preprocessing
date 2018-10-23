@@ -51,7 +51,7 @@ if pil_image is not None:
 
 
 def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
-                    fill_mode='nearest', cval=0.):
+                    fill_mode='nearest', cval=0., interpolation_order=1):
     """Performs a random rotation of a Numpy image tensor.
 
     # Arguments
@@ -65,18 +65,20 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-
+        interpolation_order int: order of spline interpolation.
+            see `ndimage.interpolation.affine_transform`
     # Returns
         Rotated Numpy image tensor.
     """
     theta = np.random.uniform(-rg, rg)
     x = apply_affine_transform(x, theta=theta, channel_axis=channel_axis,
-                               fill_mode=fill_mode, cval=cval)
+                               fill_mode=fill_mode, cval=cval,
+                               order=interpolation_order)
     return x
 
 
 def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
-                 fill_mode='nearest', cval=0.):
+                 fill_mode='nearest', cval=0., interpolation_order=1):
     """Performs a random spatial shift of a Numpy image tensor.
 
     # Arguments
@@ -91,7 +93,8 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-
+        interpolation_order int: order of spline interpolation.
+            see `ndimage.interpolation.affine_transform`
     # Returns
         Shifted Numpy image tensor.
     """
@@ -99,12 +102,13 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
     tx = np.random.uniform(-hrg, hrg) * h
     ty = np.random.uniform(-wrg, wrg) * w
     x = apply_affine_transform(x, tx=tx, ty=ty, channel_axis=channel_axis,
-                               fill_mode=fill_mode, cval=cval)
+                               fill_mode=fill_mode, cval=cval,
+                               order=interpolation_order)
     return x
 
 
 def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
-                 fill_mode='nearest', cval=0.):
+                 fill_mode='nearest', cval=0., interpolation_order=1):
     """Performs a random spatial shear of a Numpy image tensor.
 
     # Arguments
@@ -118,18 +122,20 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-
+        interpolation_order int: order of spline interpolation.
+            see `ndimage.interpolation.affine_transform`
     # Returns
         Sheared Numpy image tensor.
     """
     shear = np.random.uniform(-intensity, intensity)
     x = apply_affine_transform(x, shear=shear, channel_axis=channel_axis,
-                               fill_mode=fill_mode, cval=cval)
+                               fill_mode=fill_mode, cval=cval,
+                               order=interpolation_order)
     return x
 
 
 def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
-                fill_mode='nearest', cval=0.):
+                fill_mode='nearest', cval=0., interpolation_order=1):
     """Performs a random spatial zoom of a Numpy image tensor.
 
     # Arguments
@@ -143,6 +149,8 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
+        interpolation_order int: order of spline interpolation.
+            see `ndimage.interpolation.affine_transform`
 
     # Returns
         Zoomed Numpy image tensor.
@@ -159,7 +167,8 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
     else:
         zx, zy = np.random.uniform(zoom_range[0], zoom_range[1], 2)
     x = apply_affine_transform(x, zx=zx, zy=zy, channel_axis=channel_axis,
-                               fill_mode=fill_mode, cval=cval)
+                               fill_mode=fill_mode, cval=cval,
+                               order=interpolation_order)
     return x
 
 
@@ -260,7 +269,7 @@ def transform_matrix_offset_center(matrix, x, y):
 
 def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
                            row_axis=0, col_axis=1, channel_axis=2,
-                           fill_mode='nearest', cval=0.):
+                           fill_mode='nearest', cval=0., order=1):
     """Applies an affine transformation specified by the parameters given.
 
     # Arguments
@@ -279,6 +288,7 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
+        order int: order of interpolation
 
     # Returns
         The transformed version of the input.
@@ -334,7 +344,7 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
             x_channel,
             final_affine_matrix,
             final_offset,
-            order=1,
+            order=order,
             mode=fill_mode,
             cval=cval) for x_channel in x]
         x = np.stack(channel_images, axis=0)
@@ -775,7 +785,9 @@ class ImageDataGenerator(object):
                  preprocessing_function=None,
                  data_format='channels_last',
                  validation_split=0.0,
+                 interpolation_order=1,
                  dtype='float32'):
+
         self.featurewise_center = featurewise_center
         self.samplewise_center = samplewise_center
         self.featurewise_std_normalization = featurewise_std_normalization
@@ -795,6 +807,7 @@ class ImageDataGenerator(object):
         self.rescale = rescale
         self.preprocessing_function = preprocessing_function
         self.dtype = dtype
+        self.interpolation_order = interpolation_order
 
         if data_format not in {'channels_last', 'channels_first'}:
             raise ValueError(
@@ -1283,7 +1296,8 @@ class ImageDataGenerator(object):
                                    col_axis=img_col_axis,
                                    channel_axis=img_channel_axis,
                                    fill_mode=self.fill_mode,
-                                   cval=self.cval)
+                                   cval=self.cval,
+                                   order=self.interpolation_order)
 
         if transform_parameters.get('channel_shift_intensity') is not None:
             x = apply_channel_shift(x,
