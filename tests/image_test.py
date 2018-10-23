@@ -761,6 +761,48 @@ class TestImage(object):
         assert df_iterator.n == n_files - 2
         assert df2_iterator.n == n_files - 2
 
+    def test_dataframe_iterator_with_sort_and_drop_duplicates(self, tmpdir):
+
+        # save the images in the tmpdir
+        count = 0
+        filenames = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = "image-{:0>5}.png".format(count)
+                filenames.append(filename)
+                im.save(str(tmpdir / filename))
+                count += 1
+
+        # prepare input_filenames
+        n_files = len(filenames)
+        idx_rand, idx_rand2 = random.choices(range(1, n_files), k=2)
+        input_filenames = filenames[::-1]  # reversed
+        input_filenames2 = filenames[:idx_rand] + filenames[:idx_rand2]
+
+        # create dataframes
+        df = pd.DataFrame({"filename": input_filenames})
+        df2 = pd.DataFrame({"filename": input_filenames2})
+
+        # create iterators
+        generator = image.ImageDataGenerator()
+        df_sort_iterator = generator.flow_from_dataframe(
+            df, str(tmpdir), class_mode=None, sort=True, shuffle=False)
+        df_no_sort_iterator = generator.flow_from_dataframe(
+            df, str(tmpdir), class_mode=None, sort=False, shuffle=False)
+        df_drop_iterator = generator.flow_from_dataframe(
+            df2, str(tmpdir), class_mode=None, drop_duplicates=True)
+        df_no_drop_iterator = generator.flow_from_dataframe(
+            df2, str(tmpdir), class_mode=None, drop_duplicates=False)
+
+        # Test sort
+        assert df_sort_iterator.filenames == df_no_sort_iterator.filenames[::-1]
+        assert df_sort_iterator.filenames[0] == filenames[0]
+        assert df_no_sort_iterator.filenames[0] == filenames[-1]
+
+        # Test drop_duplicates
+        assert df_drop_iterator.n == len(set(input_filenames2))
+        assert df_no_drop_iterator.n == len(input_filenames2)
+
     def test_img_utils(self):
         height, width = 10, 8
 
