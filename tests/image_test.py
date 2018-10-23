@@ -775,7 +775,7 @@ class TestImage(object):
 
         # prepare input_filenames
         n_files = len(filenames)
-        idx_rand, idx_rand2 = random.choices(range(1, n_files), k=2)
+        idx_rand, idx_rand2 = np.random.randint(1, n_files, size=2)
         input_filenames = filenames[::-1]  # reversed
         input_filenames2 = filenames[:idx_rand] + filenames[:idx_rand2]
 
