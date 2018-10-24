@@ -1036,5 +1036,27 @@ class TestImage(object):
             loaded_im = image.load_img(filename_rgb, target_size=(25, 25),
                                        interpolation="unsupported")
 
+        # Test aspect ratio preservation
+        with tempfile.NamedTemporaryFile(suffix='.png') as f:
+            fn = f.name
+            white_square = Image.new(
+                mode='RGB', size=(10, 10), color=(255, 255, 255)
+            )
+            white_square.save(fn)
+            f.flush()
+
+            i1 = image.load_img(fn, target_size=(5, 7), keep_aspect_ratio=True)
+            i2 = image.load_img(
+                fn, target_size=(10, 5), keep_aspect_ratio=True,
+                cval=0, grayscale=True)
+
+        assert i1.size == (7, 5)
+        assert i2.size == (5, 10)
+        i2arr = np.array(i2)
+        # expect a (5, 5) white square over a (5, 10) black canvas
+        assert i2arr.shape == (10, 5)
+        assert 120 < np.mean(i2arr) < 140
+
+
 if __name__ == '__main__':
     pytest.main([__file__])

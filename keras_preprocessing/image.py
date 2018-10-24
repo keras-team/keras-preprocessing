@@ -475,7 +475,7 @@ def save_img(path,
 
 
 def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
-             interpolation='nearest'):
+             interpolation='nearest', keep_aspect_ratio=False, cval=0):
     """Loads an image into PIL format.
 
     # Arguments
@@ -490,6 +490,11 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
+        keep_aspect_ratio: if `True`, the resized image will have the
+            same aspect ratio as the original, centered and padded
+            with `cval` to respect `target_size`
+        cval: integer in [0, 255]. value to pad the output image with if
+            `keep_aspect_ratio` is `True`
 
     # Returns
         A PIL Image instance.
@@ -527,7 +532,21 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
                         interpolation,
                         ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
             resample = _PIL_INTERPOLATION_METHODS[interpolation]
-            img = img.resize(width_height_tuple, resample)
+            if not keep_aspect_ratio:
+                img = img.resize(width_height_tuple, resample)
+            else:
+                img.thumbnail(width_height_tuple, resample)
+
+                final_img = pil_image.new(img.mode, width_height_tuple,
+                                          (cval if img.mode == 'L'
+                                           else (cval, cval, cval)))
+
+                final_img.paste(
+                    img,
+                    ((width_height_tuple[0] - img.size[0]) // 2,
+                     (width_height_tuple[1] - img.size[1]) // 2)
+                )
+                return final_img
     return img
 
 
@@ -943,7 +962,10 @@ class ImageDataGenerator(object):
                             save_format='png',
                             follow_links=False,
                             subset=None,
-                            interpolation='nearest'):
+                            interpolation='nearest',
+                            keep_aspect_ratio=False,
+                            cval=0,
+                            ):
         """Takes the path to a directory & generates batches of augmented data.
 
         # Arguments
@@ -1029,7 +1051,10 @@ class ImageDataGenerator(object):
             save_format=save_format,
             follow_links=follow_links,
             subset=subset,
-            interpolation=interpolation)
+            interpolation=interpolation,
+            keep_aspect_ratio=keep_aspect_ratio,
+            cval=cval,
+        )
 
     def flow_from_dataframe(self, dataframe, directory,
                             x_col="filename", y_col="class", has_ext=True,
@@ -1857,6 +1882,8 @@ class DirectoryIterator(Iterator):
                  follow_links=False,
                  subset=None,
                  interpolation='nearest',
+                 keep_aspect_ratio=False,
+                 cval=0,
                  dtype='float32'):
         super(DirectoryIterator, self).common_init(image_data_generator,
                                                    target_size,
@@ -1879,6 +1906,11 @@ class DirectoryIterator(Iterator):
         self.dtype = dtype
         white_list_formats = {'png', 'jpg', 'jpeg', 'bmp',
                               'ppm', 'tif', 'tiff'}
+        self.keep_aspect_ratio = keep_aspect_ratio
+        if not (0 <= cval < 255):
+            raise ValueError('cval {} not valid, must be in [0, 255]'
+                             .format(cval))
+        self.cval = cval
         # First, count the number of samples and classes.
         self.samples = 0
 
@@ -1932,7 +1964,10 @@ class DirectoryIterator(Iterator):
             img = load_img(os.path.join(self.directory, fname),
                            color_mode=self.color_mode,
                            target_size=self.target_size,
-                           interpolation=self.interpolation)
+                           interpolation=self.interpolation,
+                           keep_aspect_ratio=self.keep_aspect_ratio,
+                           cval=self.cval,
+                           )
             x = img_to_array(img, data_format=self.data_format)
             # Pillow images should be closed after `load_img`,
             # but not PIL images.
