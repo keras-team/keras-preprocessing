@@ -1997,9 +1997,12 @@ class DataFrameIterator(Iterator):
             via the `classes` argument.
             if used with dataframe,this will be the directory to under which
             all the images are present.
+            You could also set it to None if data in x_col column are
+            absolute paths.
         image_data_generator: Instance of `ImageDataGenerator`
             to use for random transformations and normalization.
-        x_col: Column in dataframe that contains all the filenames.
+        x_col: Column in dataframe that contains all the filenames (or absolute
+            paths, if directory is set to None).
         y_col: Column/s in dataframe that has the target data.
         has_ext: bool, Whether the filenames in x_col has extensions or not.
         target_size: tuple of integers, dimensions to resize input images to.
@@ -2098,13 +2101,21 @@ class DataFrameIterator(Iterator):
         # Second, build an index of the images.
         self.filenames = []
         self.classes = np.zeros((self.samples,), dtype='int32')
-        filenames = _list_valid_filenames_in_directory(
-            directory,
-            white_list_formats,
-            self.split,
-            class_indices=self.class_indices,
-            follow_links=follow_links,
-            df=True)
+
+        if self.directory is not None:
+            filenames = _list_valid_filenames_in_directory(
+                directory,
+                white_list_formats,
+                self.split,
+                class_indices=self.class_indices,
+                follow_links=follow_links,
+                df=True)
+        else:
+            if not has_ext:
+                raise ValueError('has_ext cannot be set to False'
+                                 ' if directory is None.')
+            filenames = list(self.df[x_col][self.df[x_col].map(os.path.exists)])
+
         if has_ext:
             ext_exist = False
             for ext in white_list_formats:
@@ -2152,7 +2163,11 @@ class DataFrameIterator(Iterator):
         # build batch of image data
         for i, j in enumerate(index_array):
             fname = self.filenames[j]
-            img = load_img(os.path.join(self.directory, fname),
+            if self.directory is not None:
+                img_path = os.path.join(self.directory, fname)
+            else:
+                img_path = fname
+            img = load_img(img_path,
                            color_mode=self.color_mode,
                            target_size=self.target_size,
                            interpolation=self.interpolation)

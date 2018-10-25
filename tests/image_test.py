@@ -775,6 +775,56 @@ class TestImage(object):
         assert df_iterator.n == n_files - 2
         assert df2_iterator.n == n_files - 2
 
+    def test_dataframe_iterator_absolute_path(self, tmpdir):
+
+        # save the images in the tmpdir
+        count = 0
+        file_paths = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = "image-{}.png".format(count)
+                file_path = str(tmpdir / filename)
+                file_paths.append(file_path)
+                im.save(file_path)
+                count += 1
+
+        # create dataframes
+        classes = np.random.randint(2, size=len(file_paths))
+        df = pd.DataFrame({"filename": file_paths})
+        df2 = pd.DataFrame({"filename": file_paths,
+                            "class": classes})
+        df3 = pd.DataFrame({"filename": ['image-not-exist.png'] + file_paths})
+
+        # create iterators
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(
+            df, None, has_ext=True, class_mode=None, shuffle=False)
+        df2_iterator = generator.flow_from_dataframe(
+            df2, None, has_ext=True, class_mode='binary', shuffle=False)
+        df3_iterator = generator.flow_from_dataframe(
+            df3, None, has_ext=True, class_mode=None, shuffle=False)
+
+        # Test invalid use cases
+        with pytest.raises(ValueError):
+            generator.flow_from_dataframe(df, None,
+                                          has_ext=False, class_mode=None)
+        with pytest.raises(ValueError):
+            generator.flow_from_dataframe(df2, None,
+                                          has_ext=False, class_mode='binary')
+
+        # Test the number of items in iterators
+        assert df_iterator.n == len(file_paths)
+        assert df2_iterator.n == len(file_paths)
+        assert df3_iterator.n == len(file_paths)
+
+        # Test flow_from_dataframe
+        for _ in range(len(file_paths)):
+            a1 = next(df_iterator)
+            a2, _ = next(df2_iterator)
+            a3 = next(df3_iterator)
+            assert np.array_equal(a1, a2)
+            assert np.array_equal(a1, a3)
+
     def test_img_utils(self):
         height, width = 10, 8
 
