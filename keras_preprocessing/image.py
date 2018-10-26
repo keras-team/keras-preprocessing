@@ -2071,6 +2071,7 @@ class DataFrameIterator(Iterator):
             raise ValueError("has_ext must be either True if filenames in"
                              " x_col has extensions,else False.")
         self.df = dataframe.drop_duplicates(x_col)
+        self.x_col = x_col
         self.df[x_col] = self.df[x_col].astype(str)
         self.directory = directory
         self.classes = classes
@@ -2106,7 +2107,7 @@ class DataFrameIterator(Iterator):
             filenames = _list_valid_filenames_in_directory(
                 directory,
                 white_list_formats,
-                self.split,
+                None,
                 class_indices=self.class_indices,
                 follow_links=follow_links,
                 df=True)
@@ -2114,7 +2115,7 @@ class DataFrameIterator(Iterator):
             if not has_ext:
                 raise ValueError('has_ext cannot be set to False'
                                  ' if directory is None.')
-            filenames = list(self.df[x_col][self.df[x_col].map(os.path.exists)])
+            filenames = self._list_valid_filepaths(white_list_formats)
 
         if has_ext:
             ext_exist = False
@@ -2135,6 +2136,14 @@ class DataFrameIterator(Iterator):
             self.df = (self.df[self.df[x_col].isin(filenames_without_ext)]
                        .sort_values(by=x_col))
             self.filenames = [without_ext_with[f] for f in list(self.df[x_col])]
+
+        if self.split:
+            num_files = len(self.filenames)
+            start = int(self.split[0] * num_files)
+            stop = int(self.split[1] * num_files)
+            self.df = self.df.iloc[start: stop, :]
+            self.filenames = self.filenames[start: stop]
+
         if class_mode not in ["other", "input", None]:
             classes = self.df[y_col].values
             self.classes = np.array([self.class_indices[cls] for cls in classes])
@@ -2208,6 +2217,21 @@ class DataFrameIterator(Iterator):
         else:
             return batch_x
         return batch_x, batch_y
+
+    def _list_valid_filepaths(self, white_list_formats):
+
+        def get_ext(filename):
+            return os.path.splitext(filename)[1][1:]
+
+        df_paths = self.df[self.x_col]
+
+        format_check = df_paths.map(get_ext).isin(white_list_formats)
+        existence_check = df_paths.map(os.path.isfile)
+
+        valid_filepaths = list(df_paths[np.logical_and(format_check,
+                                                       existence_check)])
+
+        return valid_filepaths
 
     def next(self):
         """For python 2.x.

@@ -782,11 +782,15 @@ class TestImage(object):
         file_paths = []
         for test_images in self.all_test_images:
             for im in test_images:
-                filename = "image-{}.png".format(count)
+                filename = "image-{:0>5}.png".format(count)
                 file_path = str(tmpdir / filename)
                 file_paths.append(file_path)
                 im.save(file_path)
                 count += 1
+
+        # prepare an image with a forbidden extension.
+        file_path_fbd = str(tmpdir / 'image-forbid.fbd')
+        shutil.copy(file_path, file_path_fbd)
 
         # create dataframes
         classes = np.random.randint(2, size=len(file_paths))
@@ -794,15 +798,31 @@ class TestImage(object):
         df2 = pd.DataFrame({"filename": file_paths,
                             "class": classes})
         df3 = pd.DataFrame({"filename": ['image-not-exist.png'] + file_paths})
+        df4 = pd.DataFrame({"filename": file_paths + [file_path_fbd]})
 
         # create iterators
         generator = image.ImageDataGenerator()
         df_iterator = generator.flow_from_dataframe(
-            df, None, has_ext=True, class_mode=None, shuffle=False)
+            df, None, has_ext=True, class_mode=None,
+            shuffle=False, batch_size=1)
         df2_iterator = generator.flow_from_dataframe(
-            df2, None, has_ext=True, class_mode='binary', shuffle=False)
+            df2, None, has_ext=True, class_mode='binary',
+            shuffle=False, batch_size=1)
         df3_iterator = generator.flow_from_dataframe(
-            df3, None, has_ext=True, class_mode=None, shuffle=False)
+            df3, None, has_ext=True, class_mode=None,
+            shuffle=False, batch_size=1)
+        df4_iterator = generator.flow_from_dataframe(
+            df4, None, has_ext=True, class_mode=None,
+            shuffle=False, batch_size=1)
+
+        validation_split = 0.2
+        generator_split = image.ImageDataGenerator(validation_split=validation_split)
+        df_train_iterator = generator_split.flow_from_dataframe(
+            df, None, has_ext=True, class_mode=None,
+            shuffle=False, subset='training', batch_size=1)
+        df_val_iterator = generator_split.flow_from_dataframe(
+            df, None, has_ext=True, class_mode=None,
+            shuffle=False, subset='validation', batch_size=1)
 
         # Test invalid use cases
         with pytest.raises(ValueError):
@@ -816,14 +836,26 @@ class TestImage(object):
         assert df_iterator.n == len(file_paths)
         assert df2_iterator.n == len(file_paths)
         assert df3_iterator.n == len(file_paths)
+        assert df4_iterator.n == len(file_paths)
+        assert df_val_iterator.n == int(validation_split * len(file_paths))
+        assert df_train_iterator.n == len(file_paths) - df_val_iterator.n
 
         # Test flow_from_dataframe
-        for _ in range(len(file_paths)):
+        for i in range(len(file_paths)):
             a1 = next(df_iterator)
             a2, _ = next(df2_iterator)
             a3 = next(df3_iterator)
+            a4 = next(df4_iterator)
+
+            if i < df_val_iterator.n:
+                a5 = next(df_val_iterator)
+            else:
+                a5 = next(df_train_iterator)
+
             assert np.array_equal(a1, a2)
             assert np.array_equal(a1, a3)
+            assert np.array_equal(a1, a4)
+            assert np.array_equal(a1, a5)
 
     def test_img_utils(self):
         height, width = 10, 8
