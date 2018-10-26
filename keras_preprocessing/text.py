@@ -145,7 +145,7 @@ class Tokenizer(object):
 
     # Arguments
         num_words: the maximum number of words to keep, based
-            on word frequency. Only the most common `num_words`-1 words will
+            on word frequency. Only the most common `num_words-1` words will
             be kept.
         filters: a string where each element is a character that will be
             filtered from the texts. The default is all punctuation, plus
@@ -266,7 +266,7 @@ class Tokenizer(object):
     def texts_to_sequences(self, texts):
         """Transforms each text in texts to a sequence of integers.
 
-        Only top "num_words"-1 most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
@@ -283,7 +283,7 @@ class Tokenizer(object):
         Each item in texts can also be a list,
         in which case we assume each item of that list to be a token.
 
-        Only top "num_words"-1 most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
@@ -323,7 +323,7 @@ class Tokenizer(object):
     def sequences_to_texts(self, sequences):
         """Transforms each sequence into a list of text.
 
-        Only top "num_words"-1 most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
@@ -340,7 +340,7 @@ class Tokenizer(object):
         Each sequence has to a list of integers.
         In other words, sequences should be a list of sequences
 
-        Only top "num_words"-1 most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
@@ -398,7 +398,7 @@ class Tokenizer(object):
             if self.word_index:
                 num_words = len(self.word_index) + 1
             else:
-                raise ValueError('Specify a dimension (num_words argument), '
+                raise ValueError('Specify a dimension (`num_words` argument), '
                                  'or fit on some text data first.')
         else:
             num_words = self.num_words
