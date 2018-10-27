@@ -480,7 +480,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
 
     # Arguments
         path: Path to image file.
-        color_mode: One of "grayscale", "rbg", "rgba". Default: "rgb".
+        color_mode: One of "grayscale", "rgb", "rgba". Default: "rgb".
             The desired image format.
         target_size: Either `None` (default to original size)
             or tuple of ints `(img_height, img_width)`.
@@ -516,7 +516,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
         if img.mode != 'RGB':
             img = img.convert('RGB')
     else:
-        raise ValueError('color_mode must be "grayscale", "rbg", or "rgba"')
+        raise ValueError('color_mode must be "grayscale", "rgb", or "rgba"')
     if target_size is not None:
         width_height_tuple = (target_size[1], target_size[0])
         if img.size != width_height_tuple:
@@ -958,7 +958,7 @@ class ImageDataGenerator(object):
             target_size: Tuple of integers `(height, width)`,
                 default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
-            color_mode: One of "grayscale", "rbg", "rgba". Default: "rgb".
+            color_mode: One of "grayscale", "rgb", "rgba". Default: "rgb".
                 Whether the images will be converted to
                 have 1, 3, or 4 channels.
             classes: Optional list of class subdirectories
@@ -1040,7 +1040,9 @@ class ImageDataGenerator(object):
                             save_prefix='',
                             save_format='png',
                             subset=None,
-                            interpolation='nearest'):
+                            interpolation='nearest',
+                            sort=True,
+                            drop_duplicates=True):
         """Takes the dataframe and the path to a directory
          and generates batches of augmented/normalized data.
 
@@ -1060,7 +1062,7 @@ class ImageDataGenerator(object):
                 has filename extensions,else False.
             target_size: tuple of integers `(height, width)`, default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
-            color_mode: one of "grayscale", "rbg". Default: "rgb".
+            color_mode: one of "grayscale", "rgb". Default: "rgb".
                 Whether the images will be converted to have 1 or 3 color channels.
             classes: optional list of classes (e.g. `['dogs', 'cats']`).
                 Default: None. If not provided, the list of classes will be
@@ -1101,6 +1103,9 @@ class ImageDataGenerator(object):
                 If PIL version 1.1.3 or newer is installed, `"lanczos"` is also
                 supported. If PIL version 3.4.0 or newer is installed, `"box"` and
                 `"hamming"` are also supported. By default, `"nearest"` is used.
+            sort: Boolean, whether to sort dataframe by filename (before shuffle).
+            drop_duplicates: Boolean, whether to drop duplicate rows
+                based on filename.
 
         # Returns
             A DataFrameIterator yielding tuples of `(x, y)`
@@ -1119,7 +1124,9 @@ class ImageDataGenerator(object):
                                  save_prefix=save_prefix,
                                  save_format=save_format,
                                  subset=subset,
-                                 interpolation=interpolation)
+                                 interpolation=interpolation,
+                                 sort=sort,
+                                 drop_duplicates=drop_duplicates)
 
     def standardize(self, x):
         """Applies the normalization configuration to a batch of inputs.
@@ -2039,6 +2046,8 @@ class DataFrameIterator(Iterator):
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
+        sort: Boolean, whether to sort dataframe by filename (before shuffle).
+        drop_duplicates: Boolean, whether to drop duplicate rows based on filename.
     """
 
     def __init__(self, dataframe, directory, image_data_generator,
@@ -2051,7 +2060,9 @@ class DataFrameIterator(Iterator):
                  follow_links=False,
                  subset=None,
                  interpolation='nearest',
-                 dtype='float32'):
+                 dtype='float32',
+                 sort=True,
+                 drop_duplicates=True):
         super(DataFrameIterator, self).common_init(image_data_generator,
                                                    target_size,
                                                    color_mode,
@@ -2070,7 +2081,9 @@ class DataFrameIterator(Iterator):
         if type(has_ext) != bool:
             raise ValueError("has_ext must be either True if filenames in"
                              " x_col has extensions,else False.")
-        self.df = dataframe.drop_duplicates(x_col)
+        self.df = dataframe.copy()
+        if drop_duplicates:
+            self.df.drop_duplicates(x_col, inplace=True)
         self.x_col = x_col
         self.df[x_col] = self.df[x_col].astype(str)
         self.directory = directory
@@ -2126,15 +2139,18 @@ class DataFrameIterator(Iterator):
             if not ext_exist:
                 raise ValueError('has_ext is set to True but'
                                  ' extension not found in x_col')
-            self.df = self.df[self.df[x_col].isin(filenames)].sort_values(by=x_col)
+            self.df = self.df[self.df[x_col].isin(filenames)]
+            if sort:
+                self.df.sort_values(by=x_col, inplace=True)
             self.filenames = list(self.df[x_col])
         else:
             without_ext_with = {f[:-1 * (len(f.split(".")[-1]) + 1)]: f
                                 for f in filenames}
             filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
                                      for f in filenames]
-            self.df = (self.df[self.df[x_col].isin(filenames_without_ext)]
-                       .sort_values(by=x_col))
+            self.df = self.df[self.df[x_col].isin(filenames_without_ext)]
+            if sort:
+                self.df.sort_values(by=x_col, inplace=True)
             self.filenames = [without_ext_with[f] for f in list(self.df[x_col])]
 
         if self.split:
