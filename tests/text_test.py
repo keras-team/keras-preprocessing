@@ -20,7 +20,7 @@ def test_one_hot():
     assert len(encoded) == 6
     assert np.max(encoded) <= 4
     assert np.min(encoded) >= 0
-    
+
     sample_text = 'The-cat-sat-on-the-mat'
     encoded2 = text.one_hot(sample_text, 5, analyzer=lambda t: t.lower().split('-'))
     assert encoded == encoded2

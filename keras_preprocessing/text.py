@@ -140,7 +140,7 @@ def hashing_trick(text, n,
                                     split=split)
     else:
         seq = analyzer(text)
-    
+
     return [(hash_function(w) % (n - 1) + 1) for w in seq]
 
 
@@ -532,4 +532,3 @@ def tokenizer_from_json(json_string):
     tokenizer.index_word = index_word
 
     return tokenizer
-
