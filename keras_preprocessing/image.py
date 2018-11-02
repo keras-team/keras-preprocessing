@@ -2133,7 +2133,7 @@ class DataFrameIterator(Iterator):
         if has_ext:
             ext_exist = False
             for ext in white_list_formats:
-                if self.df[x_col].values[0].endswith("." + ext):
+                if self.df[x_col].values[0].lower().endswith("." + ext):
                     ext_exist = True
                     break
             if not ext_exist:
@@ -2237,7 +2237,7 @@ class DataFrameIterator(Iterator):
     def _list_valid_filepaths(self, white_list_formats):
 
         def get_ext(filename):
-            return os.path.splitext(filename)[1][1:]
+            return os.path.splitext(filename)[1][1:].lower()
 
         df_paths = self.df[self.x_col]
 
