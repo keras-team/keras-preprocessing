@@ -327,7 +327,7 @@ class Tokenizer(object):
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
-            texts: A list of sequences (list of integers).
+            sequences: A list of sequences (list of integers).
 
         # Returns
             A list of texts (strings)
@@ -344,7 +344,7 @@ class Tokenizer(object):
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
-            texts: A list of sequences.
+            sequences: A list of sequences.
 
         # Yields
             Yields individual texts.
