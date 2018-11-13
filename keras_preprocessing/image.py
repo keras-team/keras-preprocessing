@@ -1046,7 +1046,8 @@ class ImageDataGenerator(object):
         """Takes the dataframe and the path to a directory
          and generates batches of augmented/normalized data.
 
-        # A simple tutorial can be found at: http://bit.ly/keras_flow_from_dataframe
+        **A simple tutorial can be found **[here](
+                                    http://bit.ly/keras_flow_from_dataframe).
 
         # Arguments
             dataframe: Pandas dataframe containing the filenames of the
