@@ -1773,12 +1773,12 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
         classes: a list of class indices(returns only if `df=False`)
         filenames: if `df=False`,returns the path of valid files in `directory`,
             relative from `directory`'s parent (e.g., if `directory` is
-            "dataset/class1", the filenames will be
+            "dataset", the filenames will be
+            `["dataset/class1/file1.jpg", "dataset/class1/file2.jpg", ...]`).
+            if `df=True`, returns the path of valid files in `directory`,
+            relative from `directory` (e.g., if `directory` is
+            "dataset", the filenames will be
             `["class1/file1.jpg", "class1/file2.jpg", ...]`).
-            if `df=True`, returns only the filenames that are found inside the
-             provided directory (e.g., if `directory` is
-            "dataset/", the filenames will be
-            `["file1.jpg", "file2.jpg", ...]`).
     """
     dirname = os.path.basename(directory)
     if split:
@@ -1794,7 +1794,9 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     if df:
         filenames = []
         for root, fname in valid_files:
-            filenames.append(os.path.basename(fname))
+            absolute_path = os.path.join(root, fname)
+            relative_path = os.path.relpath(absolute_path, directory)
+            filenames.append(relative_path)
         return filenames
     classes = []
     filenames = []

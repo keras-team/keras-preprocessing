@@ -899,6 +899,53 @@ class TestImage(object):
         assert df_drop_iterator.n == len(set(input_filenames2))
         assert df_no_drop_iterator.n == len(input_filenames2)
 
+    def test_dataframe_iterator_with_subdirs(self, tmpdir):
+        num_classes = 2
+
+        # create folders and subfolders
+        paths = []
+        for cl in range(num_classes):
+            class_directory = 'class-{}'.format(cl)
+            classpaths = [
+                class_directory,
+                os.path.join(class_directory, 'subfolder-1'),
+                os.path.join(class_directory, 'subfolder-2'),
+                os.path.join(class_directory, 'subfolder-1', 'sub-subfolder')
+            ]
+            for path in classpaths:
+                tmpdir.join(path).mkdir()
+            paths.append(classpaths)
+
+        # save the images in the paths
+        count = 0
+        filenames = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                # rotate image class
+                im_class = count % num_classes
+                # rotate subfolders
+                classpaths = paths[im_class]
+                filename = os.path.join(
+                    classpaths[count % len(classpaths)],
+                    'image-{}.png'.format(count))
+                filenames.append(filename)
+                im.save(str(tmpdir / filename))
+                count += 1
+
+        # create dataframe
+        classes = np.random.randint(num_classes, size=len(filenames))
+        df = pd.DataFrame({"filename": filenames,
+                           "class": classes})
+
+        # create iterator
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(
+            df, str(tmpdir), has_ext=True, class_mode='binary')
+
+        # Test the number of items in iterator
+        assert df_iterator.n == len(filenames)
+        assert set(df_iterator.filenames) == set(filenames)
+
     def test_img_utils(self):
         height, width = 10, 8
 
