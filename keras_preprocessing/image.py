@@ -1049,11 +1049,12 @@ class ImageDataGenerator(object):
         # A simple tutorial can be found at: http://bit.ly/keras_flow_from_dataframe
 
         # Arguments
-            dataframe: Pandas dataframe containing the filenames of the
-                images in a column and classes in another or column/s
-                that can be fed as raw target data.
+            dataframe: Pandas dataframe containing the filenames
+                (or paths relative to `directory`) of the images in a column and
+                classes in another column/s that can be fed as raw target data.
             directory: string, path to the target directory that contains all
                 the images mapped in the dataframe.
+                None if x_col column contains absolute paths.
             x_col: string, column in the dataframe that contains
                 the filenames of the target images.
             y_col: string or list of strings,columns in
@@ -1996,9 +1997,9 @@ class DataFrameIterator(Iterator):
         through a dataframe.
 
     # Arguments
-        dataframe: Pandas dataframe containing the filenames of the
-                   images in a column and classes in another or column/s
-                   that can be fed as raw target data.
+        dataframe: Pandas dataframe containing the filenames
+            (or paths relative to `directory`) of the images in a column and
+            classes in another column/s that can be fed as raw target data.
         directory: Path to the directory to read images from.
             Each subdirectory in this directory will be
             considered to contain images from one class,
