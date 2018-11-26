@@ -1049,11 +1049,12 @@ class ImageDataGenerator(object):
         # A simple tutorial can be found at: http://bit.ly/keras_flow_from_dataframe
 
         # Arguments
-            dataframe: Pandas dataframe containing the filenames of the
-                images in a column and classes in another or column/s
-                that can be fed as raw target data.
+            dataframe: Pandas dataframe containing the filenames
+                (or paths relative to `directory`) of the images in a column and
+                classes in another column/s that can be fed as raw target data.
             directory: string, path to the target directory that contains all
                 the images mapped in the dataframe.
+                None if x_col column contains absolute paths.
             x_col: string, column in the dataframe that contains
                 the filenames of the target images.
             y_col: string or list of strings,columns in
@@ -1773,12 +1774,12 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
         classes: a list of class indices(returns only if `df=False`)
         filenames: if `df=False`,returns the path of valid files in `directory`,
             relative from `directory`'s parent (e.g., if `directory` is
-            "dataset/class1", the filenames will be
+            "dataset", the filenames will be
+            `["dataset/class1/file1.jpg", "dataset/class1/file2.jpg", ...]`).
+            if `df=True`, returns the path of valid files in `directory`,
+            relative from `directory` (e.g., if `directory` is
+            "dataset", the filenames will be
             `["class1/file1.jpg", "class1/file2.jpg", ...]`).
-            if `df=True`, returns only the filenames that are found inside the
-             provided directory (e.g., if `directory` is
-            "dataset/", the filenames will be
-            `["file1.jpg", "file2.jpg", ...]`).
     """
     dirname = os.path.basename(directory)
     if split:
@@ -1794,7 +1795,9 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     if df:
         filenames = []
         for root, fname in valid_files:
-            filenames.append(os.path.basename(fname))
+            absolute_path = os.path.join(root, fname)
+            relative_path = os.path.relpath(absolute_path, directory)
+            filenames.append(relative_path)
         return filenames
     classes = []
     filenames = []
@@ -1994,9 +1997,9 @@ class DataFrameIterator(Iterator):
         through a dataframe.
 
     # Arguments
-        dataframe: Pandas dataframe containing the filenames of the
-                   images in a column and classes in another or column/s
-                   that can be fed as raw target data.
+        dataframe: Pandas dataframe containing the filenames
+            (or paths relative to `directory`) of the images in a column and
+            classes in another column/s that can be fed as raw target data.
         directory: Path to the directory to read images from.
             Each subdirectory in this directory will be
             considered to contain images from one class,
