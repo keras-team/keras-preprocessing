@@ -2107,7 +2107,7 @@ class DataFrameIterator(Iterator):
         if not classes:
             classes = []
             if class_mode not in ["other", "input", None]:
-                classes = list(self.df[y_col].unique())
+                classes = list(np.sort(self.df[y_col].unique()))
         else:
             if class_mode in ["other", "input", None]:
                 raise ValueError('classes cannot be set if class_mode'
