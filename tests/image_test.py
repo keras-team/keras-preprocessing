@@ -97,7 +97,8 @@ class TestImage(object):
             for x, y in generator.flow(images, np.arange(images.shape[0]),
                                        shuffle=True,
                                        save_to_dir=str(tmpdir),
-                                       batch_size=3):
+                                       batch_size=3,
+                                       seed=42):
                 assert x.shape == images[:3].shape
                 # Check that the sequence is shuffled.
                 assert list(y) != [0, 1, 2]
