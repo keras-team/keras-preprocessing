@@ -498,7 +498,7 @@ def tokenizer_from_json(json_string):
 
     word_counts = json.loads(config.pop('word_counts'))
     word_docs = json.loads(config.pop('word_docs'))
-    document_count = json.loads(config.pop('document_count'))
+    document_count = config.pop('document_count')
     index_docs = json.loads(config.pop('index_docs'))
     # Integer indexing gets converted to strings with json.dumps()
     index_docs = {int(k): v for k, v in index_docs.items()}
