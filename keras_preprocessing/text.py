@@ -170,7 +170,6 @@ class Tokenizer(object):
                  split=' ',
                  char_level=False,
                  oov_token=None,
-                 document_count=0,
                  **kwargs):
         # Legacy support
         if 'nb_words' in kwargs:
@@ -186,7 +185,7 @@ class Tokenizer(object):
         self.split = split
         self.lower = lower
         self.num_words = num_words
-        self.document_count = document_count
+        self.document_count = 0
         self.char_level = char_level
         self.oov_token = oov_token
         self.index_docs = defaultdict(int)
