@@ -50,6 +50,14 @@ if pil_image is not None:
         _PIL_INTERPOLATION_METHODS['lanczos'] = pil_image.LANCZOS
 
 
+def get_extension(filename):
+    """Get extension of the filename
+
+    There are newer methods to achieve this but this method is backwards compatible.
+    """
+    return os.path.splitext(filename)[1].strip('.').lower()
+
+
 def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
                     fill_mode='nearest', cval=0., interpolation_order=1):
     """Performs a random rotation of a Numpy image tensor.
@@ -1744,12 +1752,10 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
 
     for root, _, files in _recursive_list(directory):
         for fname in sorted(files):
-            for extension in white_list_formats:
-                if fname.lower().endswith('.tiff'):
-                    warnings.warn('Using \'.tiff\' files with multiple bands '
-                                  'will cause distortion. '
-                                  'Please verify your output.')
-                if fname.lower().endswith('.' + extension):
+            if fname.lower().endswith('.tiff'):
+                warnings.warn('Using ".tiff" files with multiple bands '
+                              'will cause distortion. Please verify your output.')
+            if get_extension(fname) in white_list_formats:
                     yield root, fname
 
 
@@ -2136,10 +2142,8 @@ class DataFrameIterator(Iterator):
 
         if has_ext:
             ext_exist = False
-            for ext in white_list_formats:
-                if self.df[x_col].values[0].lower().endswith("." + ext):
-                    ext_exist = True
-                    break
+            if get_extension(self.df[x_col].values[0]) in white_list_formats:
+                ext_exist = True
             if not ext_exist:
                 raise ValueError('has_ext is set to True but'
                                  ' extension not found in x_col')
@@ -2239,18 +2243,11 @@ class DataFrameIterator(Iterator):
         return batch_x, batch_y
 
     def _list_valid_filepaths(self, white_list_formats):
-
-        def get_ext(filename):
-            return os.path.splitext(filename)[1][1:].lower()
-
         df_paths = self.df[self.x_col]
-
-        format_check = df_paths.map(get_ext).isin(white_list_formats)
+        format_check = df_paths.map(get_extension).isin(white_list_formats)
         existence_check = df_paths.map(os.path.isfile)
-
         valid_filepaths = list(df_paths[np.logical_and(format_check,
                                                        existence_check)])
-
         return valid_filepaths
 
     def next(self):
