@@ -2076,15 +2076,6 @@ class DataFrameIterator(Iterator):
                                                    save_format,
                                                    subset,
                                                    interpolation)
-        try:
-            import pandas as pd
-        except ImportError:
-            raise ImportError('Install pandas to use flow_from_dataframe.')
-        if type(x_col) != str:
-            raise ValueError("x_col must be a string.")
-        if type(has_ext) != bool:
-            raise ValueError("has_ext must be either True if filenames in"
-                             " x_col has extensions,else False.")
         self.df = dataframe.copy()
         if drop_duplicates:
             self.df.drop_duplicates(x_col, inplace=True)
