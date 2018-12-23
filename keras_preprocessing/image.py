@@ -1565,6 +1565,20 @@ class Iterator(IteratorType):
         """
         raise NotImplementedError
 
+    def next(self):
+        """For python 2.x.
+
+        # Returns
+            The next batch.
+        """
+        # Keeps under lock only the mechanism which advances
+        # the indexing of each batch.
+        with self.lock:
+            index_array = next(self.index_generator)
+        # The transformation of images is not under thread lock
+        # so it can be done in parallel
+        return self._get_batches_of_transformed_samples(index_array)
+
 
 class NumpyArrayIterator(Iterator):
     """Iterator yielding data from a Numpy array.
@@ -1717,20 +1731,6 @@ class NumpyArrayIterator(Iterator):
         if self.sample_weight is not None:
             output += (self.sample_weight[index_array],)
         return output
-
-    def next(self):
-        """For python 2.x.
-
-        # Returns
-            The next batch.
-        """
-        # Keeps under lock only the mechanism which advances
-        # the indexing of each batch.
-        with self.lock:
-            index_array = next(self.index_generator)
-        # The transformation of images is not under thread lock
-        # so it can be done in parallel
-        return self._get_batches_of_transformed_samples(index_array)
 
 
 def _iter_valid_files(directory, white_list_formats, follow_links):
@@ -1986,18 +1986,6 @@ class DirectoryIterator(Iterator):
             return batch_x
         return batch_x, batch_y
 
-    def next(self):
-        """For python 2.x.
-
-        # Returns
-            The next batch.
-        """
-        with self.lock:
-            index_array = next(self.index_generator)
-        # The transformation of images is not under thread lock
-        # so it can be done in parallel
-        return self._get_batches_of_transformed_samples(index_array)
-
 
 class DataFrameIterator(Iterator):
     """Iterator capable of reading images from a directory on disk
@@ -2240,15 +2228,3 @@ class DataFrameIterator(Iterator):
         valid_filepaths = list(df_paths[np.logical_and(format_check,
                                                        existence_check)])
         return valid_filepaths
-
-    def next(self):
-        """For python 2.x.
-
-        # Returns
-            The next batch.
-        """
-        with self.lock:
-            index_array = next(self.index_generator)
-        # The transformation of images is not under thread lock
-        # so it can be done in parallel
-        return self._get_batches_of_transformed_samples(index_array)
