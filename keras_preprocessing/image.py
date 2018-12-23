@@ -1437,6 +1437,7 @@ class Iterator(IteratorType):
         shuffle: Boolean, whether to shuffle the data between epochs.
         seed: Random seeding for data shuffling.
     """
+    white_list_formats = {'png', 'jpg', 'jpeg', 'bmp', 'ppm', 'tif', 'tiff'}
 
     def __init__(self, n, batch_size, shuffle, seed):
         self.n = n
@@ -1894,8 +1895,6 @@ class DirectoryIterator(Iterator):
                              ' or None.')
         self.class_mode = class_mode
         self.dtype = dtype
-        white_list_formats = {'png', 'jpg', 'jpeg', 'bmp',
-                              'ppm', 'tif', 'tiff'}
         # First, count the number of samples and classes.
         self.samples = 0
 
@@ -1917,7 +1916,7 @@ class DirectoryIterator(Iterator):
         for dirpath in (os.path.join(directory, subdir) for subdir in classes):
             results.append(
                 pool.apply_async(_list_valid_filenames_in_directory,
-                                 (dirpath, white_list_formats, self.split,
+                                 (dirpath, self.white_list_formats, self.split,
                                   self.class_indices, follow_links)))
         classes_list = []
         for res in results:
@@ -2085,8 +2084,6 @@ class DataFrameIterator(Iterator):
                              '"other" or None.')
         self.class_mode = class_mode
         self.dtype = dtype
-        white_list_formats = {'png', 'jpg', 'jpeg', 'bmp',
-                              'ppm', 'tif', 'tiff'}
         # First, count the number of samples and classes.
         self.samples = 0
 
@@ -2108,7 +2105,7 @@ class DataFrameIterator(Iterator):
         if self.directory is not None:
             filenames = _list_valid_filenames_in_directory(
                 directory,
-                white_list_formats,
+                self.white_list_formats,
                 None,
                 class_indices=self.class_indices,
                 follow_links=follow_links,
@@ -2117,11 +2114,11 @@ class DataFrameIterator(Iterator):
             if not has_ext:
                 raise ValueError('has_ext cannot be set to False'
                                  ' if directory is None.')
-            filenames = self._list_valid_filepaths(white_list_formats)
+            filenames = self._list_valid_filepaths(self.white_list_formats)
 
         if has_ext:
             ext_exist = False
-            if get_extension(self.df[x_col].values[0]) in white_list_formats:
+            if get_extension(self.df[x_col].values[0]) in self.white_list_formats:
                 ext_exist = True
             if not ext_exist:
                 raise ValueError('has_ext is set to True but'
