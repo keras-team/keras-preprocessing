@@ -93,8 +93,6 @@ class DirectoryIterator(Iterator):
                              ' or None.')
         self.class_mode = class_mode
         self.dtype = dtype
-        white_list_formats = {'png', 'jpg', 'jpeg', 'bmp',
-                              'ppm', 'tif', 'tiff'}
         # First, count the number of samples and classes.
         self.samples = 0
 
@@ -116,7 +114,7 @@ class DirectoryIterator(Iterator):
         for dirpath in (os.path.join(directory, subdir) for subdir in classes):
             results.append(
                 pool.apply_async(_list_valid_filenames_in_directory,
-                                 (dirpath, white_list_formats, self.split,
+                                 (dirpath, self.white_list_formats, self.split,
                                   self.class_indices, follow_links)))
         classes_list = []
         for res in results:
