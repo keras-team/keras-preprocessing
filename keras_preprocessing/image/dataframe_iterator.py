@@ -254,15 +254,3 @@ class DataFrameIterator(Iterator):
         valid_filepaths = list(df_paths[np.logical_and(format_check,
                                                        existence_check)])
         return valid_filepaths
-
-    def next(self):
-        """For python 2.x.
-
-        # Returns
-            The next batch.
-        """
-        with self.lock:
-            index_array = next(self.index_generator)
-        # The transformation of images is not under thread lock
-        # so it can be done in parallel
-        return self._get_batches_of_transformed_samples(index_array)
