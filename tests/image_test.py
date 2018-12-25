@@ -1172,5 +1172,174 @@ class TestImage(object):
             loaded_im = image.load_img(filename_rgb, target_size=(25, 25),
                                        interpolation="unsupported")
 
-if __name__ == '__main__':
-    pytest.main([__file__])
+    def write_images_for_dictionary_iterator(self, directory):
+        # save the images in the tmpdir
+        count = 0
+        filenames = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = "image-{}.png".format(count)
+                im.save(os.path.join(directory, filename))
+                filenames.append(filename)
+                count += 1
+        return directory, filenames
+
+    def test_dictionary_iterator_absolute_paths(self, tmpdir):
+        root, filenames = self.write_images_for_dictionary_iterator(str(tmpdir))
+        filepaths = [os.path.join(root, fname) for fname in filenames]
+        dictionary = dict(zip(filepaths, [random.randint(0, 1) for _ in filepaths]))
+        generator = image.ImageDataGenerator()
+        dict_iterator = generator.flow_from_dictionary(dictionary)
+        if np.isnan(dict_iterator.labels).any():
+            raise ValueError('Invalid values.')
+        # check number of classes and images
+        assert len(dict_iterator.class_indices) == 2
+        assert len(dict_iterator.labels) == len(filenames)
+        assert set(dict_iterator.filepaths) == set(filepaths)
+        # Test invalid use cases
+        with pytest.raises(ValueError):
+            generator.flow_from_dictionary(dictionary, color_mode='cmyk')
+        with pytest.raises(ValueError):
+            generator.flow_from_dictionary(dictionary, class_mode='output')
+
+        def preprocessing_function(x):
+            """This will fail if not provided by a Numpy array.
+            Note: This is made to enforce backward compatibility.
+            """
+            assert x.shape == (26, 26, 3)
+            assert type(x) is np.ndarray
+            return np.zeros_like(x)
+
+        # Test usage as Sequence
+        generator = image.ImageDataGenerator(
+            preprocessing_function=preprocessing_function)
+        dir_seq = generator.flow_from_dictionary(dictionary,
+                                                 target_size=(26, 26),
+                                                 color_mode='rgb',
+                                                 batch_size=3,
+                                                 class_mode='categorical')
+        assert len(dir_seq) == np.ceil(len(filenames) / 3)
+        x1, y1 = dir_seq[1]
+        assert x1.shape == (3, 26, 26, 3)
+        assert y1.shape == (3, 2)
+        x1, y1 = dir_seq[5]
+        assert (x1 == 0).all()
+
+        with pytest.raises(ValueError):
+            x1, y1 = dir_seq[9]
+
+    def test_dictionary_iterator_relative_paths(self, tmpdir):
+        root, filenames = self.write_images_for_dictionary_iterator(str(tmpdir))
+        filepaths = [os.path.join(root, fname) for fname in filenames]
+        dictionary = dict(zip(filenames, [random.randint(0, 1) for _ in filepaths]))
+        generator = image.ImageDataGenerator()
+        dict_iterator = generator.flow_from_dictionary(dictionary, root)
+        if np.isnan(dict_iterator.labels).any():
+            raise ValueError('Invalid values.')
+        # check number of classes and images
+        assert len(dict_iterator.class_indices) == 2
+        assert len(dict_iterator.labels) == len(filenames)
+        assert set(dict_iterator.filepaths) == set(filepaths)
+
+    def test_dictionary_iterator_class_mode_categorical(self, tmpdir):
+        root, filenames = self.write_images_for_dictionary_iterator(str(tmpdir))
+        dictionary = dict(zip(filenames, [random.randint(0, 1) for _ in filenames]))
+        generator = image.ImageDataGenerator()
+        dict_iterator = generator.flow_from_dictionary(dictionary, root,
+                                                       class_mode='categorical')
+        batch_x, batch_y = next(dict_iterator)
+        assert len(batch_x.shape) == 4
+        assert len(batch_y.shape) == 2
+        assert batch_y.shape[1] == 2
+        assert len(batch_x) == len(batch_y)
+
+    def test_dictionary_iterator_class_mode_binary(self, tmpdir):
+        root, filenames = self.write_images_for_dictionary_iterator(str(tmpdir))
+        dictionary = dict(zip(filenames,
+                              [random.randint(10, 11) for _ in filenames]))
+        generator = image.ImageDataGenerator()
+        dict_iterator = generator.flow_from_dictionary(dictionary, root,
+                                                       class_mode='binary')
+        batch_x, batch_y = next(dict_iterator)
+        assert len(batch_x.shape) == 4
+        assert len(batch_y.shape) == 1
+        for label in batch_y:
+            assert label in {0, 1}
+        assert len(batch_x) == len(batch_y)
+
+    def test_dictionary_iterator_class_mode_sparse(self, tmpdir):
+        root, filenames = self.write_images_for_dictionary_iterator(str(tmpdir))
+        dictionary = dict(zip(filenames,
+                              [random.randint(10, 13) for _ in filenames]))
+        generator = image.ImageDataGenerator()
+        dict_iterator = generator.flow_from_dictionary(dictionary, root,
+                                                       class_mode='sparse')
+        batch_x, batch_y = next(dict_iterator)
+        assert len(batch_x.shape) == 4
+        assert len(batch_y.shape) == 1
+        for label in batch_y:
+            assert label in set(range(4))
+        assert len(batch_x) == len(batch_y)
+
+    def test_dictionary_iterator_class_mode_input(self, tmpdir):
+        root, filenames = self.write_images_for_dictionary_iterator(str(tmpdir))
+        dictionary = dict(zip(filenames, [random.randint(0, 1) for _ in filenames]))
+        generator = image.ImageDataGenerator()
+        dict_iterator = generator.flow_from_dictionary(dictionary, root,
+                                                       class_mode='input')
+        batch = next(dict_iterator)
+        # check if input and output have the same shape and they're the same
+        assert(batch[0].all() == batch[1].all())
+        # check if the input and output images are not the same numpy array
+        input_img = batch[0][0]
+        output_img = batch[1][0]
+        output_img[0][0][0] += 1
+        assert(input_img[0][0][0] != output_img[0][0][0])
+
+    @pytest.mark.parametrize('validation_split,num_training', [
+        (0.25, 18),
+        (0.50, 12),
+        (0.75, 6),
+    ])
+    def test_dataframe_iterator_with_validation_split(self,
+                                                      validation_split,
+                                                      num_training, tmpdir):
+        root, filenames = self.write_images_for_dictionary_iterator(str(tmpdir))
+        filepaths = [os.path.join(root, fname) for fname in filenames]
+        dictionary = dict(zip(filepaths, [random.randint(0, 1) for _ in filepaths]))
+        count = len(filepaths)
+        generator = image.ImageDataGenerator()
+        dict_iterator = generator.flow_from_dictionary(dictionary,
+                                                       class_mode='input')
+        # create iterator
+        generator = image.ImageDataGenerator(validation_split=validation_split)
+        dict_iterator = generator.flow_from_dictionary(dictionary,
+                                                       class_mode="sparse")
+        if np.isnan(next(dict_iterator)[:][1]).any():
+            raise ValueError('Invalid values.')
+
+        with pytest.raises(ValueError):
+            generator.flow_from_dictionary(dictionary, subset='foo')
+
+        train_iterator = generator.flow_from_dictionary(dictionary,
+                                                        subset='training')
+        valid_iterator = generator.flow_from_dictionary(dictionary,
+                                                        subset='validation')
+
+        assert len(train_iterator.filepaths) == num_training
+        assert len(valid_iterator.filepaths) == count - num_training
+        # check number of classes and images
+        assert len(train_iterator.class_indices) == 2
+        assert len(valid_iterator.class_indices) == 2
+        assert len(train_iterator.labels) == num_training
+        assert len(valid_iterator.labels) == count - num_training
+        assert len(set(train_iterator.filepaths) &
+                   set(filepaths)) == num_training
+        # no filepaths in common
+        assert not set(train_iterator.filepaths).intersection(
+            set(valid_iterator.filepaths)
+        )
+        # all files in valid and train
+        assert set(train_iterator.filepaths).union(
+            set(valid_iterator.filepaths)
+        ) == set(filepaths)
