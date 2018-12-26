@@ -556,7 +556,6 @@ class ImageDataGenerator(object):
                             save_format='png',
                             subset=None,
                             interpolation='nearest',
-                            sort=True,
                             drop_duplicates=True,
                             **kwargs):
         """Takes the dataframe and the path to a directory
@@ -619,7 +618,6 @@ class ImageDataGenerator(object):
                 If PIL version 1.1.3 or newer is installed, `"lanczos"` is also
                 supported. If PIL version 3.4.0 or newer is installed, `"box"` and
                 `"hamming"` are also supported. By default, `"nearest"` is used.
-            sort: Boolean, whether to sort dataframe by filename (before shuffle).
             drop_duplicates: Boolean, whether to drop duplicate rows
                 based on filename.
 
@@ -652,7 +650,6 @@ class ImageDataGenerator(object):
             save_format=save_format,
             subset=subset,
             interpolation=interpolation,
-            sort=sort,
             drop_duplicates=drop_duplicates
         )
 
