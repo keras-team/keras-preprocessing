@@ -59,7 +59,8 @@ class Iterator(IteratorType):
                                        self.batch_size * (idx + 1)]
         return self._get_batches_of_transformed_samples(index_array)
 
-    def common_init(self, image_data_generator,
+    def common_init(self,
+                    image_data_generator,
                     target_size,
                     color_mode,
                     data_format,

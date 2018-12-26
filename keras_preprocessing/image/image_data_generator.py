@@ -366,10 +366,17 @@ class ImageDataGenerator(object):
                     'Received: %s' % (brightness_range,))
         self.brightness_range = brightness_range
 
-    def flow(self, x,
-             y=None, batch_size=32, shuffle=True,
-             sample_weight=None, seed=None,
-             save_to_dir=None, save_prefix='', save_format='png', subset=None):
+    def flow(self,
+             x,
+             y=None,
+             batch_size=32,
+             shuffle=True,
+             sample_weight=None,
+             seed=None,
+             save_to_dir=None,
+             save_prefix='',
+             save_format='png',
+             subset=None):
         """Takes data & label arrays, generates batches of augmented data.
 
         # Arguments
@@ -422,12 +429,17 @@ class ImageDataGenerator(object):
             save_to_dir=save_to_dir,
             save_prefix=save_prefix,
             save_format=save_format,
-            subset=subset)
+            subset=subset
+        )
 
     def flow_from_directory(self, directory,
-                            target_size=(256, 256), color_mode='rgb',
-                            classes=None, class_mode='categorical',
-                            batch_size=32, shuffle=True, seed=None,
+                            target_size=(256, 256),
+                            color_mode='rgb',
+                            classes=None,
+                            class_mode='categorical',
+                            batch_size=32,
+                            shuffle=True,
+                            seed=None,
                             save_to_dir=None,
                             save_prefix='',
                             save_format='png',
@@ -509,23 +521,35 @@ class ImageDataGenerator(object):
                 and `y` is a numpy array of corresponding labels.
         """
         return DirectoryIterator(
-            directory, self,
-            target_size=target_size, color_mode=color_mode,
-            classes=classes, class_mode=class_mode,
+            directory,
+            self,
+            target_size=target_size,
+            color_mode=color_mode,
+            classes=classes,
+            class_mode=class_mode,
             data_format=self.data_format,
-            batch_size=batch_size, shuffle=shuffle, seed=seed,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            seed=seed,
             save_to_dir=save_to_dir,
             save_prefix=save_prefix,
             save_format=save_format,
             follow_links=follow_links,
             subset=subset,
-            interpolation=interpolation)
+            interpolation=interpolation
+        )
 
     def flow_from_dataframe(self, dataframe, directory,
-                            x_col="filename", y_col="class", has_ext=True,
-                            target_size=(256, 256), color_mode='rgb',
-                            classes=None, class_mode='categorical',
-                            batch_size=32, shuffle=True, seed=None,
+                            x_col="filename",
+                            y_col="class",
+                            has_ext=True,
+                            target_size=(256, 256),
+                            color_mode='rgb',
+                            classes=None,
+                            class_mode='categorical',
+                            batch_size=32,
+                            shuffle=True,
+                            seed=None,
                             save_to_dir=None,
                             save_prefix='',
                             save_format='png',
@@ -606,19 +630,29 @@ class ImageDataGenerator(object):
             and `y` is a numpy array of corresponding labels.
         """
 
-        return DataFrameIterator(dataframe, directory, self,
-                                 x_col=x_col, y_col=y_col, has_ext=has_ext,
-                                 target_size=target_size, color_mode=color_mode,
-                                 classes=classes, class_mode=class_mode,
-                                 data_format=self.data_format,
-                                 batch_size=batch_size, shuffle=shuffle, seed=seed,
-                                 save_to_dir=save_to_dir,
-                                 save_prefix=save_prefix,
-                                 save_format=save_format,
-                                 subset=subset,
-                                 interpolation=interpolation,
-                                 sort=sort,
-                                 drop_duplicates=drop_duplicates)
+        return DataFrameIterator(
+            dataframe,
+            directory,
+            self,
+            x_col=x_col,
+            y_col=y_col,
+            has_ext=has_ext,
+            target_size=target_size,
+            color_mode=color_mode,
+            classes=classes,
+            class_mode=class_mode,
+            data_format=self.data_format,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            seed=seed,
+            save_to_dir=save_to_dir,
+            save_prefix=save_prefix,
+            save_format=save_format,
+            subset=subset,
+            interpolation=interpolation,
+            sort=sort,
+            drop_duplicates=drop_duplicates
+        )
 
     def standardize(self, x):
         """Applies the normalization configuration to a batch of inputs.
