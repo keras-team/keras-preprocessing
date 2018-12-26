@@ -497,6 +497,11 @@ class TestImage(object):
                            "class": [random.randint(0, 1) for _ in filenames]})
 
         # create iterator
+        iterator = image.DataFrameIterator(df, str(tmpdir))
+        batch = next(iterator)
+        assert len(batch) == 2
+        assert isinstance(batch[0], np.ndarray)
+        assert isinstance(batch[1], np.ndarray)
         generator = image.ImageDataGenerator()
         df_iterator = generator.flow_from_dataframe(
             df, str(tmpdir), has_ext=True)
