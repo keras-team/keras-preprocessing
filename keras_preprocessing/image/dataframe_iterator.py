@@ -20,9 +20,9 @@ class DataFrameIterator(Iterator):
         through a dataframe.
 
     # Arguments
-        dataframe: Pandas dataframe containing the filenames
-            (or paths relative to `directory`) of the images in a column and
-            classes in another column/s that can be fed as raw target data.
+        dataframe: Pandas dataframe containing the filepaths relative to
+            `directory` of the images in a column and classes in another
+            column/s that can be fed as raw target data.
         directory: Path to the directory to read images from.
             Each subdirectory in this directory will be
             considered to contain images from one class,
@@ -38,7 +38,6 @@ class DataFrameIterator(Iterator):
         x_col: Column in dataframe that contains all the filenames (or absolute
             paths, if directory is set to None).
         y_col: Column/s in dataframe that has the target data.
-        has_ext: bool, Whether the filenames in x_col has extensions or not.
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
             Color mode to read images.
@@ -152,31 +151,11 @@ class DataFrameIterator(Iterator):
                 follow_links=follow_links,
                 df=True)
         else:
-            if not has_ext:
-                raise ValueError('has_ext cannot be set to False'
-                                 ' if directory is None.')
             filenames = self._list_valid_filepaths(self.white_list_formats)
-
-        if has_ext:
-            ext_exist = False
-            if get_extension(self.df[x_col].values[0]) in self.white_list_formats:
-                ext_exist = True
-            if not ext_exist:
-                raise ValueError('has_ext is set to True but'
-                                 ' extension not found in x_col')
-            self.df = self.df[self.df[x_col].isin(filenames)]
-            if sort:
-                self.df.sort_values(by=x_col, inplace=True)
-            self.filenames = list(self.df[x_col])
-        else:
-            without_ext_with = {f[:-1 * (len(f.split(".")[-1]) + 1)]: f
-                                for f in filenames}
-            filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
-                                     for f in filenames]
-            self.df = self.df[self.df[x_col].isin(filenames_without_ext)]
-            if sort:
-                self.df.sort_values(by=x_col, inplace=True)
-            self.filenames = [without_ext_with[f] for f in list(self.df[x_col])]
+        self.df = self.df[self.df[x_col].isin(filenames)]
+        if sort:
+            self.df.sort_values(by=x_col, inplace=True)
+        self.filenames = list(self.df[x_col])
 
         if self.split:
             num_files = len(self.filenames)
