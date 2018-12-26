@@ -32,8 +32,9 @@ class DataFrameIterator(Iterator):
             all the images are present.
             You could also set it to None if data in x_col column are
             absolute paths.
-        image_data_generator: Instance of `ImageDataGenerator`
-            to use for random transformations and normalization.
+        image_data_generator: Instance of `ImageDataGenerator` to use for
+            random transformations and normalization. If None, no transformations
+            and normalizations are made.
         x_col: Column in dataframe that contains all the filenames (or absolute
             paths, if directory is set to None).
         y_col: Column/s in dataframe that has the target data.
