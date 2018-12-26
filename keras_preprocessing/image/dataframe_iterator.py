@@ -76,13 +76,23 @@ class DataFrameIterator(Iterator):
         drop_duplicates: Boolean, whether to drop duplicate rows based on filename.
     """
 
-    def __init__(self, dataframe, directory, image_data_generator,
-                 x_col="filenames", y_col="class", has_ext=True,
-                 target_size=(256, 256), color_mode='rgb',
-                 classes=None, class_mode='categorical',
-                 batch_size=32, shuffle=True, seed=None,
+    def __init__(self, dataframe,
+                 directory,
+                 image_data_generator=None,
+                 x_col="filenames",
+                 y_col="class",
+                 has_ext=True,
+                 target_size=(256, 256),
+                 color_mode='rgb',
+                 classes=None,
+                 class_mode='categorical',
+                 batch_size=32,
+                 shuffle=True,
+                 seed=None,
                  data_format=None,
-                 save_to_dir=None, save_prefix='', save_format='png',
+                 save_to_dir=None,
+                 save_prefix='',
+                 save_format='png',
                  follow_links=False,
                  subset=None,
                  interpolation='nearest',
@@ -214,9 +224,10 @@ class DataFrameIterator(Iterator):
             # but not PIL images.
             if hasattr(img, 'close'):
                 img.close()
-            params = self.image_data_generator.get_random_transform(x.shape)
-            x = self.image_data_generator.apply_transform(x, params)
-            x = self.image_data_generator.standardize(x)
+            if self.image_data_generator:
+                params = self.image_data_generator.get_random_transform(x.shape)
+                x = self.image_data_generator.apply_transform(x, params)
+                x = self.image_data_generator.standardize(x)
             batch_x[i] = x
         # optionally save augmented images to disk for debugging purposes
         if self.save_to_dir:
