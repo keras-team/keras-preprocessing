@@ -509,12 +509,7 @@ class TestImage(object):
                                                            class_mode="sparse")
         if np.isnan(df_sparse_iterator.classes).any():
             raise ValueError('Invalid values.')
-        df_without_ext = pd.DataFrame({"filename": filenames_without,
-                                       "class": [random.randint(0, 1)
-                                                 for _ in filenames_without]})
-        df_without_ext_iterator = generator.flow_from_dataframe(
-            df_without_ext, str(tmpdir),
-            has_ext=False)
+
         df_regression = pd.DataFrame({"filename": filenames,
                                       "col1": [random.randrange(0, 1)
                                                for _ in filenames],
@@ -540,17 +535,12 @@ class TestImage(object):
         assert len(df_iterator.class_indices) == num_classes
         assert len(df_iterator.classes) == count
         assert set(df_iterator.filenames) == set(filenames)
-        assert len(df_without_ext_iterator.class_indices) == num_classes
-        assert len(df_without_ext_iterator.classes) == count
-        assert set(df_without_ext_iterator.filenames) == set(filenames)
         assert batch_y.shape[1] == 2
         # Test invalid use cases
         with pytest.raises(ValueError):
             generator.flow_from_dataframe(df, str(tmpdir), color_mode='cmyk')
         with pytest.raises(ValueError):
             generator.flow_from_dataframe(df, str(tmpdir), class_mode='output')
-        with pytest.raises(ValueError):
-            generator.flow_from_dataframe(df_without_ext, str(tmpdir))
 
         def preprocessing_function(x):
             """This will fail if not provided by a Numpy array.
@@ -651,9 +641,6 @@ class TestImage(object):
 
         df = pd.DataFrame({"filename": filenames,
                            "class": [random.randint(0, 1) for _ in filenames]})
-        df_without_ext = pd.DataFrame({"filename": filenames_without,
-                                       "class": [random.randint(0, 1)
-                                                 for _ in filenames_without]})
         # create iterator
         generator = image.ImageDataGenerator(validation_split=validation_split)
         df_sparse_iterator = generator.flow_from_dataframe(df,
@@ -674,25 +661,11 @@ class TestImage(object):
                                                        subset='validation')
         assert valid_iterator.samples == count - num_training
 
-        train_iterator_without = generator.flow_from_dataframe(
-            df_without_ext, str(tmpdir),
-            has_ext=False,
-            subset='training')
-        assert train_iterator_without.samples == num_training
-
-        valid_iterator_without = generator.flow_from_dataframe(
-            df_without_ext, str(tmpdir),
-            has_ext=False,
-            subset='validation')
-        assert valid_iterator_without.samples == count - num_training
-
         # check number of classes and images
         assert len(train_iterator.class_indices) == num_classes
         assert len(train_iterator.classes) == num_training
         assert len(set(train_iterator.filenames) &
                    set(filenames)) == num_training
-        intersection = set(train_iterator_without.filenames) & set(filenames)
-        assert len(intersection) == num_training
 
     def test_dataframe_iterator_with_custom_indexed_dataframe(self, tmpdir):
         num_classes = 2
@@ -819,14 +792,6 @@ class TestImage(object):
         df_val_iterator = generator_split.flow_from_dataframe(
             df, None, class_mode=None,
             shuffle=False, subset='validation', batch_size=1)
-
-        # Test invalid use cases
-        with pytest.raises(ValueError):
-            generator.flow_from_dataframe(df, None,
-                                          has_ext=False, class_mode=None)
-        with pytest.raises(ValueError):
-            generator.flow_from_dataframe(df2, None,
-                                          has_ext=False, class_mode='binary')
 
         # Test the number of items in iterators
         assert df_iterator.n == len(file_paths)
