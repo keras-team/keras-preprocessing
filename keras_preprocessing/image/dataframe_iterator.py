@@ -139,23 +139,12 @@ class DataFrameIterator(Iterator):
         self.class_indices = dict(zip(classes, range(len(classes))))
 
         # Second, build an index of the images.
-        self.filenames = []
         self.classes = np.zeros((self.samples,), dtype='int32')
 
-        if self.directory is not None:
-            filenames = _list_valid_filenames_in_directory(
-                directory,
-                self.white_list_formats,
-                None,
-                class_indices=self.class_indices,
-                follow_links=follow_links,
-                df=True)
-        else:
-            filenames = self._list_valid_filepaths(self.white_list_formats)
-        self.df = self.df[self.df[x_col].isin(filenames)]
+        self.df = self._filter_valid_filepaths(self.df)
         if sort:
             self.df.sort_values(by=x_col, inplace=True)
-        self.filenames = list(self.df[x_col])
+        self.filenames = self.df[x_col].tolist()
 
         if self.split:
             num_files = len(self.filenames)
@@ -239,10 +228,18 @@ class DataFrameIterator(Iterator):
             return batch_x
         return batch_x, batch_y
 
-    def _list_valid_filepaths(self, white_list_formats):
-        df_paths = self.df[self.x_col]
-        format_check = df_paths.map(get_extension).isin(white_list_formats)
-        existence_check = df_paths.map(os.path.isfile)
-        valid_filepaths = list(df_paths[np.logical_and(format_check,
-                                                       existence_check)])
-        return valid_filepaths
+    def _filter_valid_filepaths(self, df):
+        """Keep only dataframe rows with valid filenames
+
+        # Arguments
+            df: Pandas dataframe containing filenames in a column
+
+        # Returns
+            absolute paths to image files
+        """
+        filepaths = df[self.x_col].map(
+            lambda fname: os.path.join(self.directory or '', fname)
+        )
+        format_check = filepaths.map(get_extension).isin(self.white_list_formats)
+        existence_check = filepaths.map(os.path.isfile)
+        return df[format_check & existence_check]
