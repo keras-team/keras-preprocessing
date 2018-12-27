@@ -123,8 +123,6 @@ class DataFrameIterator(Iterator):
                              .format(class_mode, self.allowed_class_modes))
         self.class_mode = class_mode
         self.dtype = dtype
-        # First, count the number of samples and classes.
-        self.samples = 0
 
         if not classes:
             classes = []
