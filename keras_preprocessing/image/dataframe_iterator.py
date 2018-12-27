@@ -134,10 +134,6 @@ class DataFrameIterator(Iterator):
                                  ' is either "other" or "input" or None.')
         self.num_classes = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
-
-        # Second, build an index of the images.
-        self.classes = np.zeros((self.samples,), dtype='int32')
-
         self.df = self._filter_valid_filepaths(self.df)
         if sort:
             self.df.sort_values(by=x_col, inplace=True)
