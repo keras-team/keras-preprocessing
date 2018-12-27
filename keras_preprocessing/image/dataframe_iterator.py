@@ -32,8 +32,9 @@ class DataFrameIterator(Iterator):
             all the images are present.
             You could also set it to None if data in x_col column are
             absolute paths.
-        image_data_generator: Instance of `ImageDataGenerator`
-            to use for random transformations and normalization.
+        image_data_generator: Instance of `ImageDataGenerator` to use for
+            random transformations and normalization. If None, no transformations
+            and normalizations are made.
         x_col: Column in dataframe that contains all the filenames (or absolute
             paths, if directory is set to None).
         y_col: Column/s in dataframe that has the target data.
@@ -79,13 +80,23 @@ class DataFrameIterator(Iterator):
         'categorical', 'binary', 'sparse', 'input', 'other', None
     }
 
-    def __init__(self, dataframe, directory, image_data_generator,
-                 x_col="filenames", y_col="class", has_ext=True,
-                 target_size=(256, 256), color_mode='rgb',
-                 classes=None, class_mode='categorical',
-                 batch_size=32, shuffle=True, seed=None,
-                 data_format=None,
-                 save_to_dir=None, save_prefix='', save_format='png',
+    def __init__(self, dataframe,
+                 directory,
+                 image_data_generator=None,
+                 x_col="filename",
+                 y_col="class",
+                 has_ext=True,
+                 target_size=(256, 256),
+                 color_mode='rgb',
+                 classes=None,
+                 class_mode='categorical',
+                 batch_size=32,
+                 shuffle=True,
+                 seed=None,
+                 data_format='channels_last',
+                 save_to_dir=None,
+                 save_prefix='',
+                 save_format='png',
                  follow_links=False,
                  subset=None,
                  interpolation='nearest',
@@ -214,9 +225,10 @@ class DataFrameIterator(Iterator):
             # but not PIL images.
             if hasattr(img, 'close'):
                 img.close()
-            params = self.image_data_generator.get_random_transform(x.shape)
-            x = self.image_data_generator.apply_transform(x, params)
-            x = self.image_data_generator.standardize(x)
+            if self.image_data_generator:
+                params = self.image_data_generator.get_random_transform(x.shape)
+                x = self.image_data_generator.apply_transform(x, params)
+                x = self.image_data_generator.standardize(x)
             batch_x[i] = x
         # optionally save augmented images to disk for debugging purposes
         if self.save_to_dir:
