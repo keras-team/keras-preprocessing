@@ -483,18 +483,23 @@ class TestImage(object):
         # save the images in the tmpdir
         count = 0
         filenames = []
+        filepaths = []
         filenames_without = []
         for test_images in self.all_test_images:
             for im in test_images:
                 filename = "image-{}.png".format(count)
                 filename_without = "image-{}".format(count)
                 filenames.append(filename)
+                filepaths.append(os.path.join(str(tmpdir), filename))
                 filenames_without.append(filename_without)
                 im.save(str(tmpdir / filename))
                 count += 1
 
-        df = pd.DataFrame({"filename": filenames,
-                           "class": [random.randint(0, 1) for _ in filenames]})
+        df = pd.DataFrame({
+            "filename": filenames,
+            "class": [random.randint(0, 1) for _ in filenames],
+            "filepaths": filepaths
+        })
 
         # create iterator
         iterator = image.DataFrameIterator(df, str(tmpdir))
@@ -503,8 +508,8 @@ class TestImage(object):
         assert isinstance(batch[0], np.ndarray)
         assert isinstance(batch[1], np.ndarray)
         generator = image.ImageDataGenerator()
-        df_iterator = generator.flow_from_dataframe(
-            df, str(tmpdir))
+        df_iterator = generator.flow_from_dataframe(df, x_col='filepaths')
+        df_iterator_dir = generator.flow_from_dataframe(df, str(tmpdir))
         df_sparse_iterator = generator.flow_from_dataframe(df, str(tmpdir),
                                                            class_mode="sparse")
         if np.isnan(df_sparse_iterator.classes).any():
@@ -534,7 +539,13 @@ class TestImage(object):
         # check number of classes and images
         assert len(df_iterator.class_indices) == num_classes
         assert len(df_iterator.classes) == count
-        assert set(df_iterator.filenames) == set(filenames)
+        assert set(df_iterator.filenames) == set(filepaths)
+        assert len(df_iterator_dir.class_indices) == num_classes
+        assert len(df_iterator_dir.classes) == count
+        assert set(df_iterator_dir.filenames) == set(filenames)
+        assert len(df_without_ext_iterator.class_indices) == num_classes
+        assert len(df_without_ext_iterator.classes) == count
+        assert set(df_without_ext_iterator.filenames) == set(filenames)
         assert batch_y.shape[1] == 2
         # Test invalid use cases
         with pytest.raises(ValueError):
