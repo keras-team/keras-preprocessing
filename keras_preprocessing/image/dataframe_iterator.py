@@ -97,7 +97,6 @@ class DataFrameIterator(Iterator):
                  save_to_dir=None,
                  save_prefix='',
                  save_format='png',
-                 follow_links=False,
                  subset=None,
                  interpolation='nearest',
                  dtype='float32',
