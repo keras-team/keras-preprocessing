@@ -21,17 +21,12 @@ class DataFrameIterator(Iterator):
 
     # Arguments
         dataframe: Pandas dataframe containing the filepaths relative to
-            `directory` of the images in a column and classes in another
-            column/s that can be fed as raw target data.
-        directory: Path to the directory to read images from.
-            Each subdirectory in this directory will be
-            considered to contain images from one class,
-            or alternatively you could specify class subdirectories
-            via the `classes` argument.
-            if used with dataframe,this will be the directory to under which
-            all the images are present.
-            You could also set it to None if data in x_col column are
-            absolute paths.
+            `directory` or absolute paths if `directory` is None of the images
+            in a column and classes in another column/s that can be fed as raw
+            target data.
+        directory: Path to the directory to read images from. Directory to
+            under which all the images are present. If None, data in x_col column
+            should be absolute paths.
         image_data_generator: Instance of `ImageDataGenerator` to use for
             random transformations and normalization. If None, no transformations
             and normalizations are made.
@@ -79,9 +74,14 @@ class DataFrameIterator(Iterator):
         'categorical', 'binary', 'sparse', 'input', 'other', None
     }
 
+<<<<<<< HEAD
     def __init__(self,
                  dataframe,
                  directory,
+=======
+    def __init__(self, dataframe,
+                 directory=None,
+>>>>>>> Set default directory parameter as None
                  image_data_generator=None,
                  x_col="filename",
                  y_col="class",
