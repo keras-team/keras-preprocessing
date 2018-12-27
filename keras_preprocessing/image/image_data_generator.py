@@ -541,7 +541,7 @@ class ImageDataGenerator(object):
 
     def flow_from_dataframe(self,
                             dataframe,
-                            directory,
+                            directory=None,
                             x_col="filename",
                             y_col="class",
                             target_size=(256, 256),
@@ -566,12 +566,13 @@ class ImageDataGenerator(object):
                                     http://bit.ly/keras_flow_from_dataframe).
 
         # Arguments
-            dataframe: Pandas dataframe containing the filenames
-                (or paths relative to `directory`) of the images in a column and
-                classes in another column/s that can be fed as raw target data.
-            directory: string, path to the target directory that contains all
-                the images mapped in the dataframe.
-                None if x_col column contains absolute paths.
+            dataframe: Pandas dataframe containing the filepaths relative to
+                `directory` or absolute paths if `directory` is None of the images
+                in a column and classes in another column/s that can be fed as raw
+                target data.
+            directory: Path to the directory to read images from. Directory to
+                under which all the images are present. If None, data in
+                x_col column should be absolute paths.
             x_col: string, column in the dataframe that contains
                 the filenames of the target images.
             y_col: string or list of strings,columns in
