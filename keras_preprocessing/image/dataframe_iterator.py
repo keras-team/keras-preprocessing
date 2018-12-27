@@ -84,7 +84,7 @@ class DataFrameIterator(Iterator):
                  dataframe,
                  directory,
                  image_data_generator=None,
-                 x_col="filenames",
+                 x_col="filename",
                  y_col="class",
                  has_ext=True,
                  target_size=(256, 256),
