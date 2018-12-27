@@ -75,6 +75,9 @@ class DataFrameIterator(Iterator):
         sort: Boolean, whether to sort dataframe by filename (before shuffle).
         drop_duplicates: Boolean, whether to drop duplicate rows based on filename.
     """
+    allowed_class_modes = {
+        'categorical', 'binary', 'sparse', 'input', 'other', None
+    }
 
     def __init__(self, dataframe, directory, image_data_generator,
                  x_col="filenames", y_col="class", has_ext=True,
@@ -105,12 +108,9 @@ class DataFrameIterator(Iterator):
         self.df[x_col] = self.df[x_col].astype(str)
         self.directory = directory
         self.classes = classes
-        if class_mode not in {'categorical', 'binary', 'sparse',
-                              'input', 'other', None}:
-            raise ValueError('Invalid class_mode:', class_mode,
-                             '; expected one of "categorical", '
-                             '"binary", "sparse", "input"'
-                             '"other" or None.')
+        if class_mode not in self.allowed_class_modes:
+            raise ValueError('Invalid class_mode: {}; expected one of: {}'
+                             .format(class_mode, self.allowed_class_modes))
         self.class_mode = class_mode
         self.dtype = dtype
         # First, count the number of samples and classes.
