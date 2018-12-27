@@ -143,14 +143,13 @@ class DataFrameIterator(Iterator):
         self.df = self._filter_valid_filepaths(self.df)
         if sort:
             self.df.sort_values(by=x_col, inplace=True)
-        self.filenames = self.df[x_col].tolist()
 
         if self.split:
-            num_files = len(self.filenames)
+            num_files = len(self.df)
             start = int(self.split[0] * num_files)
             stop = int(self.split[1] * num_files)
             self.df = self.df.iloc[start: stop, :]
-            self.filenames = self.filenames[start: stop]
+        self.filenames = self.df[x_col].tolist()
 
         if class_mode not in ["other", "input", None]:
             classes = self.df[y_col].values
