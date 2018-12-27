@@ -115,7 +115,6 @@ class DataFrameIterator(Iterator):
         if drop_duplicates:
             self.df.drop_duplicates(x_col, inplace=True)
         self.x_col = x_col
-        self.df[x_col] = self.df[x_col].astype(str)
         self.directory = directory
         self.classes = classes
         if class_mode not in self.allowed_class_modes:
