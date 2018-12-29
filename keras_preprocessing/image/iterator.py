@@ -13,6 +13,10 @@ try:
 except ImportError:
     IteratorType = object
 
+from .utils import (array_to_img,
+                    img_to_array,
+                    load_img)
+
 
 class Iterator(IteratorType):
     """Base class for image data iterators.
@@ -167,3 +171,65 @@ class Iterator(IteratorType):
         # The transformation of images is not under thread lock
         # so it can be done in parallel
         return self._get_batches_of_transformed_samples(index_array)
+
+    def _get_batches_of_transformed_samples(self, index_array):
+        batch_x = np.zeros(
+            (len(index_array),) + self.image_shape,
+            dtype=self.dtype)
+        # build batch of image data
+        fielpaths = self.filepaths
+        for i, j in enumerate(index_array):
+            img = load_img(filepaths[j],
+                           color_mode=self.color_mode,
+                           target_size=self.target_size,
+                           interpolation=self.interpolation)
+            x = img_to_array(img, data_format=self.data_format)
+            # Pillow images should be closed after `load_img`,
+            # but not PIL images.
+            if hasattr(img, 'close'):
+                img.close()
+            if self.image_data_generator:
+                params = self.image_data_generator.get_random_transform(x.shape)
+                x = self.image_data_generator.apply_transform(x, params)
+                x = self.image_data_generator.standardize(x)
+            batch_x[i] = x
+        # optionally save augmented images to disk for debugging purposes
+        if self.save_to_dir:
+            for i, j in enumerate(index_array):
+                img = array_to_img(batch_x[i], self.data_format, scale=True)
+                fname = '{prefix}_{index}_{hash}.{format}'.format(
+                    prefix=self.save_prefix,
+                    index=j,
+                    hash=np.random.randint(1e7),
+                    format=self.save_format)
+                img.save(os.path.join(self.save_to_dir, fname))
+        # build batch of labels
+        if self.class_mode == 'input':
+            batch_y = batch_x.copy()
+        elif self.class_mode == 'sparse':
+            batch_y = self.classes[index_array]
+        elif self.class_mode == 'binary':
+            batch_y = self.classes[index_array].astype(self.dtype)
+        elif self.class_mode == 'categorical':
+            batch_y = np.zeros(
+                (len(batch_x), len(set(self.labels))),
+                dtype=self.dtype)
+            for i, label in enumerate(self.labels[index_array]):
+                batch_y[i, label] = 1.
+        elif self.class_mode == 'other':
+            batch_y = self.data[index_array]
+        else:
+            return batch_x
+        return batch_x, batch_y
+
+    @property
+    def filepaths(self):
+        raise NotImplementedError('filepaths property has not been implemented.')
+
+    @property
+    def labels(self):
+        raise NotImplementedError('labels property has not been implemented.')
+
+    @property
+    def data(self):
+        raise NotImplementedError('data property has not been implemented.')
