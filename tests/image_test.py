@@ -1316,6 +1316,45 @@ class TestImage(object):
             for label in output:
                 assert label in {0, 1}
 
+    def test_dictionary_iterator_class_mode_categorical_multi_label(self, tmpdir):
+        root, filenames = self.write_images_for_dictionary_iterator(str(tmpdir))
+        label_options = ['a', 'b', ['a'], ['b'], ['a', 'b'], ['b', 'a']]
+        dictionary = dict(zip(
+            filenames,
+            [random.choice(label_options) for _ in filenames[:-1]] + ['b', 'a']
+        ))
+        generator = image.ImageDataGenerator()
+        dict_iterator = generator.flow_from_dictionary(dictionary, root)
+        batch_x, batch_y = next(dict_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, np.ndarray)
+        assert batch_y.shape == (len(batch_x), 2)
+        for labels in batch_y:
+            assert all(l in {0, 1} for l in labels)
+
+        print(filenames)
+        dictionary = dict(zip(
+            filenames,
+            [['b', 'a']] + ['b'] + [['a']] +
+            [random.choice(label_options) for _ in filenames[:-2]]
+        ))
+        generator = image.ImageDataGenerator()
+        dict_iterator = generator.flow_from_dictionary(dictionary, root,
+                                                       shuffle=False)
+        print(dict_iterator.filepaths)
+        print(dict_iterator.labels)
+        batch_x, batch_y = next(dict_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, np.ndarray)
+        assert batch_y.shape == (len(batch_x), 2)
+        for labels in batch_y:
+            assert all(l in {0, 1} for l in labels)
+        assert (batch_y[0] == np.array([1, 1])).all()
+        assert (batch_y[1] == np.array([0, 1])).all()
+        assert (batch_y[2] == np.array([1, 0])).all()
+
     @pytest.mark.parametrize('validation_split,num_training', [
         (0.25, 18),
         (0.50, 12),

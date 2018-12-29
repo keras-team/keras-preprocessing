@@ -191,7 +191,6 @@ class DictionaryIterator(Iterator):
                 batch_y[i, self.labels[n_observation]] = 1.
         elif self.class_mode == 'multi-output':
             batch_y = list(np.array(self.labels)[index_array].T)
-            print(batch_y)
         else:
             return batch_x
         return batch_x, batch_y
