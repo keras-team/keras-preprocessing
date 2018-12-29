@@ -149,17 +149,6 @@ class Iterator(IteratorType):
     def __next__(self, *args, **kwargs):
         return self.next(*args, **kwargs)
 
-    def _get_batches_of_transformed_samples(self, index_array):
-        """Gets a batch of transformed samples.
-
-        # Arguments
-            index_array: Array of sample indices to include in batch.
-
-        # Returns
-            A batch of transformed samples.
-        """
-        raise NotImplementedError
-
     def next(self):
         """For python 2.x.
 
@@ -173,6 +162,14 @@ class Iterator(IteratorType):
         return self._get_batches_of_transformed_samples(index_array)
 
     def _get_batches_of_transformed_samples(self, index_array):
+        """Gets a batch of transformed samples.
+
+        # Arguments
+            index_array: Array of sample indices to include in batch.
+
+        # Returns
+            A batch of transformed samples.
+        """
         batch_x = np.zeros(
             (len(index_array),) + self.image_shape,
             dtype=self.dtype)
