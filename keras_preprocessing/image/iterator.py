@@ -174,7 +174,7 @@ class Iterator(IteratorType):
             (len(index_array),) + self.image_shape,
             dtype=self.dtype)
         # build batch of image data
-        fielpaths = self.filepaths
+        filepaths = self.filepaths
         for i, j in enumerate(index_array):
             img = load_img(filepaths[j],
                            color_mode=self.color_mode,
@@ -221,12 +221,21 @@ class Iterator(IteratorType):
 
     @property
     def filepaths(self):
-        raise NotImplementedError('filepaths property has not been implemented.')
+        raise NotImplementedError(
+            '`filepaths` property method has not been implemented in {}.'
+            .format(type(self).__name__)
+        )
 
     @property
     def labels(self):
-        raise NotImplementedError('labels property has not been implemented.')
+        raise NotImplementedError(
+            '`labels` property method has not been implemented in {}.'
+            .format(type(self).__name__)
+        )
 
     @property
     def data(self):
-        raise NotImplementedError('data property has not been implemented.')
+        raise NotImplementedError(
+            '`data` property method has not been implemented in {}.'
+            .format(type(self).__name__)
+        )
