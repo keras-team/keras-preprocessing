@@ -1296,6 +1296,26 @@ class TestImage(object):
         output_img[0][0][0] += 1
         assert(input_img[0][0][0] != output_img[0][0][0])
 
+    def test_dictionary_iterator_class_mode_multi_output(self, tmpdir):
+        root, filenames = self.write_images_for_dictionary_iterator(str(tmpdir))
+        dictionary = dict(zip(
+            filenames,
+            [[random.randint(10, 11), random.randint(10, 11)] for _ in filenames]
+        ))
+        generator = image.ImageDataGenerator()
+        dict_iterator = generator.flow_from_dictionary(dictionary, root,
+                                                       class_mode='multi-output')
+        batch_x, batch_y = next(dict_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, list)
+        assert len(batch_y) == 2
+        for output in batch_y:
+            assert isinstance(output, np.ndarray)
+            assert len(output) == len(batch_x)
+            for label in output:
+                assert label in {0, 1}
+
     @pytest.mark.parametrize('validation_split,num_training', [
         (0.25, 18),
         (0.50, 12),
