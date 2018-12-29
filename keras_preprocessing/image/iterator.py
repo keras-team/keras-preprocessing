@@ -174,6 +174,7 @@ class Iterator(IteratorType):
             (len(index_array),) + self.image_shape,
             dtype=self.dtype)
         # build batch of image data
+        # self.filepaths is dynamic, is better to call it once outside the loop
         filepaths = self.filepaths
         for i, j in enumerate(index_array):
             img = load_img(filepaths[j],
@@ -221,6 +222,7 @@ class Iterator(IteratorType):
 
     @property
     def filepaths(self):
+        """List of absolute paths to image files"""
         raise NotImplementedError(
             '`filepaths` property method has not been implemented in {}.'
             .format(type(self).__name__)
@@ -228,6 +230,7 @@ class Iterator(IteratorType):
 
     @property
     def labels(self):
+        """Class labels of every observation"""
         raise NotImplementedError(
             '`labels` property method has not been implemented in {}.'
             .format(type(self).__name__)
