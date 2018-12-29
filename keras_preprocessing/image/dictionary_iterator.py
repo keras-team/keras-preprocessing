@@ -56,7 +56,9 @@ class DictionaryIterator(Iterator):
             By default, "nearest" is used.
         dtype: Dtype to use for generated arrays.
     """
-    allowed_class_modes = {'categorical', 'binary', 'sparse', 'input', None}
+    allowed_class_modes = {
+        'categorical', 'binary', 'multi-output', 'sparse', 'input', None
+    }
 
     def __init__(self, dictionary, image_data_generator,
                  directory=None,
@@ -116,7 +118,7 @@ class DictionaryIterator(Iterator):
             classes = set()
             for v in dictionary.values():
                 if isinstance(v, (list, tuple)):
-                    classes.union(v)
+                    classes.update(v)
                 else:
                     classes.add(v)
         return dictionary, classes
@@ -144,7 +146,7 @@ class DictionaryIterator(Iterator):
                     os.path.isfile(filepath)):
                 filepaths.append(filepath)
                 if isinstance(label, (list, tuple)):
-                    labels.extend(self.class_indices[lbl] for lbl in label)
+                    labels.append([self.class_indices[lbl] for lbl in label])
                 else:
                     labels.append(self.class_indices[label])
         return filepaths, labels
@@ -187,6 +189,9 @@ class DictionaryIterator(Iterator):
                                dtype=self.dtype)
             for i, n_observation in enumerate(index_array):
                 batch_y[i, self.labels[n_observation]] = 1.
+        elif self.class_mode == 'multi-output':
+            batch_y = list(np.array(self.labels)[index_array].T)
+            print(batch_y)
         else:
             return batch_x
         return batch_x, batch_y
