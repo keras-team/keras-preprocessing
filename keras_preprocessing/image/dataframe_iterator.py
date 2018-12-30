@@ -24,7 +24,7 @@ class DataFrameIterator(Iterator):
             `directory` or absolute paths if `directory` is None of the images
             in a column and classes in another column/s that can be fed as raw
             target data.
-        directory: Path to the directory to read images from. Directory to
+        directory: string, path to the directory to read images from. Directory to
             under which all the images are present. If None, data in x_col column
             should be absolute paths.
         image_data_generator: Instance of `ImageDataGenerator` to use for
@@ -74,14 +74,9 @@ class DataFrameIterator(Iterator):
         'categorical', 'binary', 'sparse', 'input', 'other', None
     }
 
-<<<<<<< HEAD
     def __init__(self,
                  dataframe,
-                 directory,
-=======
-    def __init__(self, dataframe,
                  directory=None,
->>>>>>> Set default directory parameter as None
                  image_data_generator=None,
                  x_col="filename",
                  y_col="class",

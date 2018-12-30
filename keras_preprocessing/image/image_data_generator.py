@@ -449,7 +449,7 @@ class ImageDataGenerator(object):
         """Takes the path to a directory & generates batches of augmented data.
 
         # Arguments
-            directory: Path to the target directory.
+            directory: string, path to the target directory.
                 It should contain one subdirectory per class.
                 Any PNG, JPG, BMP, PPM or TIF images
                 inside each of the subdirectories directory tree
@@ -566,13 +566,9 @@ class ImageDataGenerator(object):
                                     http://bit.ly/keras_flow_from_dataframe).
 
         # Arguments
-            dataframe: Pandas dataframe containing the filepaths relative to
-                `directory` or absolute paths if `directory` is None of the images
-                in a column and classes in another column/s that can be fed as raw
-                target data.
-            directory: Path to the directory to read images from. Directory to
-                under which all the images are present. If None, data in
-                x_col column should be absolute paths.
+            directory: string, path to the directory to read images from.
+                Directory to under which all the images are present.
+                If None, data in x_col column should be absolute paths.
             x_col: string, column in the dataframe that contains
                 the filenames of the target images.
             y_col: string or list of strings,columns in
