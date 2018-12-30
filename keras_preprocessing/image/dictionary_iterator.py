@@ -121,7 +121,7 @@ class DictionaryIterator(Iterator):
                     classes.update(v)
                 else:
                     classes.add(v)
-        return dictionary, classes
+        return dictionary, sorted(classes)
 
     def _list_filepaths_and_labels(self, dictionary, directory):
         """List valid filepaths and their respective class labels
