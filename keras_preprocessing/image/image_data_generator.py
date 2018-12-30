@@ -420,7 +420,9 @@ class ImageDataGenerator(object):
                 If `y` is None, only the numpy array `x` is returned.
         """
         return NumpyArrayIterator(
-            x, y, self,
+            x,
+            y,
+            self,
             batch_size=batch_size,
             shuffle=shuffle,
             sample_weight=sample_weight,
@@ -432,7 +434,8 @@ class ImageDataGenerator(object):
             subset=subset
         )
 
-    def flow_from_directory(self, directory,
+    def flow_from_directory(self,
+                            directory,
                             target_size=(256, 256),
                             color_mode='rgb',
                             classes=None,
@@ -539,7 +542,9 @@ class ImageDataGenerator(object):
             interpolation=interpolation
         )
 
-    def flow_from_dataframe(self, dataframe, directory,
+    def flow_from_dataframe(self,
+                            dataframe,
+                            directory,
                             x_col="filename",
                             y_col="class",
                             has_ext=True,
