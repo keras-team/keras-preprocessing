@@ -19,6 +19,7 @@ except ImportError:
     scipy = None
 
 from .dataframe_iterator import DataFrameIterator
+from .dictionary_iterator import DictionaryIterator
 from .directory_iterator import DirectoryIterator
 from .numpy_array_iterator import NumpyArrayIterator
 from .affine_transformations import (apply_affine_transform,
@@ -654,6 +655,94 @@ class ImageDataGenerator(object):
             interpolation=interpolation,
             sort=sort,
             drop_duplicates=drop_duplicates
+        )
+
+    def flow_from_dictionary(self,
+                             dictionary,
+                             directory=None,
+                             target_size=(256, 256),
+                             color_mode='rgb',
+                             classes=None,
+                             class_mode='categorical',
+                             batch_size=32,
+                             shuffle=True,
+                             seed=None,
+                             save_to_dir=None,
+                             save_prefix='',
+                             save_format='png',
+                             subset=None,
+                             interpolation='nearest'):
+        """Takes a dictionary with image filenames and class labels and generates
+        batches of augmented data.
+
+        # Arguments
+            dictionary: Filenames or filepaths as keys and class labels as values.
+            directory: string, filenames in `directory` will be looked in this
+            directory if provided. Only PNG, JPG, JPEG, BMP, PPM, TIF or TIFF
+            extensions will be considered.
+            target_size: Tuple of integers `(height, width)`. Default: `(256, 256)`.
+                The dimensions to which all images found will be resized.
+            color_mode: One of "grayscale", "rgb", "rgba". Default: "rgb".
+                Whether the images will be converted to have 1, 3, or 4 channels.
+            classes: Optional list of classes to use  (e.g. `['dogs', 'cats']`).
+                If not provided, the list of classes will be automatically
+                created from the dictionary values. The dictionary containing
+                the mapping from class names to class indices can be obtained
+                via the attribute `class_indices`.
+            class_mode: One of "categorical", "binary", "sparse", "input", or None.
+                Default: "categorical".
+                Determines the type of target that is returned:
+                - "categorical": 2D one-hot encoded labels,
+                - "binary": 1D binary labels,
+                  "sparse": 1D integer labels,
+                - "input": identical to input images (mainly used to work
+                    with autoencoders).
+                - None: no labels are returned (the generator will only
+                    yield batches of image data, which is useful to use with
+                    `model.predict_generator()`,
+                    `model.evaluate_generator()`, etc.).
+            batch_size: Size of the batches of data (default: 32).
+            shuffle: Whether to shuffle the data (default: True)
+            seed: Optional random seed for shuffling and transformations.
+            save_to_dir: None or str (default: None).
+                This allows you to optionally specify a directory to which to
+                save the augmented pictures being generated. This is useful
+                for visualizing the random transformations being applied, for
+                debugging purposes.
+            save_format: One of "png", "jpeg" (if `save_to_dir` is set).
+                Default: "png".
+            subset: Subset of data (`"training"` or `"validation"`) if
+                validation_split` is set in `ImageDataGenerator`.
+            interpolation: Interpolation method used to resample the image
+                if the target size is different from that of the loaded image.
+                Supported methods are `"nearest"`, `"bilinear"` and `"bicubic"`.
+                If PIL version 1.1.3 or newer, `"lanczos"` is also supported.
+                If PIL version 3.4.0 or newer,`"box"` and `"hamming"` are
+                    also supported.
+                By default, `"nearest"` is used.
+        # Returns
+            A `DirectoryIterator` yielding tuples of `(x, y)` where `x` is a
+            numpy array containing a batch of images with shape
+            `(batch_size, height, width, channels)` and `y` is a numpy array
+            of corresponding targets.
+        """
+        return DictionaryIterator(
+            dictionary,
+            self,
+            directory=directory,
+            target_size=target_size,
+            color_mode=color_mode,
+            classes=classes,
+            class_mode=class_mode,
+            data_format=self.data_format,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            seed=seed,
+            save_to_dir=save_to_dir,
+            save_prefix=save_prefix,
+            save_format=save_format,
+            subset=subset,
+            interpolation=interpolation
         )
 
     def standardize(self, x):
