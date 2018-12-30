@@ -8,6 +8,8 @@ import keras
 import pandas as pd
 import random
 
+from collections import OrderedDict
+
 # TODO: remove the 3 lines below once the Keras release
 # is configured to use keras_preprocessing
 import keras_preprocessing
@@ -1333,7 +1335,9 @@ class TestImage(object):
         for labels in batch_y:
             assert all(l in {0, 1} for l in labels)
 
-        dictionary = dict(zip(
+        # use OrderedDict to mantain order in python 2.7 and allow for checks
+        # on first 3 batches
+        dictionary = OrderedDict(zip(
             filenames,
             [['b', 'a']] + ['b'] + [['c']] +
             [random.choice(label_options) for _ in filenames[:-2]]
