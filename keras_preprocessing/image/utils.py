@@ -160,7 +160,7 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
 
 
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,
-                                       class_indices, follow_links, df=False):
+                                       class_indices, follow_links):
     """Lists paths of files in `subdir` with extensions in `white_list_formats`.
 
     # Arguments
@@ -175,7 +175,6 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             of images in each directory.
         class_indices: dictionary mapping a class name to its index.
         follow_links: boolean.
-        df: boolean
 
     # Returns
         classes: a list of class indices(returns only if `df=False`)
@@ -199,13 +198,6 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     else:
         valid_files = _iter_valid_files(
             directory, white_list_formats, follow_links)
-    if df:
-        filenames = []
-        for root, fname in valid_files:
-            absolute_path = os.path.join(root, fname)
-            relative_path = os.path.relpath(absolute_path, directory)
-            filenames.append(relative_path)
-        return filenames
     classes = []
     filenames = []
     for root, fname in valid_files:
