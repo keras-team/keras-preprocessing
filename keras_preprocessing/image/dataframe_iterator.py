@@ -80,7 +80,8 @@ class DataFrameIterator(Iterator):
         'categorical', 'binary', 'sparse', 'input', 'other', None
     }
 
-    def __init__(self, dataframe,
+    def __init__(self,
+                 dataframe,
                  directory,
                  image_data_generator=None,
                  x_col="filename",

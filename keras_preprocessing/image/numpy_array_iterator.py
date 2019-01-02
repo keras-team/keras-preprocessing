@@ -42,11 +42,20 @@ class NumpyArrayIterator(Iterator):
         dtype: Dtype to use for the generated arrays.
     """
 
-    def __init__(self, x, y, image_data_generator,
-                 batch_size=32, shuffle=False, sample_weight=None,
-                 seed=None, data_format='channels_last',
-                 save_to_dir=None, save_prefix='', save_format='png',
-                 subset=None, dtype='float32'):
+    def __init__(self,
+                 x,
+                 y,
+                 image_data_generator,
+                 batch_size=32,
+                 shuffle=False,
+                 sample_weight=None,
+                 seed=None,
+                 data_format='channels_last',
+                 save_to_dir=None,
+                 save_prefix='',
+                 save_format='png',
+                 subset=None,
+                 dtype='float32'):
         self.dtype = dtype
         if (type(x) is tuple) or (type(x) is list):
             if type(x[1]) is not list:
