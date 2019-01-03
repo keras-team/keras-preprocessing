@@ -536,6 +536,11 @@ class TestImage(object):
         assert len(df_iterator.classes) == count
         assert set(df_iterator.filenames) == set(filenames)
         assert batch_y.shape[1] == 2
+        # test shuffle=False
+        _, batch_y = next(generator.flow_from_dataframe(df, str(tmpdir),
+                                                        shuffle=False,
+                                                        class_mode="sparse"))
+        assert (batch_y == df['class'].tolist()[:len(batch_y)]).all()
         # Test invalid use cases
         with pytest.raises(ValueError):
             generator.flow_from_dataframe(df, str(tmpdir), color_mode='cmyk')
