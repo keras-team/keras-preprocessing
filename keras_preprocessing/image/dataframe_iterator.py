@@ -20,9 +20,9 @@ class DataFrameIterator(Iterator):
         through a dataframe.
 
     # Arguments
-        dataframe: Pandas dataframe containing the filenames
-            (or paths relative to `directory`) of the images in a column and
-            classes in another column/s that can be fed as raw target data.
+        dataframe: Pandas dataframe containing the filepaths relative to
+            `directory` of the images in a column and classes in another
+            column/s that can be fed as raw target data.
         directory: Path to the directory to read images from.
             Each subdirectory in this directory will be
             considered to contain images from one class,
@@ -38,7 +38,6 @@ class DataFrameIterator(Iterator):
         x_col: Column in dataframe that contains all the filenames (or absolute
             paths, if directory is set to None).
         y_col: Column/s in dataframe that has the target data.
-        has_ext: bool, Whether the filenames in x_col has extensions or not.
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
             Color mode to read images.
@@ -86,7 +85,6 @@ class DataFrameIterator(Iterator):
                  image_data_generator=None,
                  x_col="filename",
                  y_col="class",
-                 has_ext=True,
                  target_size=(256, 256),
                  color_mode='rgb',
                  classes=None,
@@ -98,7 +96,6 @@ class DataFrameIterator(Iterator):
                  save_to_dir=None,
                  save_prefix='',
                  save_format='png',
-                 follow_links=False,
                  subset=None,
                  interpolation='nearest',
                  dtype='float32',
@@ -117,7 +114,6 @@ class DataFrameIterator(Iterator):
         if drop_duplicates:
             self.df.drop_duplicates(x_col, inplace=True)
         self.x_col = x_col
-        self.df[x_col] = self.df[x_col].astype(str)
         self.directory = directory
         self.classes = classes
         if class_mode not in self.allowed_class_modes:
@@ -125,8 +121,6 @@ class DataFrameIterator(Iterator):
                              .format(class_mode, self.allowed_class_modes))
         self.class_mode = class_mode
         self.dtype = dtype
-        # First, count the number of samples and classes.
-        self.samples = 0
 
         if not classes:
             classes = []
@@ -138,52 +132,16 @@ class DataFrameIterator(Iterator):
                                  ' is either "other" or "input" or None.')
         self.num_classes = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
-
-        # Second, build an index of the images.
-        self.filenames = []
-        self.classes = np.zeros((self.samples,), dtype='int32')
-
-        if self.directory is not None:
-            filenames = _list_valid_filenames_in_directory(
-                directory,
-                self.white_list_formats,
-                None,
-                class_indices=self.class_indices,
-                follow_links=follow_links,
-                df=True)
-        else:
-            if not has_ext:
-                raise ValueError('has_ext cannot be set to False'
-                                 ' if directory is None.')
-            filenames = self._list_valid_filepaths(self.white_list_formats)
-
-        if has_ext:
-            ext_exist = False
-            if get_extension(self.df[x_col].values[0]) in self.white_list_formats:
-                ext_exist = True
-            if not ext_exist:
-                raise ValueError('has_ext is set to True but'
-                                 ' extension not found in x_col')
-            self.df = self.df[self.df[x_col].isin(filenames)]
-            if sort:
-                self.df.sort_values(by=x_col, inplace=True)
-            self.filenames = list(self.df[x_col])
-        else:
-            without_ext_with = {f[:-1 * (len(f.split(".")[-1]) + 1)]: f
-                                for f in filenames}
-            filenames_without_ext = [f[:-1 * (len(f.split(".")[-1]) + 1)]
-                                     for f in filenames]
-            self.df = self.df[self.df[x_col].isin(filenames_without_ext)]
-            if sort:
-                self.df.sort_values(by=x_col, inplace=True)
-            self.filenames = [without_ext_with[f] for f in list(self.df[x_col])]
+        self.df = self._filter_valid_filepaths(self.df)
+        if sort:
+            self.df.sort_values(by=x_col, inplace=True)
 
         if self.split:
-            num_files = len(self.filenames)
+            num_files = len(self.df)
             start = int(self.split[0] * num_files)
             stop = int(self.split[1] * num_files)
             self.df = self.df.iloc[start: stop, :]
-            self.filenames = self.filenames[start: stop]
+        self.filenames = self.df[x_col].tolist()
 
         if class_mode not in ["other", "input", None]:
             classes = self.df[y_col].values
@@ -260,10 +218,18 @@ class DataFrameIterator(Iterator):
             return batch_x
         return batch_x, batch_y
 
-    def _list_valid_filepaths(self, white_list_formats):
-        df_paths = self.df[self.x_col]
-        format_check = df_paths.map(get_extension).isin(white_list_formats)
-        existence_check = df_paths.map(os.path.isfile)
-        valid_filepaths = list(df_paths[np.logical_and(format_check,
-                                                       existence_check)])
-        return valid_filepaths
+    def _filter_valid_filepaths(self, df):
+        """Keep only dataframe rows with valid filenames
+
+        # Arguments
+            df: Pandas dataframe containing filenames in a column
+
+        # Returns
+            absolute paths to image files
+        """
+        filepaths = df[self.x_col].map(
+            lambda fname: os.path.join(self.directory or '', fname)
+        )
+        format_check = filepaths.map(get_extension).isin(self.white_list_formats)
+        existence_check = filepaths.map(os.path.isfile)
+        return df[format_check & existence_check]

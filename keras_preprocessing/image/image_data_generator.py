@@ -208,8 +208,7 @@ class ImageDataGenerator(object):
     ```
 
     Example of using ```.flow_from_dataframe(dataframe, directory,
-                                            x_col, y_col,
-                                            has_ext)```:
+                                            x_col, y_col)```:
 
     ```python
 
@@ -229,7 +228,6 @@ class ImageDataGenerator(object):
             directory='data/train',
             x_col="filename",
             y_col="class",
-            has_ext=True,
             target_size=(150, 150),
             batch_size=32,
             class_mode='binary')
@@ -239,7 +237,6 @@ class ImageDataGenerator(object):
             directory='data/validation',
             x_col="filename",
             y_col="class",
-            has_ext=True,
             target_size=(150, 150),
             batch_size=32,
             class_mode='binary')
@@ -547,7 +544,6 @@ class ImageDataGenerator(object):
                             directory,
                             x_col="filename",
                             y_col="class",
-                            has_ext=True,
                             target_size=(256, 256),
                             color_mode='rgb',
                             classes=None,
@@ -561,7 +557,8 @@ class ImageDataGenerator(object):
                             subset=None,
                             interpolation='nearest',
                             sort=True,
-                            drop_duplicates=True):
+                            drop_duplicates=True,
+                            **kwargs):
         """Takes the dataframe and the path to a directory
          and generates batches of augmented/normalized data.
 
@@ -579,8 +576,6 @@ class ImageDataGenerator(object):
                 the filenames of the target images.
             y_col: string or list of strings,columns in
                 the dataframe that will be the target data.
-            has_ext: bool, True if filenames in dataframe[x_col]
-                has filename extensions,else False.
             target_size: tuple of integers `(height, width)`, default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
             color_mode: one of "grayscale", "rgb". Default: "rgb".
@@ -634,14 +629,16 @@ class ImageDataGenerator(object):
             of images with shape `(batch_size, *target_size, channels)`
             and `y` is a numpy array of corresponding labels.
         """
-
+        if 'has_ext' in kwargs:
+            warnings.warn('has_ext is deprecated, filenames in the dataframe have '
+                          'to match the exact filenames in disk.',
+                          DeprecationWarning)
         return DataFrameIterator(
             dataframe,
             directory,
             self,
             x_col=x_col,
             y_col=y_col,
-            has_ext=has_ext,
             target_size=target_size,
             color_mode=color_mode,
             classes=classes,
