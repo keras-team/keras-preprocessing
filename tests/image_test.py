@@ -541,6 +541,10 @@ class TestImage(object):
             generator.flow_from_dataframe(df, str(tmpdir), color_mode='cmyk')
         with pytest.raises(ValueError):
             generator.flow_from_dataframe(df, str(tmpdir), class_mode='output')
+        with pytest.warns(DeprecationWarning):
+            generator.flow_from_dataframe(df, str(tmpdir), has_ext=True)
+        with pytest.warns(DeprecationWarning):
+            generator.flow_from_dataframe(df, str(tmpdir), has_ext=False)
 
         def preprocessing_function(x):
             """This will fail if not provided by a Numpy array.
@@ -572,7 +576,7 @@ class TestImage(object):
 
     def test_valid_args(self):
         with pytest.raises(ValueError):
-            dt = image.ImageDataGenerator(brightness_range=0.1)
+            image.ImageDataGenerator(brightness_range=0.1)
 
     def test_dataframe_iterator_class_mode_input(self, tmpdir):
         # save the images in the paths

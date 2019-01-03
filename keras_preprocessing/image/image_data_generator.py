@@ -544,7 +544,6 @@ class ImageDataGenerator(object):
                             directory,
                             x_col="filename",
                             y_col="class",
-                            has_ext=True,
                             target_size=(256, 256),
                             color_mode='rgb',
                             classes=None,
@@ -558,7 +557,8 @@ class ImageDataGenerator(object):
                             subset=None,
                             interpolation='nearest',
                             sort=True,
-                            drop_duplicates=True):
+                            drop_duplicates=True,
+                            **kwargs):
         """Takes the dataframe and the path to a directory
          and generates batches of augmented/normalized data.
 
@@ -629,13 +629,16 @@ class ImageDataGenerator(object):
             of images with shape `(batch_size, *target_size, channels)`
             and `y` is a numpy array of corresponding labels.
         """
+        if 'has_ext' in kwargs:
+            warnings.warn('has_ext is deprecated, filenames in the dataframe have '
+                          'to match the exact filenames in disk.',
+                          DeprecationWarning)
         return DataFrameIterator(
             dataframe,
             directory,
             self,
             x_col=x_col,
             y_col=y_col,
-            has_ext=has_ext,
             target_size=target_size,
             color_mode=color_mode,
             classes=classes,
