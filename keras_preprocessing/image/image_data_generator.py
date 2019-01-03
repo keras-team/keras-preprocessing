@@ -631,6 +631,10 @@ class ImageDataGenerator(object):
             warnings.warn('has_ext is deprecated, filenames in the dataframe have '
                           'to match the exact filenames in disk.',
                           DeprecationWarning)
+        if 'sort' in kwargs:
+            warnings.warn('sort is deprecated, batches will be created in the'
+                          'same order than the filenames provided if shuffle'
+                          'is set to False.')
         return DataFrameIterator(
             dataframe,
             directory,
