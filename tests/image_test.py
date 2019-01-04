@@ -543,9 +543,6 @@ class TestImage(object):
         assert len(df_iterator_dir.class_indices) == num_classes
         assert len(df_iterator_dir.classes) == count
         assert set(df_iterator_dir.filenames) == set(filenames)
-        assert len(df_without_ext_iterator.class_indices) == num_classes
-        assert len(df_without_ext_iterator.classes) == count
-        assert set(df_without_ext_iterator.filenames) == set(filenames)
         assert batch_y.shape[1] == 2
         # Test invalid use cases
         with pytest.raises(ValueError):
