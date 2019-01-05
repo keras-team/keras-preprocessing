@@ -14,7 +14,7 @@ from .utils import (array_to_img,
                     load_img)
 
 
-class DataFrameIterator(Iterator, BatchFromFilesMixin):
+class DataFrameIterator(BatchFromFilesMixin, Iterator):
     """Iterator capable of reading images from a directory on disk
         through a dataframe.
 

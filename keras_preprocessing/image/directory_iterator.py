@@ -17,7 +17,7 @@ from .utils import (array_to_img,
                     load_img)
 
 
-class DirectoryIterator(Iterator, BatchFromFilesMixin):
+class DirectoryIterator(BatchFromFilesMixin, Iterator):
     """Iterator capable of reading images from a directory on disk.
 
     # Arguments
