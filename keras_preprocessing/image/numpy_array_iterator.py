@@ -172,17 +172,3 @@ class NumpyArrayIterator(Iterator):
         if self.sample_weight is not None:
             output += (self.sample_weight[index_array],)
         return output
-
-    def next(self):
-        """For python 2.x.
-
-        # Returns
-            The next batch.
-        """
-        # Keeps under lock only the mechanism which advances
-        # the indexing of each batch.
-        with self.lock:
-            index_array = next(self.index_generator)
-        # The transformation of images is not under thread lock
-        # so it can be done in parallel
-        return self._get_batches_of_transformed_samples(index_array)
