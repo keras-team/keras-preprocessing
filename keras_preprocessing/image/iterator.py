@@ -110,6 +110,17 @@ class Iterator(IteratorType):
         # so it can be done in parallel
         return self._get_batches_of_transformed_samples(index_array)
 
+    def _get_batches_of_transformed_samples(self, index_array):
+        """Gets a batch of transformed samples.
+
+        # Arguments
+            index_array: Array of sample indices to include in batch.
+
+        # Returns
+            A batch of transformed samples.
+        """
+        raise NotImplementedError
+
 
 class BatchFromFilesMixin():
 
