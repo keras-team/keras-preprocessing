@@ -142,6 +142,37 @@ class TestImage(object):
                 if i == 2:
                     break
 
+            # Test without miscellaneous input but with landmarks
+            dsize = images.shape[0]
+            x_misc1 = None
+            x_landmarks = np.random.random_integers(400, size=(dsize, 4, 2))
+
+            for i, (x, y) in enumerate(generator.flow(
+                    (images, x_misc1, x_landmarks),
+                    np.arange(dsize),
+                    shuffle=False,
+                    batch_size=2)):
+                assert x[0].shape == images[:2].shape
+                assert x[1].shape == x_landmarks[:2].shape
+                if i == 2:
+                    break
+
+            # Test with miscellaneous input and landmarks
+            dsize = images.shape[0]
+            x_misc1 = np.random.random(dsize)
+            x_landmarks = np.random.random_integers(400, size=(dsize, 4, 2))
+
+            for i, (x, y) in enumerate(generator.flow(
+                    (images, x_misc1, x_landmarks),
+                    np.arange(dsize),
+                    shuffle=False,
+                    batch_size=2)):
+                assert x[0].shape == images[:2].shape
+                assert (x[1] == x_misc1[(i * 2):((i + 1) * 2)]).all()
+                assert x[2].shape == x_landmarks[:2].shape
+                if i == 2:
+                    break
+
             # Test cases with `y = None`
             x = generator.flow(images, None, batch_size=3).next()
             assert type(x) is np.ndarray
@@ -160,12 +191,19 @@ class TestImage(object):
 
             # Test some failure cases:
             x_misc_err = np.random.random((dsize + 1, 3, 3))
+            x_landmarks_err = np.random.random_integers(400, size=(dsize + 1, 4, 2))
 
             with pytest.raises(ValueError) as e_info:
                 generator.flow((images, x_misc_err), np.arange(dsize),
                                batch_size=3)
             assert str(e_info.value).find(
                 'All of the arrays in') != -1
+
+            with pytest.raises(ValueError) as e_info:
+                generator.flow((images, None, x_landmarks_err), np.arange(dsize),
+                               batch_size=3)
+            assert str(e_info.value).find(
+                'x[0] (images tensor) and x[2] (landmarks tensor)') != -1
 
             with pytest.raises(ValueError) as e_info:
                 generator.flow((images, x_misc1), np.arange(dsize + 1),
@@ -1028,7 +1066,6 @@ class TestImage(object):
         assert transform_dict['brightness'] is None
 
     def test_deterministic_transform(self):
-        x = np.ones((32, 32, 3))
         generator = image.ImageDataGenerator(
             rotation_range=90,
             fill_mode='constant')
@@ -1037,20 +1074,33 @@ class TestImage(object):
                            x[::-1, :, :])
         assert np.allclose(generator.apply_transform(x, {'flip_horizontal': True}),
                            x[:, ::-1, :])
-        x = np.ones((3, 3, 3))
-        x_rotated = np.array([[[0., 0., 0.],
-                               [0., 0., 0.],
-                               [1., 1., 1.]],
-                              [[0., 0., 0.],
-                               [1., 1., 1.],
-                               [1., 1., 1.]],
-                              [[0., 0., 0.],
-                               [0., 0., 0.],
-                               [1., 1., 1.]]])
+        x = np.ones((4, 4, 3))
+        # 4x4 square rotated by 45 degree as ASCII art:
+        x_rotated = np.array([[0, 0, 1, 0],
+                              [0, 1, 1, 1],
+                              [0, 1, 1, 1],
+                              [0, 0, 1, 0]],
+                             dtype=np.float32)[..., np.newaxis].repeat(3, axis=2)
         assert np.allclose(generator.apply_transform(x, {'theta': 45}),
                            x_rotated)
         assert np.allclose(image.apply_affine_transform(
             x, theta=45, channel_axis=2, fill_mode='constant'), x_rotated)
+
+    def test_deterministic_transform_landmarks(self):
+        generator = image.ImageDataGenerator(
+            rotation_range=90,
+            fill_mode='constant')
+        x = np.random.random((9, 9, 3))
+        x_landmarks = [[0., 0.], [4.5, 0.], [4.5, 4.5]]
+        assert np.allclose(generator.transform_landmarks(
+            x, x_landmarks, {'flip_vertical': True}),
+            [[0., 9.], [4.5, 9.], [4.5, 4.5]])
+        assert np.allclose(generator.transform_landmarks(
+            x, x_landmarks, {'flip_horizontal': True}),
+            [[9., 0], [4.5, 0.], [4.5, 4.5]])
+        assert np.allclose(generator.transform_landmarks(
+            x, x_landmarks, {'theta': 90}),
+            [[9., 0.], [9., 4.5], [4.5, 4.5]])
 
     def test_batch_standardize(self):
         # ImageDataGenerator.standardize should work on batches

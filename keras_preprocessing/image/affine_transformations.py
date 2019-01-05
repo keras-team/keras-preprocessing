@@ -37,6 +37,26 @@ def flip_axis(x, axis):
     return x
 
 
+def flip_points(points, height, width, flip_horizontal=False, flip_vertical=False):
+    """Flips the coordinates of points in a frame with dimensions height and width
+    horizontally and/or vertically.
+
+    # Arguments
+        x: Point tensor. Must be 3D.
+        height: Height of the frame.
+        width: Width of the frame.
+        flip_horizontal: Boolean if coordinates shall be flipped horizontally.
+        flip_vertical: Boolean if coordinates shall be flipped vertically.
+    # Returns
+        Flipped Numpy point tensor.
+    """
+    if flip_horizontal or flip_vertical:
+        points = points * np.array(
+            [1 - 2 * flip_horizontal, 1 - 2 * flip_vertical]) + np.array(
+            [width * flip_horizontal, height * flip_vertical])
+    return points
+
+
 def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
                     fill_mode='nearest', cval=0., interpolation_order=1):
     """Performs a random rotation of a Numpy image tensor.
@@ -246,8 +266,8 @@ def random_brightness(x, brightness_range):
 
 
 def transform_matrix_offset_center(matrix, x, y):
-    o_x = float(x) / 2 + 0.5
-    o_y = float(y) / 2 + 0.5
+    o_x = float(x) / 2
+    o_y = float(y) / 2
     offset_matrix = np.array([[1, 0, o_x], [0, 1, o_y], [0, 0, 1]])
     reset_matrix = np.array([[1, 0, -o_x], [0, 1, -o_y], [0, 0, 1]])
     transform_matrix = np.dot(np.dot(offset_matrix, matrix), reset_matrix)
@@ -263,7 +283,7 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
         x: 2D numpy array, single image.
         theta: Rotation angle in degrees.
         tx: Width shift.
-        ty: Heigh shift.
+        ty: Height shift.
         shear: Shear angle in degrees.
         zx: Zoom in x direction.
         zy: Zoom in y direction
@@ -283,6 +303,82 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
     if scipy is None:
         raise ImportError('Image transformations require SciPy. '
                           'Install SciPy.')
+
+    transform_matrix = _get_affine_transform_matrix(
+        x.shape[row_axis], x.shape[col_axis],
+        theta, tx, ty, shear, zx, zy)
+
+    if transform_matrix is not None:
+        x = np.rollaxis(x, channel_axis, 0)
+        final_affine_matrix = transform_matrix[:2, :2]
+        final_offset = transform_matrix[:2, 2]
+
+        channel_images = [scipy.ndimage.interpolation.affine_transform(
+            x_channel,
+            final_affine_matrix,
+            final_offset,
+            order=order,
+            mode=fill_mode,
+            cval=cval) for x_channel in x]
+        x = np.stack(channel_images, axis=0)
+        x = np.rollaxis(x, 0, channel_axis + 1)
+
+    return x
+
+
+def affine_transform_points(points, height, width, theta=0,
+                            tx=0, ty=0, shear=0, zx=1, zy=1):
+    """Applies an affine transformation of the points specified
+     by the parameters given.
+
+    # Arguments
+        points: 3D tensor, containing all the 2D points to be transformed.
+        height: Height of the image the points are part of
+        width: Width of the image the points are part of
+        theta: Rotation angle in degrees.
+        tx: Width shift.
+        ty: Height shift.
+        shear: Shear angle in degrees.
+        zx: Zoom in x direction.
+        zy: Zoom in y direction
+
+    # Returns
+        The transformed version of the points.
+    """
+    transform_matrix = _get_affine_transform_matrix(
+        height, width,
+        theta, tx, ty, shear, zx, zy)
+
+    if transform_matrix is not None:
+        homogeneous_points = np.transpose(points)
+        homogeneous_points = np.insert(homogeneous_points[[1, 0]], 2, 1, axis=0)
+        inverse = np.linalg.inv(transform_matrix)
+        homogeneous_points = np.dot(inverse, homogeneous_points)
+        points = homogeneous_points[[1, 0]]
+        points = np.transpose(points)
+
+    return points
+
+
+def _get_affine_transform_matrix(height, width, theta=0,
+                                 tx=0, ty=0, shear=0, zx=1, zy=1):
+    """Compute the affine transformation specified by the parameters given.
+
+    # Arguments
+        height: Height of the image to transform
+        width: Width of the image to transform
+        theta: Rotation angle in degrees.
+        tx: Width shift.
+        ty: Height shift.
+        shear: Shear angle in degrees.
+        zx: Zoom in x direction.
+        zy: Zoom in y direction
+
+    # Returns
+        The affine transformation matrix for the parameters
+        or None if no transformation is needed.
+    """
+
     transform_matrix = None
     if theta != 0:
         theta = np.deg2rad(theta)
@@ -320,20 +416,7 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
             transform_matrix = np.dot(transform_matrix, zoom_matrix)
 
     if transform_matrix is not None:
-        h, w = x.shape[row_axis], x.shape[col_axis]
         transform_matrix = transform_matrix_offset_center(
-            transform_matrix, h, w)
-        x = np.rollaxis(x, channel_axis, 0)
-        final_affine_matrix = transform_matrix[:2, :2]
-        final_offset = transform_matrix[:2, 2]
+            transform_matrix, height, width)
 
-        channel_images = [scipy.ndimage.interpolation.affine_transform(
-            x_channel,
-            final_affine_matrix,
-            final_offset,
-            order=order,
-            mode=fill_mode,
-            cval=cval) for x_channel in x]
-        x = np.stack(channel_images, axis=0)
-        x = np.rollaxis(x, 0, channel_axis + 1)
-    return x
+    return transform_matrix

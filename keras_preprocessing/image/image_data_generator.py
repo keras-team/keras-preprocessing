@@ -22,9 +22,11 @@ from .dataframe_iterator import DataFrameIterator
 from .directory_iterator import DirectoryIterator
 from .numpy_array_iterator import NumpyArrayIterator
 from .affine_transformations import (apply_affine_transform,
+                                     affine_transform_points,
                                      apply_brightness_shift,
                                      apply_channel_shift,
-                                     flip_axis)
+                                     flip_axis,
+                                     flip_points)
 
 
 class ImageDataGenerator(object):
@@ -378,13 +380,18 @@ class ImageDataGenerator(object):
 
         # Arguments
             x: Input data. Numpy array of rank 4 or a tuple.
-                If tuple, the first element
-                should contain the images and the second element
-                another numpy array or a list of numpy arrays
-                that gets passed to the output
-                without any modifications.
-                Can be used to feed the model miscellaneous data
-                along with the images.
+                If tuple, the first element is a 4D tensor that should contain
+                the images. The second element should contain another numpy array or
+                list of numpy arrays that gets passed to the output
+                without any modifications. This can be used
+                to feed the model miscellaneous data along with the images.
+                A 3D tensor of landmarks can optionally be passed
+                as the third element of the tuple. The landmarks are associated
+                with positions on the image and are transformed
+                in the same way as the image itself.
+                The landmark tensor's first dimension refers to the image index
+                while the second dimension represents a landmark
+                with x and y coordinates in the third dimension.
                 In case of grayscale data, the channels axis of the image array
                 should have value 1, in case
                 of RGB data, it should have value 3, and in case
@@ -849,6 +856,53 @@ class ImageDataGenerator(object):
             x = apply_brightness_shift(x, transform_parameters['brightness'])
 
         return x
+
+    def transform_landmarks(self, x, landmarks, transform_parameters):
+        """Applies a transformation to an tensor of landmarks on an image
+         according to given parameters.
+
+        # Arguments
+            x: 3D tensor, single image. Required only to analyze image dimensions.
+            landmarks: 3D tensor, containing all the 2D points to be transformed.
+            transform_parameters: Dictionary with string - parameter pairs
+                describing the transformation.
+                Currently, the following parameters
+                from the dictionary are used:
+                - `'theta'`: Float. Rotation angle in degrees.
+                - `'tx'`: Float. Shift in the x direction.
+                - `'ty'`: Float. Shift in the y direction.
+                - `'shear'`: Float. Shear angle in degrees.
+                - `'zx'`: Float. Zoom in the x direction.
+                - `'zy'`: Float. Zoom in the y direction.
+                - `'flip_horizontal'`: Boolean. Horizontal flip.
+                - `'flip_vertical'`: Boolean. Vertical flip.
+
+        # Returns
+            A transformed version of the landmarks.
+        """
+        # x is a single image, so it doesn't have image number at index 0
+        img_row_axis = self.row_axis - 1
+        img_col_axis = self.col_axis - 1
+        height = x.shape[img_row_axis]
+        width = x.shape[img_col_axis]
+
+        landmarks = affine_transform_points(landmarks, height, width,
+                                            transform_parameters.get('theta', 0),
+                                            transform_parameters.get('tx', 0),
+                                            transform_parameters.get('ty', 0),
+                                            transform_parameters.get('shear', 0),
+                                            transform_parameters.get('zx', 1),
+                                            transform_parameters.get('zy', 1)
+                                            )
+
+        landmarks = flip_points(landmarks, height, width,
+                                flip_horizontal=transform_parameters.get(
+                                    'flip_horizontal', 0),
+                                flip_vertical=transform_parameters.get(
+                                    'flip_vertical', 0)
+                                )
+
+        return landmarks
 
     def random_transform(self, x, seed=None):
         """Applies a random transformation to an image.

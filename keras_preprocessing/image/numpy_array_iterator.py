@@ -58,20 +58,41 @@ class NumpyArrayIterator(Iterator):
                  dtype='float32'):
         self.dtype = dtype
         if (type(x) is tuple) or (type(x) is list):
-            if type(x[1]) is not list:
+            if x[1] is None:
+                x_misc = []
+            elif type(x[1]) is not list:
                 x_misc = [np.asarray(x[1])]
             else:
                 x_misc = [np.asarray(xx) for xx in x[1]]
-            x = x[0]
             for xx in x_misc:
-                if len(x) != len(xx):
+                if len(x[0]) != len(xx):
                     raise ValueError(
                         'All of the arrays in `x` '
                         'should have the same length. '
                         'Found a pair with: len(x[0]) = %s, len(x[?]) = %s' %
-                        (len(x), len(xx)))
+                        (len(x[0]), len(xx)))
+
+            if len(x) > 2:
+                x_landmarks = np.asarray(x[2], dtype=np.float32)
+                if len(x[0]) != len(x_landmarks):
+                    raise ValueError(
+                        'x[0] (images tensor) and x[2] (landmarks tensor) '
+                        'should have the same length. '
+                        'Found: len(x[0]) = %s and len(x[2]) = %s' %
+                        (len(x[0]), len(x[2]))
+                    )
+                if x_landmarks.ndim != 3 or x_landmarks.shape[2] != 2:
+                    raise ValueError(
+                        'x[2] (landmarks tensor) must have shape (,,2) '
+                        'Found: %s' % str(x_landmarks.shape)
+                    )
+            else:
+                x_landmarks = None
+
+            x = x[0]
         else:
             x_misc = []
+            x_landmarks = None
 
         if y is not None and len(x) != len(y):
             raise ValueError('`x` (images tensor) and `y` (labels) '
@@ -101,16 +122,21 @@ class NumpyArrayIterator(Iterator):
             if subset == 'validation':
                 x = x[:split_idx]
                 x_misc = [np.asarray(xx[:split_idx]) for xx in x_misc]
+                if x_landmarks is not None:
+                    x_landmarks = x_landmarks[:split_idx]
                 if y is not None:
                     y = y[:split_idx]
             else:
                 x = x[split_idx:]
                 x_misc = [np.asarray(xx[split_idx:]) for xx in x_misc]
+                if x_landmarks is not None:
+                    x_landmarks = x_landmarks[split_idx:]
                 if y is not None:
                     y = y[split_idx:]
 
         self.x = np.asarray(x, dtype=self.dtype)
         self.x_misc = x_misc
+        self.x_landmarks = x_landmarks
         if self.x.ndim != 4:
             raise ValueError('Input data in `NumpyArrayIterator` '
                              'should have rank 4. You passed an array '
@@ -118,11 +144,11 @@ class NumpyArrayIterator(Iterator):
         channels_axis = 3 if data_format == 'channels_last' else 1
         if self.x.shape[channels_axis] not in {1, 3, 4}:
             warnings.warn('NumpyArrayIterator is set to use the '
-                          'data format convention "' + data_format + '" '
-                          '(channels on axis ' + str(channels_axis) +
+                          'data format convention "' + data_format +
+                          '" (channels on axis ' + str(channels_axis) +
                           '), i.e. expected either 1, 3, or 4 '
-                          'channels on axis ' + str(channels_axis) + '. '
-                          'However, it was passed an array with shape ' +
+                          'channels on axis ' + str(channels_axis) +
+                          '. However, it was passed an array with shape ' +
                           str(self.x.shape) + ' (' +
                           str(self.x.shape[channels_axis]) + ' channels).')
         if y is not None:
@@ -146,6 +172,14 @@ class NumpyArrayIterator(Iterator):
     def _get_batches_of_transformed_samples(self, index_array):
         batch_x = np.zeros(tuple([len(index_array)] + list(self.x.shape)[1:]),
                            dtype=self.dtype)
+
+        if self.x_landmarks is not None:
+            batch_x_landmarks = np.zeros(
+                tuple([len(index_array)] + list(self.x_landmarks.shape)[1:]),
+                dtype=np.float32)
+        else:
+            batch_x_landmarks = None
+
         for i, j in enumerate(index_array):
             x = self.x[j]
             params = self.image_data_generator.get_random_transform(x.shape)
@@ -153,6 +187,12 @@ class NumpyArrayIterator(Iterator):
                 x.astype(self.dtype), params)
             x = self.image_data_generator.standardize(x)
             batch_x[i] = x
+
+            if self.x_landmarks is not None:
+                x_landmarks = self.x_landmarks[j]
+                x_landmarks = self.image_data_generator.transform_landmarks(
+                    x.astype(self.dtype), x_landmarks, params)
+                batch_x_landmarks[i] = x_landmarks
 
         if self.save_to_dir:
             for i, j in enumerate(index_array):
@@ -164,8 +204,8 @@ class NumpyArrayIterator(Iterator):
                     format=self.save_format)
                 img.save(os.path.join(self.save_to_dir, fname))
         batch_x_miscs = [xx[index_array] for xx in self.x_misc]
-        output = (batch_x if batch_x_miscs == []
-                  else [batch_x] + batch_x_miscs,)
+        output = (batch_x if batch_x_miscs == [] and self.x_landmarks is None
+                  else [batch_x] + batch_x_miscs + [batch_x_landmarks],)
         if self.y is None:
             return output[0]
         output += (self.y[index_array],)
