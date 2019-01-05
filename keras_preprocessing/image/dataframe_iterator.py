@@ -7,14 +7,14 @@ from __future__ import print_function
 import os
 import numpy as np
 
-from .iterator import Iterator
+from .iterator import BatchFromFilesMixin, Iterator
 from .utils import (array_to_img,
                     get_extension,
                     img_to_array,
                     load_img)
 
 
-class DataFrameIterator(Iterator):
+class DataFrameIterator(Iterator, BatchFromFilesMixin):
     """Iterator capable of reading images from a directory on disk
         through a dataframe.
 
@@ -93,15 +93,15 @@ class DataFrameIterator(Iterator):
                  interpolation='nearest',
                  dtype='float32',
                  drop_duplicates=True):
-        super(DataFrameIterator, self).common_init(image_data_generator,
-                                                   target_size,
-                                                   color_mode,
-                                                   data_format,
-                                                   save_to_dir,
-                                                   save_prefix,
-                                                   save_format,
-                                                   subset,
-                                                   interpolation)
+        super(DataFrameIterator, self).set_processing_attrs(image_data_generator,
+                                                            target_size,
+                                                            color_mode,
+                                                            data_format,
+                                                            save_to_dir,
+                                                            save_prefix,
+                                                            save_format,
+                                                            subset,
+                                                            interpolation)
         self.df = dataframe.copy()
         if drop_duplicates:
             self.df.drop_duplicates(x_col, inplace=True)

@@ -10,14 +10,14 @@ from six.moves import range
 
 import numpy as np
 
-from .iterator import Iterator
+from .iterator import BatchFromFilesMixin, Iterator
 from .utils import (array_to_img,
                     img_to_array,
                     _list_valid_filenames_in_directory,
                     load_img)
 
 
-class DirectoryIterator(Iterator):
+class DirectoryIterator(Iterator, BatchFromFilesMixin):
     """Iterator capable of reading images from a directory on disk.
 
     # Arguments
@@ -83,15 +83,15 @@ class DirectoryIterator(Iterator):
                  subset=None,
                  interpolation='nearest',
                  dtype='float32'):
-        super(DirectoryIterator, self).common_init(image_data_generator,
-                                                   target_size,
-                                                   color_mode,
-                                                   data_format,
-                                                   save_to_dir,
-                                                   save_prefix,
-                                                   save_format,
-                                                   subset,
-                                                   interpolation)
+        super(DirectoryIterator, self).set_processing_attrs(image_data_generator,
+                                                            target_size,
+                                                            color_mode,
+                                                            data_format,
+                                                            save_to_dir,
+                                                            save_prefix,
+                                                            save_format,
+                                                            subset,
+                                                            interpolation)
         self.directory = directory
         self.classes = classes
         if class_mode not in self.allowed_class_modes:

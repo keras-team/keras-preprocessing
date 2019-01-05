@@ -63,57 +63,6 @@ class Iterator(IteratorType):
                                        self.batch_size * (idx + 1)]
         return self._get_batches_of_transformed_samples(index_array)
 
-    def common_init(self,
-                    image_data_generator,
-                    target_size,
-                    color_mode,
-                    data_format,
-                    save_to_dir,
-                    save_prefix,
-                    save_format,
-                    subset,
-                    interpolation):
-        self.image_data_generator = image_data_generator
-        self.target_size = tuple(target_size)
-        if color_mode not in {'rgb', 'rgba', 'grayscale'}:
-            raise ValueError('Invalid color mode:', color_mode,
-                             '; expected "rgb", "rgba", or "grayscale".')
-        self.color_mode = color_mode
-        self.data_format = data_format
-        if self.color_mode == 'rgba':
-            if self.data_format == 'channels_last':
-                self.image_shape = self.target_size + (4,)
-            else:
-                self.image_shape = (4,) + self.target_size
-        elif self.color_mode == 'rgb':
-            if self.data_format == 'channels_last':
-                self.image_shape = self.target_size + (3,)
-            else:
-                self.image_shape = (3,) + self.target_size
-        else:
-            if self.data_format == 'channels_last':
-                self.image_shape = self.target_size + (1,)
-            else:
-                self.image_shape = (1,) + self.target_size
-        self.save_to_dir = save_to_dir
-        self.save_prefix = save_prefix
-        self.save_format = save_format
-        self.interpolation = interpolation
-        if subset is not None:
-            validation_split = self.image_data_generator._validation_split
-            if subset == 'validation':
-                split = (0, validation_split)
-            elif subset == 'training':
-                split = (validation_split, 1)
-            else:
-                raise ValueError(
-                    'Invalid subset name: %s;'
-                    'expected "training" or "validation"' % (subset,))
-        else:
-            split = None
-        self.split = split
-        self.subset = subset
-
     def __len__(self):
         return (self.n + self.batch_size - 1) // self.batch_size  # round up
 
@@ -160,6 +109,60 @@ class Iterator(IteratorType):
         # The transformation of images is not under thread lock
         # so it can be done in parallel
         return self._get_batches_of_transformed_samples(index_array)
+
+
+class BatchFromFilesMixin():
+
+    def set_processing_attrs(self,
+                             image_data_generator,
+                             target_size,
+                             color_mode,
+                             data_format,
+                             save_to_dir,
+                             save_prefix,
+                             save_format,
+                             subset,
+                             interpolation):
+        self.image_data_generator = image_data_generator
+        self.target_size = tuple(target_size)
+        if color_mode not in {'rgb', 'rgba', 'grayscale'}:
+            raise ValueError('Invalid color mode:', color_mode,
+                             '; expected "rgb", "rgba", or "grayscale".')
+        self.color_mode = color_mode
+        self.data_format = data_format
+        if self.color_mode == 'rgba':
+            if self.data_format == 'channels_last':
+                self.image_shape = self.target_size + (4,)
+            else:
+                self.image_shape = (4,) + self.target_size
+        elif self.color_mode == 'rgb':
+            if self.data_format == 'channels_last':
+                self.image_shape = self.target_size + (3,)
+            else:
+                self.image_shape = (3,) + self.target_size
+        else:
+            if self.data_format == 'channels_last':
+                self.image_shape = self.target_size + (1,)
+            else:
+                self.image_shape = (1,) + self.target_size
+        self.save_to_dir = save_to_dir
+        self.save_prefix = save_prefix
+        self.save_format = save_format
+        self.interpolation = interpolation
+        if subset is not None:
+            validation_split = self.image_data_generator._validation_split
+            if subset == 'validation':
+                split = (0, validation_split)
+            elif subset == 'training':
+                split = (validation_split, 1)
+            else:
+                raise ValueError(
+                    'Invalid subset name: %s;'
+                    'expected "training" or "validation"' % (subset,))
+        else:
+            split = None
+        self.split = split
+        self.subset = subset
 
     def _get_batches_of_transformed_samples(self, index_array):
         """Gets a batch of transformed samples.
