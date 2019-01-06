@@ -158,6 +158,11 @@ class TestImage(object):
             assert (x[1] == x_misc1[:3]).all()
             assert (x[2] == x_misc2[:3]).all()
 
+            generator = image.ImageDataGenerator(validation_split=0.2)
+            x = generator.flow(images, batch_size=3).next()
+            assert isinstance(x, np.ndarray)
+            assert x.shape == images[:3].shape
+
             # Test some failure cases:
             x_misc_err = np.random.random((dsize + 1, 3, 3))
 
