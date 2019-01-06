@@ -21,7 +21,7 @@ class DirectoryIterator(Iterator):
     """Iterator capable of reading images from a directory on disk.
 
     # Arguments
-        directory: Path to the directory to read images from.
+        directory: string, path to the directory to read images from.
             Each subdirectory in this directory will be
             considered to contain images from one class,
             or alternatively you could specify class subdirectories
