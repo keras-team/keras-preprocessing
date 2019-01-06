@@ -72,7 +72,6 @@ class DataFrameIterator(Iterator):
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
-        sort: Boolean, whether to sort dataframe by filename (before shuffle).
         drop_duplicates: Boolean, whether to drop duplicate rows based on filename.
     """
     allowed_class_modes = {
@@ -99,7 +98,6 @@ class DataFrameIterator(Iterator):
                  subset=None,
                  interpolation='nearest',
                  dtype='float32',
-                 sort=True,
                  drop_duplicates=True):
         super(DataFrameIterator, self).common_init(image_data_generator,
                                                    target_size,
@@ -133,9 +131,6 @@ class DataFrameIterator(Iterator):
         self.num_classes = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
         self.df = self._filter_valid_filepaths(self.df)
-        if sort:
-            self.df.sort_values(by=x_col, inplace=True)
-
         if self.split:
             num_files = len(self.df)
             start = int(self.split[0] * num_files)

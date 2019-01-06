@@ -541,6 +541,11 @@ class TestImage(object):
         assert len(df_iterator.classes) == count
         assert set(df_iterator.filenames) == set(filenames)
         assert batch_y.shape[1] == 2
+        # test shuffle=False
+        _, batch_y = next(generator.flow_from_dataframe(df, str(tmpdir),
+                                                        shuffle=False,
+                                                        class_mode="sparse"))
+        assert (batch_y == df['class'].tolist()[:len(batch_y)]).all()
         # Test invalid use cases
         with pytest.raises(ValueError):
             generator.flow_from_dataframe(df, str(tmpdir), color_mode='cmyk')
@@ -827,7 +832,7 @@ class TestImage(object):
             assert np.array_equal(a1, a4)
             assert np.array_equal(a1, a5)
 
-    def test_dataframe_iterator_with_sort_and_drop_duplicates(self, tmpdir):
+    def test_dataframe_iterator_with_drop_duplicates(self, tmpdir):
 
         # save the images in the tmpdir
         count = 0
@@ -851,19 +856,10 @@ class TestImage(object):
 
         # create iterators
         generator = image.ImageDataGenerator()
-        df_sort_iterator = generator.flow_from_dataframe(
-            df, str(tmpdir), class_mode=None, sort=True, shuffle=False)
-        df_no_sort_iterator = generator.flow_from_dataframe(
-            df, str(tmpdir), class_mode=None, sort=False, shuffle=False)
         df_drop_iterator = generator.flow_from_dataframe(
             df2, str(tmpdir), class_mode=None, drop_duplicates=True)
         df_no_drop_iterator = generator.flow_from_dataframe(
             df2, str(tmpdir), class_mode=None, drop_duplicates=False)
-
-        # Test sort
-        assert df_sort_iterator.filenames == df_no_sort_iterator.filenames[::-1]
-        assert df_sort_iterator.filenames[0] == filenames[0]
-        assert df_no_sort_iterator.filenames[0] == filenames[-1]
 
         # Test drop_duplicates
         assert df_drop_iterator.n == len(set(input_filenames2))
