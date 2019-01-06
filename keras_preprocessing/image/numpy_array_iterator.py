@@ -89,7 +89,7 @@ class NumpyArrayIterator(Iterator):
                                  '; expected "training" or "validation".')
             split_idx = int(len(x) * image_data_generator._validation_split)
 
-            if (y and not
+            if (y is not None and not
                 np.array_equal(np.unique(y[:split_idx]),
                                np.unique(y[split_idx:]))):
                 raise ValueError('Training and validation subsets '
