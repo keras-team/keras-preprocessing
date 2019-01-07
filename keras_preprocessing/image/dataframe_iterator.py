@@ -103,9 +103,9 @@ class DataFrameIterator(Iterator):
                                                    save_format,
                                                    subset,
                                                    interpolation)
-        self.df = dataframe.copy()
+        df = dataframe.copy()
         if drop_duplicates:
-            self.df.drop_duplicates(x_col, inplace=True)
+            df.drop_duplicates(x_col, inplace=True)
         self.x_col = x_col
         self.directory = directory
         self.classes = classes
@@ -118,29 +118,29 @@ class DataFrameIterator(Iterator):
         if not classes:
             classes = []
             if class_mode not in ["other", "input", None]:
-                classes = list(np.sort(self.df[y_col].unique()))
+                classes = list(np.sort(df[y_col].unique()))
         else:
             if class_mode in ["other", "input", None]:
                 raise ValueError('classes cannot be set if class_mode'
                                  ' is either "other" or "input" or None.')
         self.num_classes = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
-        self.df = self._filter_valid_filepaths(self.df)
+        df = self._filter_valid_filepaths(df)
         if self.split:
-            num_files = len(self.df)
+            num_files = len(df)
             start = int(self.split[0] * num_files)
             stop = int(self.split[1] * num_files)
-            self.df = self.df.iloc[start: stop, :]
-        self.filenames = self.df[x_col].tolist()
+            df = df.iloc[start: stop, :]
+        self.filenames = df[x_col].tolist()
 
         if class_mode not in ["other", "input", None]:
-            classes = self.df[y_col].values
+            classes = df[y_col].values
             self.classes = np.array([self.class_indices[cls] for cls in classes])
         elif class_mode == "other":
-            self.data = self.df[y_col].values
+            self.data = df[y_col].values
             if type(y_col) == str:
                 y_col = [y_col]
-            if "object" in list(self.df[y_col].dtypes):
+            if "object" in list(df[y_col].dtypes):
                 raise TypeError("y_col column/s must be numeric datatypes.")
         self.samples = len(self.filenames)
         if self.num_classes > 0:
