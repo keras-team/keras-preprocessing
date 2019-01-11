@@ -104,29 +104,28 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                             subset,
                                                             interpolation)
         df = dataframe.copy()
-        if drop_duplicates:
-            df.drop_duplicates(x_col, inplace=True)
-        classes = classes or []
-        if class_mode not in ["other", "input", None]:
-            df, classes = self._filter_classes(df, y_col, classes)
         self.directory = directory
         self.class_mode = class_mode
         self.dtype = dtype
-        self.num_classes = len(classes)
-        # build an index of all the unique classes
-        self.class_indices = dict(zip(classes, range(len(classes))))
+        if drop_duplicates:
+            df.drop_duplicates(x_col, inplace=True)
         # check which image files are valid and keep them
         df = self._filter_valid_filepaths(df, x_col)
+        classes = classes or []
+        if class_mode not in ["other", "input", None]:
+            df, classes = self._filter_classes(df, y_col, classes)
         if self.split:
             num_files = len(df)
             start = int(self.split[0] * num_files)
             stop = int(self.split[1] * num_files)
             df = df.iloc[start: stop, :]
+        if class_mode not in ["other", "input", None]:
+            self.num_classes = len(classes)
+            # build an index of all the unique classes
+            self.class_indices = dict(zip(classes, range(len(classes))))
+            self.classes = self.get_classes(df, y_col)
         self.filenames = df[x_col].tolist()
 
-        if class_mode not in ["other", "input", None]:
-            classes = df[y_col].values
-            self.classes = np.array([self.class_indices[cls] for cls in classes])
         if class_mode == "other":
             self._data = df[y_col].values
             if type(y_col) == str:
@@ -144,6 +143,15 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                 batch_size,
                                                 shuffle,
                                                 seed)
+
+    def get_classes(self, df, y_col):
+        labels = []
+        for label in df[y_col]:
+            if isinstance(label, (list, tuple)):
+                labels.append([self.class_indices[lbl] for lbl in label])
+            else:
+                labels.append(self.class_indices[label])
+        return labels
 
     @staticmethod
     def _filter_classes(df, y_col, classes):
