@@ -638,6 +638,52 @@ class TestImage(object):
         output_img[0][0][0] += 1
         assert(input_img[0][0][0] != output_img[0][0][0])
 
+    def test_dataframe_iterator_class_mode_categorical_multi_label(self, tmpdir):
+        # save the images in the paths
+        filenames = []
+        count = 0
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = 'image-{}.png'.format(count)
+                im.save(str(tmpdir / filename))
+                filenames.append(filename)
+                count += 1
+        label_opt = ['a', 'b', ['a'], ['b'], ['a', 'b'], ['b', 'a']]
+        df = pd.DataFrame({
+            "filename": filenames,
+            "class": [random.choice(label_opt) for _ in filenames[:-2]] + ['b', 'a']
+        })
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(df, str(tmpdir))
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, np.ndarray)
+        assert batch_y.shape == (len(batch_x), 2)
+        for labels in batch_y:
+            assert all(l in {0, 1} for l in labels)
+
+        # use OrderedDict to mantain order in python 2.7 and allow for checks
+        # on first 3 batches
+        df = pd.DataFrame({
+            "filename": filenames,
+            "class": [['b', 'a']] + ['b'] + [['c']] + [random.choice(label_opt)
+                                                       for _ in filenames[:-3]]
+        })
+        print(df)
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(df, str(tmpdir), shuffle=False)
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, np.ndarray)
+        assert batch_y.shape == (len(batch_x), 3)
+        for labels in batch_y:
+            assert all(l in {0, 1} for l in labels)
+        assert (batch_y[0] == np.array([1, 1, 0])).all()
+        assert (batch_y[1] == np.array([0, 1, 0])).all()
+        assert (batch_y[2] == np.array([0, 0, 1])).all()
+
     @pytest.mark.parametrize('validation_split,num_training', [
         (0.25, 18),
         (0.50, 12),
