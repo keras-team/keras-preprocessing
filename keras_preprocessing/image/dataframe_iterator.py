@@ -108,12 +108,12 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         self.directory = directory
         self.class_mode = class_mode
         self.dtype = dtype
+        # check that inputs match the required class_mode
         self._check_params(df, x_col, y_col, classes)
         if drop_duplicates:
             df.drop_duplicates(x_col, inplace=True)
         # check which image files are valid and keep them
         df = self._filter_valid_filepaths(df, x_col)
-        classes = classes or []
         if class_mode not in ["other", "input", None]:
             df, classes = self._filter_classes(df, y_col, classes)
             num_classes = len(classes)
@@ -131,7 +131,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             self.data = df[y_col].values
             if isinstance(y_col, str):
                 y_col = [y_col]
-            if "object" in set(df[y_col].dtypes):
+            if "object" in list(df[y_col].dtypes):
                 raise TypeError("y_col column/s must be numeric datatypes.")
         self.samples = len(self.filenames)
         if class_mode in ["other", "input", None]:
@@ -145,7 +145,6 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                 seed)
 
     def _check_params(self, df, x_col, y_col, classes):
-        classes = set(classes)
         # check class mode is one of the currently supported
         if self.class_mode not in self.allowed_class_modes:
             raise ValueError('Invalid class_mode: {}; expected one of: {}'
@@ -156,15 +155,16 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                              .format(x_col))
         # check that labels are string or numeric if binary and sparse output
         # Note: sparse class_mode supports numeric, string, list and tuple
-        is_numeric_or_str = (is_numeric_dtype(df[y_col]) or
-                             all(df[y_col].apply(lambda x: isinstance(x, str))))
-        if self.class_mode in {'binary', 'sparse'} and not is_numeric_or_str:
-            raise TypeError('If class_mode="{}", y_col="{}" column '
-                            'values must be numeric or string. '
-                            .format(self.class_mode, y_col))
+        if self.class_mode in {'binary', 'sparse'}:
+            if not (is_numeric_dtype(df[y_col]) or
+                    all(df[y_col].apply(lambda x: isinstance(x, str)))):
+                raise TypeError('If class_mode="{}", y_col="{}" column '
+                                'values must be numeric or string. '
+                                .format(self.class_mode, y_col))
         # check that if binary there are only 2 different classes
         if self.class_mode == 'binary':
             if classes:
+                classes = set(classes)
                 if len(classes) != 2:
                     raise ValueError('If class_mode="binary" there must be 2 '
                                      'classes. {} class(es) were given.'
