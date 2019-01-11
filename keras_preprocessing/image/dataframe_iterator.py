@@ -93,6 +93,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  interpolation='nearest',
                  dtype='float32',
                  drop_duplicates=True):
+
         super(DataFrameIterator, self).set_processing_attrs(image_data_generator,
                                                             target_size,
                                                             color_mode,
@@ -102,7 +103,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                             save_format,
                                                             subset,
                                                             interpolation)
-        self.df = dataframe.copy()
+        df = dataframe.copy()
         if drop_duplicates:
             self.df.drop_duplicates(x_col, inplace=True)
         self.x_col = x_col
@@ -155,6 +156,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
 
     @staticmethod
     def _filter_classes(self, df, x_col, classes):
+        df = df.copy()
 
         def remove_classes(labels, classes):
             if isinstance(labels, (list, tuple)):
