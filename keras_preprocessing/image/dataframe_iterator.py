@@ -106,11 +106,10 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         df = dataframe.copy()
         if drop_duplicates:
             df.drop_duplicates(x_col, inplace=True)
-        df, classes = _filter_classes(self, df, y_col, classes)
+        classes = classes or []
+        if class_mode not in ["other", "input", None]:
+            df, classes = _filter_classes(self, df, y_col, classes)
         self.directory = directory
-        if class_mode not in self.allowed_class_modes:
-            raise ValueError('Invalid class_mode: {}; expected one of: {}'
-                             .format(class_mode, self.allowed_class_modes))
         self.class_mode = class_mode
         self.dtype = dtype
         self.num_classes = len(classes)
