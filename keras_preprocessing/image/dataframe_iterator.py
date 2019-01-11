@@ -41,7 +41,9 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             It will be computed automatically if not set.
         class_mode: Mode for yielding the targets:
             `"binary"`: binary targets (if there are only two classes),
-            `"categorical"`: categorical targets,
+            `"categorical"`: categorical targets, supports multi-label output
+                if class values per observation are stored in a list or tuple
+                in the y_col column,
             `"sparse"`: integer targets,
             `"input"`: targets are images identical to input images (mainly
                 used to work with autoencoders),
@@ -119,14 +121,17 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             num_classes = len(classes)
             # build an index of all the unique classes
             self.class_indices = dict(zip(classes, range(len(classes))))
+        # retrieve only training or validation set
         if self.split:
             num_files = len(df)
             start = int(self.split[0] * num_files)
             stop = int(self.split[1] * num_files)
             df = df.iloc[start: stop, :]
+        # get labels for each observation
         if class_mode not in ["other", "input", None]:
             self.classes = self.get_classes(df, y_col)
         self.filenames = df[x_col].tolist()
+        # create numpy array of raw input if class_mode="other"
         if class_mode == "other":
             self.data = df[y_col].values
             if isinstance(y_col, str):
