@@ -105,42 +105,33 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                             interpolation)
         df = dataframe.copy()
         if drop_duplicates:
-            self.df.drop_duplicates(x_col, inplace=True)
-        self.x_col = x_col
+            df.drop_duplicates(x_col, inplace=True)
+        df, classes = _filter_classes(self, df, y_col, classes)
         self.directory = directory
-        df, self.classes = self._filter_classes(df, x_col, classes)
         if class_mode not in self.allowed_class_modes:
             raise ValueError('Invalid class_mode: {}; expected one of: {}'
                              .format(class_mode, self.allowed_class_modes))
         self.class_mode = class_mode
         self.dtype = dtype
-
-        if not classes:
-            classes = []
-            if class_mode not in ["other", "input", None]:
-                classes = list(np.sort(self.df[y_col].unique()))
-        else:
-            if class_mode in ["other", "input", None]:
-                raise ValueError('classes cannot be set if class_mode'
-                                 ' is either "other" or "input" or None.')
         self.num_classes = len(classes)
+        # build an index of all the unique classes
         self.class_indices = dict(zip(classes, range(len(classes))))
-        self.df = self._filter_valid_filepaths(self.df)
+        # check which image files are valid and keep them
+        df = self._filter_valid_filepaths(df)
         if self.split:
-            num_files = len(self.df)
+            num_files = len(df)
             start = int(self.split[0] * num_files)
             stop = int(self.split[1] * num_files)
-            self.df = self.df.iloc[start: stop, :]
-        self.filenames = self.df[x_col].tolist()
+            df = df.iloc[start: stop, :]
+        self.filenames = df[x_col].tolist()
 
         if class_mode not in ["other", "input", None]:
-            classes = self.df[y_col].values
-            self.classes = np.array([self.class_indices[cls] for cls in classes])
-        elif class_mode == "other":
-            self._data = self.df[y_col].values
+            classes = df[y_col].values
+        if class_mode == "other":
+            self._data = df[y_col].values
             if type(y_col) == str:
                 y_col = [y_col]
-            if "object" in list(self.df[y_col].dtypes):
+            if "object" in list(df[y_col].dtypes):
                 raise TypeError("y_col column/s must be numeric datatypes.")
         self.samples = len(self.filenames)
         if self.num_classes > 0:
@@ -155,7 +146,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                 seed)
 
     @staticmethod
-    def _filter_classes(self, df, x_col, classes):
+    def _filter_classes(self, df, y_col, classes):
         df = df.copy()
 
         def remove_classes(labels, classes):
@@ -167,20 +158,20 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             else:
                 raise TypeError(
                     "Expect string, list or tuple but found {} in {} column "
-                    .format(type(x), x_col)
+                    .format(type(x), y_col)
                 )
 
         if classes:
             classes = set(classes)  # sort and prepare for membership lookup
-            df[x_col] = df[x_col].apply(lambda x: remove_classes(x, classes))
+            df[y_col] = df[y_col].apply(lambda x: remove_classes(x, classes))
         else:
             classes = set()
-            for v in df[x_col]:
+            for v in df[y_col]:
                 if isinstance(v, (list, tuple)):
                     classes.update(v)
                 else:
                     classes.add(v)
-        return df.dropna(subset=[x_col]), sorted(classes)
+        return df.dropna(subset=[y_col]), sorted(classes)
 
     def _filter_valid_filepaths(self, df):
         """Keep only dataframe rows with valid filenames
