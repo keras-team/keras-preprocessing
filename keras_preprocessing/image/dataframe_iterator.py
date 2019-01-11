@@ -107,7 +107,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             self.df.drop_duplicates(x_col, inplace=True)
         self.x_col = x_col
         self.directory = directory
-        self.classes = classes
+        df, self.classes = self._filter_classes(df, x_col, classes)
         if class_mode not in self.allowed_class_modes:
             raise ValueError('Invalid class_mode: {}; expected one of: {}'
                              .format(class_mode, self.allowed_class_modes))
@@ -152,6 +152,33 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                 batch_size,
                                                 shuffle,
                                                 seed)
+
+    @staticmethod
+    def _filter_classes(self, df, x_col, classes):
+
+        def remove_classes(labels, classes):
+            if isinstance(labels, (list, tuple)):
+                labels = [cls for cls in labels if cls in classes]
+                return labels or None
+            elif isinstance(labels, str):
+                return labels if labels in classes else None
+            else:
+                raise TypeError(
+                    "Expect string, list or tuple but found {} in {} column "
+                    .format(type(x), x_col)
+                )
+
+        if classes:
+            classes = set(classes)  # sort and prepare for membership lookup
+            df[x_col] = df[x_col].apply(lambda x: remove_classes(x, classes))
+        else:
+            classes = set()
+            for v in df[x_col]:
+                if isinstance(v, (list, tuple)):
+                    classes.update(v)
+                else:
+                    classes.add(v)
+        return df.dropna(subset=[x_col]), sorted(classes)
 
     def _filter_valid_filepaths(self, df):
         """Keep only dataframe rows with valid filenames
