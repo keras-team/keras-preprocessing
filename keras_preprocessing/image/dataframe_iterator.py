@@ -108,7 +108,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             df.drop_duplicates(x_col, inplace=True)
         classes = classes or []
         if class_mode not in ["other", "input", None]:
-            df, classes = _filter_classes(self, df, y_col, classes)
+            df, classes = self._filter_classes(df, y_col, classes)
         self.directory = directory
         self.class_mode = class_mode
         self.dtype = dtype
@@ -116,7 +116,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         # build an index of all the unique classes
         self.class_indices = dict(zip(classes, range(len(classes))))
         # check which image files are valid and keep them
-        df = self._filter_valid_filepaths(df)
+        df = self._filter_valid_filepaths(df, x_col)
         if self.split:
             num_files = len(df)
             start = int(self.split[0] * num_files)
@@ -126,6 +126,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
 
         if class_mode not in ["other", "input", None]:
             classes = df[y_col].values
+            self.classes = np.array([self.class_indices[cls] for cls in classes])
         if class_mode == "other":
             self._data = df[y_col].values
             if type(y_col) == str:
@@ -145,7 +146,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                 seed)
 
     @staticmethod
-    def _filter_classes(self, df, y_col, classes):
+    def _filter_classes(df, y_col, classes):
         df = df.copy()
 
         def remove_classes(labels, classes):
@@ -172,7 +173,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                     classes.add(v)
         return df.dropna(subset=[y_col]), sorted(classes)
 
-    def _filter_valid_filepaths(self, df):
+    def _filter_valid_filepaths(self, df, x_col):
         """Keep only dataframe rows with valid filenames
 
         # Arguments
@@ -181,7 +182,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         # Returns
             absolute paths to image files
         """
-        filepaths = df[self.x_col].map(
+        filepaths = df[x_col].map(
             lambda fname: os.path.join(self.directory or '', fname)
         )
         format_check = filepaths.map(get_extension).isin(self.white_list_formats)
