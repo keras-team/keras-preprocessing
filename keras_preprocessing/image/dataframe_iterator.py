@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import os
 import numpy as np
+from pandas.api.types import is_numeric_dtype
 
 from .iterator import BatchFromFilesMixin, Iterator
 from .utils import (array_to_img,
@@ -107,6 +108,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         self.directory = directory
         self.class_mode = class_mode
         self.dtype = dtype
+        self._check_params(df, x_col, y_col, classes)
         if drop_duplicates:
             df.drop_duplicates(x_col, inplace=True)
         # check which image files are valid and keep them
@@ -114,35 +116,66 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         classes = classes or []
         if class_mode not in ["other", "input", None]:
             df, classes = self._filter_classes(df, y_col, classes)
+            num_classes = len(classes)
+            # build an index of all the unique classes
+            self.class_indices = dict(zip(classes, range(len(classes))))
         if self.split:
             num_files = len(df)
             start = int(self.split[0] * num_files)
             stop = int(self.split[1] * num_files)
             df = df.iloc[start: stop, :]
         if class_mode not in ["other", "input", None]:
-            self.num_classes = len(classes)
-            # build an index of all the unique classes
-            self.class_indices = dict(zip(classes, range(len(classes))))
             self.classes = self.get_classes(df, y_col)
         self.filenames = df[x_col].tolist()
-
         if class_mode == "other":
-            self._data = df[y_col].values
-            if type(y_col) == str:
+            self.data = df[y_col].values
+            if isinstance(y_col, str):
                 y_col = [y_col]
-            if "object" in list(df[y_col].dtypes):
+            if "object" in set(df[y_col].dtypes):
                 raise TypeError("y_col column/s must be numeric datatypes.")
         self.samples = len(self.filenames)
-        if self.num_classes > 0:
-            print('Found %d images belonging to %d classes.' %
-                  (self.samples, self.num_classes))
+        if class_mode in ["other", "input", None]:
+            print('Found {} images.'.format(self.samples))
         else:
-            print('Found %d images.' % self.samples)
-
+            print('Found {} images belonging to {} classes.'
+                  .format(self.samples, num_classes))
         super(DataFrameIterator, self).__init__(self.samples,
                                                 batch_size,
                                                 shuffle,
                                                 seed)
+
+    def _check_params(self, df, x_col, y_col, classes):
+        classes = set(classes)
+        # check class mode is one of the currently supported
+        if self.class_mode not in self.allowed_class_modes:
+            raise ValueError('Invalid class_mode: {}; expected one of: {}'
+                             .format(self.class_mode, self.allowed_class_modes))
+        # check that filenames/filepaths column values are all strings
+        if not all(df[x_col].apply(lambda x: isinstance(x, str))):
+            raise ValueError('All values in column x_col={} must be strings.'
+                             .format(x_col))
+        # check that labels are string or numeric if binary and sparse output
+        # Note: sparse class_mode supports numeric, string, list and tuple
+        is_numeric_or_str = (is_numeric_dtype(df[y_col]) or
+                             all(df[y_col].apply(lambda x: isinstance(x, str))))
+        if self.class_mode in {'binary', 'sparse'} and not is_numeric_or_str:
+            raise TypeError('If class_mode="{}", y_col="{}" column '
+                            'values must be numeric or string. '
+                            .format(self.class_mode, y_col))
+        # check that if binary there are only 2 different classes
+        if self.class_mode == 'binary':
+            if classes:
+                if len(classes) != 2:
+                    raise ValueError('If class_mode="binary" there must be 2 '
+                                     'classes. {} class(es) were given.'
+                                     .format(len(classes)))
+            elif df[y_col].nunique() != 2:
+                raise ValueError('If class_mode="binary" there must be 2 classes. '
+                                 'Found {} classes.'.format(df[y_col].nunique()))
+        # check that no classes are given if class_mode other or input
+        if classes and self.class_mode in ["other", "input", None]:
+            raise ValueError('classes cannot be set if class_mode'
+                             ' is either "other" or "input" or None.')
 
     def get_classes(self, df, y_col):
         labels = []
