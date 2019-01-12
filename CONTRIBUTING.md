@@ -46,14 +46,14 @@ We love pull requests. Here's a quick guide:
     - You will need to install the test requirements as well: `pip install -e .[tests]`.
 
 7. Make sure all tests are passing:
-  - with the Theano backend, on Python 2.7 and Python 3.5
-  - with the TensorFlow backend, on Python 2.7
-  - **Please Note:** all tests run on top of the very latest Keras master branch.
+    - with the Theano backend, on Python 2.7 and Python 3.5
+    - with the TensorFlow backend, on Python 2.7
+    - **Please Note:** all tests run on top of the very latest Keras master branch.
 
 8. We use PEP8 syntax conventions, but we aren't dogmatic when it comes to line length. Make sure your lines stay reasonably sized, though. To make your life easier, we recommend running a PEP8 linter:
-  - Install PEP8 packages: `pip install pep8 pytest-pep8 autopep8`
-  - Run a standalone PEP8 check: `py.test --pep8 -m pep8`
-  - You can automatically fix some PEP8 error by running: `autopep8 -i --select <errors> <FILENAME>` for example: `autopep8 -i --select E128 tests/keras/backend/test_backends.py`
+    - Install PEP8 packages: `pip install pep8 pytest-pep8 autopep8`
+    - Run a standalone PEP8 check: `py.test --pep8 -m pep8`
+    - You can automatically fix some PEP8 error by running: `autopep8 -i --select <errors> <FILENAME>` for example: `autopep8 -i --select E128 tests/keras/backend/test_backends.py`
 
 9. When committing, use appropriate, descriptive commit messages. Make sure that your branch history is not a string of "bug fix", "fix", "oops", etc. When submitting your PR, squash your commits into a single commit with an appropriate commit message, to make sure the project history stays clean and readable. See ['rebase and squash'](http://rebaseandsqua.sh/) for technical help on how to squash your commits.
 
