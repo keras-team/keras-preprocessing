@@ -28,14 +28,6 @@ Your code doesn't work, **and you have determined that the issue lies with Keras
 
 The more information you provide, the easier it is for us to validate that there is a bug and the faster we'll be able to take action. If you want your issue to be resolved quickly, following the steps above is crucial.
 
----
-
-## Requests for Contributions
-
-[This is the board](https://github.com/keras-team/keras/projects/1) where we list current outstanding issues and features to be added. If you want to start contributing to Keras, this is the place to start.
-
----
-
 ## Pull Requests
 
 We love pull requests. Here's a quick guide:
