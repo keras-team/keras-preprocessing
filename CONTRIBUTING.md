@@ -60,9 +60,3 @@ We love pull requests. Here's a quick guide:
 10. Update the documentation. If introducing new functionality, make sure you include code snippets demonstrating the usage of your new feature.
 
 11. Submit your PR. If your changes have been approved in a previous discussion, and if you have complete (and passing) unit tests, your PR is likely to be merged promptly.
-
----
-
-## Adding new examples
-
-Even if you don't contribute to the Keras-Preprocessing source code, if you have an application of Keras-Preprocessing that is concise and powerful, please consider adding it to our collection of examples. [Existing examples](https://github.com/keras-team/keras-preprocessing/tree/master/examples) show idiomatic Keras-Preprocessing code: make sure to keep your own script in the same spirit.
