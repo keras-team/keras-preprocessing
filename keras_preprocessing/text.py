@@ -10,6 +10,7 @@ import sys
 import warnings
 from collections import OrderedDict
 from collections import defaultdict
+from collections import Counter
 from hashlib import md5
 import json
 
@@ -407,24 +408,22 @@ class Tokenizer(object):
             raise ValueError('Fit the Tokenizer on some data '
                              'before using tfidf mode.')
 
-        # calculate the smallest and largest values appearing in the sequences
-        # in order to determine the most appropriate Numpy type to use
-        min_v = min([min(seq) for seq in sequences])
-        max_v = max([max(seq) for seq in sequences])
-
         if mode == 'binary':
             dtype = np.bool_
         elif mode == 'count':
-            if (-2**7 <= min_v <= 2**7 - 1) and (-2**7 <= max_v <= 2**7 - 1):
-                dtype = np.int8
-            elif (-2**15 <= min_v <= 2**15 - 1) and \
-                 (-2**15 <= max_v <= 2**15 - 1):
-                dtype = np.int16
-            elif (-2**31 <= min_v <= 2**31 - 1) and \
-                 (-2**31 <= max_v <= 2**31 - 1):
-                dtype = np.int32
+            # calculate the counts of the most common items in each sequence
+            common_counts = [Counter(s).most_common(1)[0][1] for s in sequences]
+            # calculate the maximum value of 'common_counts' in order to
+            # determine the most appropriate Numpy type to use
+            max_count = max(common_counts)
+            if max_count <= 2**8 - 1:
+                dtype = np.uint8
+            elif max_count <= 2**16 - 1:
+                dtype = np.uint16
+            elif max_count <= 2**32 - 1:
+                dtype = np.uint32
             else:
-                dtype = np.int64
+                dtype = np.uint64
         else:
             dtype = np.float64
 
