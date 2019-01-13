@@ -7,11 +7,9 @@ from __future__ import print_function
 
 import numpy as np
 import random
+import json
 from six.moves import range
-
-from . import get_keras_submodule
-
-keras_utils = get_keras_submodule('utils')
+import six
 
 
 def pad_sequences(sequences, maxlen=None, dtype='int32',
@@ -38,12 +36,13 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
         sequences: List of lists, where each element is a sequence.
         maxlen: Int, maximum length of all sequences.
         dtype: Type of the output sequences.
+            To pad sequences with variable length strings, you can use `object`.
         padding: String, 'pre' or 'post':
             pad either before or after each sequence.
         truncating: String, 'pre' or 'post':
             remove values from sequences larger than
             `maxlen`, either at the beginning or at the end of the sequences.
-        value: Float, padding value.
+        value: Float or String, padding value.
 
     # Returns
         x: Numpy array with shape `(len(sequences), maxlen)`
@@ -73,7 +72,13 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
             sample_shape = np.asarray(s).shape[1:]
             break
 
-    x = (np.ones((num_samples, maxlen) + sample_shape) * value).astype(dtype)
+    is_dtype_str = np.issubdtype(dtype, np.str_) or np.issubdtype(dtype, np.unicode_)
+    if isinstance(value, six.string_types) and dtype != object and not is_dtype_str:
+        raise ValueError("`dtype` {} is not compatible with `value`'s type: {}\n"
+                         "You should set `dtype=object` for variable length strings."
+                         .format(dtype, type(value)))
+
+    x = np.full((num_samples, maxlen) + sample_shape, value, dtype=dtype)
     for idx, s in enumerate(sequences):
         if not len(s):
             continue  # empty list/array was found
@@ -213,7 +218,7 @@ def skipgrams(sequence, vocabulary_size,
         random.shuffle(words)
 
         couples += [[words[i % len(words)],
-                    random.randint(1, vocabulary_size - 1)]
+                     random.randint(1, vocabulary_size - 1)]
                     for i in range(num_negative_samples)]
         if categorical:
             labels += [[1, 0]] * num_negative_samples
@@ -250,7 +255,7 @@ def _remove_long_seq(maxlen, seq, label):
     return new_seq, new_label
 
 
-class TimeseriesGenerator(keras_utils.Sequence):
+class TimeseriesGenerator(object):
     """Utility class for generating batches of temporal data.
 
     This class takes in a sequence of data-points gathered at
@@ -321,6 +326,13 @@ class TimeseriesGenerator(keras_utils.Sequence):
                  shuffle=False,
                  reverse=False,
                  batch_size=128):
+
+        if len(data) != len(targets):
+            raise ValueError('Data and targets have to be' +
+                             ' of same length. '
+                             'Data length is {}'.format(len(data)) +
+                             ' while target length is {}'.format(len(targets)))
+
         self.data = data
         self.targets = targets
         self.length = length
@@ -368,3 +380,79 @@ class TimeseriesGenerator(keras_utils.Sequence):
         if self.reverse:
             return samples[:, ::-1, ...], targets
         return samples, targets
+
+    def get_config(self):
+        '''Returns the TimeseriesGenerator configuration as Python dictionary.
+
+        # Returns
+            A Python dictionary with the TimeseriesGenerator configuration.
+        '''
+        data = self.data
+        if type(self.data).__module__ == np.__name__:
+            data = self.data.tolist()
+        try:
+            json_data = json.dumps(data)
+        except:
+            raise TypeError('Data not JSON Serializable:', data)
+
+        targets = self.targets
+        if type(self.targets).__module__ == np.__name__:
+            targets = self.targets.tolist()
+        try:
+            json_targets = json.dumps(targets)
+        except:
+            raise TypeError('Targets not JSON Serializable:', targets)
+
+        return {
+            'data': json_data,
+            'targets': json_targets,
+            'length': self.length,
+            'sampling_rate': self.sampling_rate,
+            'stride': self.stride,
+            'start_index': self.start_index,
+            'end_index': self.end_index,
+            'shuffle': self.shuffle,
+            'reverse': self.reverse,
+            'batch_size': self.batch_size
+        }
+
+    def to_json(self, **kwargs):
+        """Returns a JSON string containing the timeseries generator
+        configuration. To load a generator from a JSON string, use
+        `keras.preprocessing.sequence.timeseries_generator_from_json(json_string)`.
+
+        # Arguments
+            **kwargs: Additional keyword arguments
+                to be passed to `json.dumps()`.
+
+        # Returns
+            A JSON string containing the tokenizer configuration.
+        """
+        config = self.get_config()
+        timeseries_generator_config = {
+            'class_name': self.__class__.__name__,
+            'config': config
+        }
+        return json.dumps(timeseries_generator_config, **kwargs)
+
+
+def timeseries_generator_from_json(json_string):
+    """Parses a JSON timeseries generator configuration file and
+    returns a timeseries generator instance.
+
+    # Arguments
+        json_string: JSON string encoding a timeseries
+            generator configuration.
+
+    # Returns
+        A Keras TimeseriesGenerator instance
+    """
+    full_config = json.loads(json_string)
+    config = full_config.get('config')
+
+    data = json.loads(config.pop('data'))
+    config['data'] = data
+    targets = json.loads(config.pop('targets'))
+    config['targets'] = targets
+
+    return TimeseriesGenerator(**config)

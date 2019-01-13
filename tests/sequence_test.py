@@ -2,6 +2,7 @@ from math import ceil
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose
+from numpy.testing import assert_equal
 from numpy.testing import assert_raises
 
 import keras
@@ -33,6 +34,27 @@ def test_pad_sequences():
     # test value
     b = sequence.pad_sequences(a, maxlen=3, value=1)
     assert_allclose(b, [[1, 1, 1], [1, 1, 2], [1, 2, 3]])
+
+
+def test_pad_sequences_str():
+    a = [['1'], ['1', '2'], ['1', '2', '3']]
+
+    # test padding
+    b = sequence.pad_sequences(a, maxlen=3, padding='pre', value='pad', dtype=object)
+    assert_equal(b, [['pad', 'pad', '1'], ['pad', '1', '2'], ['1', '2', '3']])
+    b = sequence.pad_sequences(a, maxlen=3, padding='post', value='pad', dtype='<U3')
+    assert_equal(b, [['1', 'pad', 'pad'], ['1', '2', 'pad'], ['1', '2', '3']])
+
+    # test truncating
+    b = sequence.pad_sequences(a, maxlen=2, truncating='pre', value='pad',
+                               dtype=object)
+    assert_equal(b, [['pad', '1'], ['1', '2'], ['2', '3']])
+    b = sequence.pad_sequences(a, maxlen=2, truncating='post', value='pad',
+                               dtype='<U3')
+    assert_equal(b, [['pad', '1'], ['1', '2'], ['1', '2']])
+
+    with pytest.raises(ValueError, match="`dtype` int32 is not compatible with "):
+        sequence.pad_sequences(a, maxlen=2, truncating='post', value='pad')
 
 
 def test_pad_sequences_vector():
@@ -101,6 +123,30 @@ def test_remove_long_seq():
     new_seq, new_label = sequence._remove_long_seq(maxlen, seq, label)
     assert new_seq == [[1, 2, 3]]
     assert new_label == ['a']
+
+
+def test_TimeseriesGenerator_serde():
+    data = np.array([[i] for i in range(50)])
+    targets = np.array([[i] for i in range(50)])
+
+    data_gen = sequence.TimeseriesGenerator(data, targets,
+                                            length=10,
+                                            sampling_rate=2,
+                                            batch_size=2)
+    json_gen = data_gen.to_json()
+    recovered_gen = sequence.timeseries_generator_from_json(json_gen)
+
+    assert data_gen.batch_size == recovered_gen.batch_size
+    assert data_gen.end_index == recovered_gen.end_index
+    assert data_gen.length == recovered_gen.length
+    assert data_gen.reverse == recovered_gen.reverse
+    assert data_gen.sampling_rate == recovered_gen.sampling_rate
+    assert data_gen.shuffle == recovered_gen.shuffle
+    assert data_gen.start_index == data_gen.start_index
+    assert data_gen.stride == data_gen.stride
+
+    assert (data_gen.data == recovered_gen.data).all()
+    assert (data_gen.targets == recovered_gen.targets).all()
 
 
 def test_TimeseriesGenerator():

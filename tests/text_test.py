@@ -57,6 +57,50 @@ def test_tokenizer():
         matrix = tokenizer.texts_to_matrix(sample_texts, mode)
 
 
+def test_tokenizer_serde_no_fitting():
+    tokenizer = text.Tokenizer(num_words=100)
+
+    tokenizer_json = tokenizer.to_json()
+    recovered = text.tokenizer_from_json(tokenizer_json)
+
+    assert tokenizer.get_config() == recovered.get_config()
+
+    assert tokenizer.word_docs == recovered.word_docs
+    assert tokenizer.word_counts == recovered.word_counts
+    assert tokenizer.word_index == recovered.word_index
+    assert tokenizer.index_word == recovered.index_word
+    assert tokenizer.index_docs == recovered.index_docs
+
+
+def test_tokenizer_serde_fitting():
+    sample_texts = [
+        'There was a time that the pieces fit, but I watched them fall away',
+        'Mildewed and smoldering, strangled by our coveting',
+        'I\'ve done the math enough to know the dangers of our second guessing']
+    tokenizer = text.Tokenizer(num_words=100)
+    tokenizer.fit_on_texts(sample_texts)
+
+    seq_generator = tokenizer.texts_to_sequences_generator(sample_texts)
+    sequences = [seq for seq in seq_generator]
+    tokenizer.fit_on_sequences(sequences)
+
+    tokenizer_json = tokenizer.to_json()
+    recovered = text.tokenizer_from_json(tokenizer_json)
+
+    assert tokenizer.char_level == recovered.char_level
+    assert tokenizer.document_count == recovered.document_count
+    assert tokenizer.filters == recovered.filters
+    assert tokenizer.lower == recovered.lower
+    assert tokenizer.num_words == recovered.num_words
+    assert tokenizer.oov_token == recovered.oov_token
+
+    assert tokenizer.word_docs == recovered.word_docs
+    assert tokenizer.word_counts == recovered.word_counts
+    assert tokenizer.word_index == recovered.word_index
+    assert tokenizer.index_word == recovered.index_word
+    assert tokenizer.index_docs == recovered.index_docs
+
+
 def test_sequential_fit():
     texts = ['The cat sat on the mat.',
              'The dog sat on the log.',
@@ -140,19 +184,6 @@ def test_tokenizer_oov_flag_and_num_words():
     assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
 
 
-def test_tokenizer_oov_flag_and_num_words():
-    x_train = ['This text has only known words this text']
-    x_test = ['This text has some unknown words']
-
-    tokenizer = keras.preprocessing.text.Tokenizer(num_words=3,
-                                                   oov_token='<unk>')
-    tokenizer.fit_on_texts(x_train)
-    x_test_seq = tokenizer.texts_to_sequences(x_test)
-    trans_text = ' '.join(tokenizer.index_word[t] for t in x_test_seq[0])
-    assert len(x_test_seq[0]) == 6
-    assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
-
-
 def test_sequences_to_texts_with_num_words_and_oov_token():
     x_train = ['This text has only known words this text']
     x_test = ['This text has some unknown words']
@@ -213,7 +244,6 @@ def test_sequences_to_texts():
     tokenizer.fit_on_texts(texts)
     tokenized_text = tokenizer.texts_to_sequences(texts)
     trans_text = tokenizer.sequences_to_texts(tokenized_text)
-    print (trans_text)
     assert trans_text == ['the cat sat on the mat',
                           'the dog sat on the log',
                           'dogs <unk> <unk> <unk> <unk>']
@@ -258,6 +288,7 @@ def test_tokenizer_lower_flag():
                                         ('g', 5), ('l', 2), ('i', 2), ('v', 1),
                                         ('r', 1)])
     assert char_tokenizer.word_counts == expected_word_counts
+
 
 if __name__ == '__main__':
     pytest.main([__file__])

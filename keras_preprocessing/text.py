@@ -11,6 +11,7 @@ import warnings
 from collections import OrderedDict
 from collections import defaultdict
 from hashlib import md5
+import json
 
 import numpy as np
 from six.moves import range
@@ -30,7 +31,7 @@ def text_to_word_sequence(text,
     # Arguments
         text: Input text (string).
         filters: list (or concatenation) of characters to filter out, such as
-            punctuation. Default: `!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n`,
+            punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\\t\\n``,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to convert the input to lowercase.
         split: str. Separator for word splitting.
@@ -73,7 +74,7 @@ def one_hot(text, n,
         text: Input text (string).
         n: int. Size of vocabulary.
         filters: list (or concatenation) of characters to filter out, such as
-            punctuation. Default: `!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n`,
+            punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\\t\\n``,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to set the text to lowercase.
         split: str. Separator for word splitting.
@@ -105,7 +106,7 @@ def hashing_trick(text, n,
             it is not consistent across different runs, while 'md5'
             is a stable hashing function.
         filters: list (or concatenation) of characters to filter out, such as
-            punctuation. Default: `!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n`,
+            punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\\t\\n``,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to set the text to lowercase.
         split: str. Separator for word splitting.
@@ -144,7 +145,7 @@ class Tokenizer(object):
 
     # Arguments
         num_words: the maximum number of words to keep, based
-            on word frequency. Only the most common `num_words` words will
+            on word frequency. Only the most common `num_words-1` words will
             be kept.
         filters: a string where each element is a character that will be
             filtered from the texts. The default is all punctuation, plus
@@ -169,6 +170,7 @@ class Tokenizer(object):
                  split=' ',
                  char_level=False,
                  oov_token=None,
+                 document_count=0,
                  **kwargs):
         # Legacy support
         if 'nb_words' in kwargs:
@@ -184,10 +186,12 @@ class Tokenizer(object):
         self.split = split
         self.lower = lower
         self.num_words = num_words
-        self.document_count = 0
+        self.document_count = document_count
         self.char_level = char_level
         self.oov_token = oov_token
         self.index_docs = defaultdict(int)
+        self.word_index = dict()
+        self.index_word = dict()
 
     def fit_on_texts(self, texts):
         """Updates internal vocabulary based on a list of texts.
@@ -262,7 +266,7 @@ class Tokenizer(object):
     def texts_to_sequences(self, texts):
         """Transforms each text in texts to a sequence of integers.
 
-        Only top "num_words" most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
@@ -279,7 +283,7 @@ class Tokenizer(object):
         Each item in texts can also be a list,
         in which case we assume each item of that list to be a token.
 
-        Only top "num_words" most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
@@ -319,11 +323,11 @@ class Tokenizer(object):
     def sequences_to_texts(self, sequences):
         """Transforms each sequence into a list of text.
 
-        Only top "num_words" most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
-            texts: A list of sequences (list of integers).
+            sequences: A list of sequences (list of integers).
 
         # Returns
             A list of texts (strings)
@@ -336,11 +340,11 @@ class Tokenizer(object):
         Each sequence has to a list of integers.
         In other words, sequences should be a list of sequences
 
-        Only top "num_words" most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
-            texts: A list of sequences.
+            sequences: A list of sequences.
 
         # Yields
             Yields individual texts.
@@ -396,7 +400,7 @@ class Tokenizer(object):
             if self.word_index:
                 num_words = len(self.word_index) + 1
             else:
-                raise ValueError('Specify a dimension (num_words argument), '
+                raise ValueError('Specify a dimension (`num_words` argument), '
                                  'or fit on some text data first.')
         else:
             num_words = self.num_words
@@ -435,3 +439,84 @@ class Tokenizer(object):
                 else:
                     raise ValueError('Unknown vectorization mode:', mode)
         return x
+
+    def get_config(self):
+        '''Returns the tokenizer configuration as Python dictionary.
+        The word count dictionaries used by the tokenizer get serialized
+        into plain JSON, so that the configuration can be read by other
+        projects.
+
+        # Returns
+            A Python dictionary with the tokenizer configuration.
+        '''
+        json_word_counts = json.dumps(self.word_counts)
+        json_word_docs = json.dumps(self.word_docs)
+        json_index_docs = json.dumps(self.index_docs)
+        json_word_index = json.dumps(self.word_index)
+        json_index_word = json.dumps(self.index_word)
+
+        return {
+            'num_words': self.num_words,
+            'filters': self.filters,
+            'lower': self.lower,
+            'split': self.split,
+            'char_level': self.char_level,
+            'oov_token': self.oov_token,
+            'document_count': self.document_count,
+            'word_counts': json_word_counts,
+            'word_docs': json_word_docs,
+            'index_docs': json_index_docs,
+            'index_word': json_index_word,
+            'word_index': json_word_index
+        }
+
+    def to_json(self, **kwargs):
+        """Returns a JSON string containing the tokenizer configuration.
+        To load a tokenizer from a JSON string, use
+        `keras.preprocessing.text.tokenizer_from_json(json_string)`.
+
+        # Arguments
+            **kwargs: Additional keyword arguments
+                to be passed to `json.dumps()`.
+
+        # Returns
+            A JSON string containing the tokenizer configuration.
+        """
+        config = self.get_config()
+        tokenizer_config = {
+            'class_name': self.__class__.__name__,
+            'config': config
+        }
+        return json.dumps(tokenizer_config, **kwargs)
+
+
+def tokenizer_from_json(json_string):
+    """Parses a JSON tokenizer configuration file and returns a
+    tokenizer instance.
+
+    # Arguments
+        json_string: JSON string encoding a tokenizer configuration.
+
+    # Returns
+        A Keras Tokenizer instance
+    """
+    tokenizer_config = json.loads(json_string)
+    config = tokenizer_config.get('config')
+
+    word_counts = json.loads(config.pop('word_counts'))
+    word_docs = json.loads(config.pop('word_docs'))
+    index_docs = json.loads(config.pop('index_docs'))
+    # Integer indexing gets converted to strings with json.dumps()
+    index_docs = {int(k): v for k, v in index_docs.items()}
+    index_word = json.loads(config.pop('index_word'))
+    index_word = {int(k): v for k, v in index_word.items()}
+    word_index = json.loads(config.pop('word_index'))
+
+    tokenizer = Tokenizer(**config)
+    tokenizer.word_counts = word_counts
+    tokenizer.word_docs = word_docs
+    tokenizer.index_docs = index_docs
+    tokenizer.word_index = word_index
+    tokenizer.index_word = index_word
+
+    return tokenizer
