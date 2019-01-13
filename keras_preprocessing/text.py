@@ -366,28 +366,26 @@ class Tokenizer(object):
             vect = ' '.join(vect)
             yield vect
 
-    def texts_to_matrix(self, texts, mode='binary', dtype=np.float64):
+    def texts_to_matrix(self, texts, mode='binary'):
         """Convert a list of texts to a Numpy matrix.
 
         # Arguments
             texts: list of strings.
             mode: one of "binary", "count", "tfidf", "freq".
-            dtype: a NumPy data type.
 
         # Returns
             A Numpy matrix.
         """
         sequences = self.texts_to_sequences(texts)
-        return self.sequences_to_matrix(sequences, mode=mode, dtype=dtype)
+        return self.sequences_to_matrix(sequences, mode=mode)
 
-    def sequences_to_matrix(self, sequences, mode='binary', dtype=np.float64):
+    def sequences_to_matrix(self, sequences, mode='binary'):
         """Converts a list of sequences into a Numpy matrix.
 
         # Arguments
             sequences: list of sequences
                 (a sequence is a list of integer word indices).
             mode: one of "binary", "count", "tfidf", "freq"
-            dtype: a NumPy data type.
 
         # Returns
             A Numpy matrix.
@@ -409,8 +407,23 @@ class Tokenizer(object):
             raise ValueError('Fit the Tokenizer on some data '
                              'before using tfidf mode.')
 
-        if mode in ['tfidf', 'freq'] or (mode == 'count' and dtype == np.bool_):
-            warnings.warn('Reverting to np.float64 data type.')
+        # calculate the smallest and largest values appearing in the sequences
+        # in order to determine the most appropriate Numpy type to use
+        min_v = min([min(seq) for seq in sequences])
+        max_v = max([max(seq) for seq in sequences])
+
+        if mode == 'binary':
+            dtype = np.bool_
+        elif mode == 'count':
+            if (-2**7 <= min_v <= 2**7-1) and (-2**7 <= max_v <= 2**7-1):
+                dtype = np.int8
+            elif (-2**15 <= min_v <= 2**15-1) and (-2**15 <= max_v <= 2**15-1):
+                dtype = np.int16
+            elif (-2**31 <= min_v <= 2**31-1) and (-2**31 <= max_v <= 2**31-1):
+                dtype = np.int32
+            else:
+                dtype = np.int64
+        else:
             dtype = np.float64
 
         x = np.zeros((len(sequences), num_words), dtype=dtype)
