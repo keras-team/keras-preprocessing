@@ -415,11 +415,13 @@ class Tokenizer(object):
         if mode == 'binary':
             dtype = np.bool_
         elif mode == 'count':
-            if (-2**7 <= min_v <= 2**7-1) and (-2**7 <= max_v <= 2**7-1):
+            if (-2**7 <= min_v <= 2**7 - 1) and (-2**7 <= max_v <= 2**7 - 1):
                 dtype = np.int8
-            elif (-2**15 <= min_v <= 2**15-1) and (-2**15 <= max_v <= 2**15-1):
+            elif (-2**15 <= min_v <= 2**15 - 1) and \
+                 (-2**15 <= max_v <= 2**15 - 1):
                 dtype = np.int16
-            elif (-2**31 <= min_v <= 2**31-1) and (-2**31 <= max_v <= 2**31-1):
+            elif (-2**31 <= min_v <= 2**31 - 1) and \
+                 (-2**31 <= max_v <= 2**31 - 1):
                 dtype = np.int32
             else:
                 dtype = np.int64
