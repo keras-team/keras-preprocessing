@@ -248,6 +248,38 @@ def test_sequences_to_texts():
                           'the dog sat on the log',
                           'dogs <unk> <unk> <unk> <unk>']
 
+def test_sequences_to_matrix():
+    # Tests for the 'count' mode NumPy data type
+    int_types = [
+                (8, np.uint8),
+                (16, np.uint16),
+                (32, np.uint32),
+                (64, np.uint64)
+                ]
+    for i in range(len(int_types) - 2):
+        exp = int_types[i][0]
+        for j in range(2):
+            count = 2**exp - j
+            texts = ['a '*count, 'b']
+            tokenizer = keras_preprocessing.text.Tokenizer()
+            tokenizer.fit_on_texts(texts)
+            encoded_docs = tokenizer.texts_to_matrix(texts, mode='count')
+            if j == 1:
+                assert encoded_docs.dtype == int_types[i][1]
+            else:
+                assert encoded_docs.dtype == int_types[i + 1][1]
+
+    # Tests for the 'binary', 'tfidf' and 'freq' modes NumPy data types
+    texts = ['Hello how are you', 'I am fine thank you']
+    modes = ['binary', 'tfidf', 'freq']
+    for mode in modes:
+        tokenizer = keras_preprocessing.text.Tokenizer()
+        tokenizer.fit_on_texts(texts)
+        encoded_docs = tokenizer.texts_to_matrix(texts, mode=mode)
+        if mode == 'binary':
+            encoded_docs.dtype == np.bool_
+        else:
+            encoded_docs.dtype == np.float64
 
 def test_tokenizer_lower_flag():
     """Tests for `lower` flag in text.Tokenizer
