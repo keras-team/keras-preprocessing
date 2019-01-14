@@ -1,7 +1,7 @@
 ---
 name: a) Issues related to images
 about: Select this if your issue is related to images (default).
-label: image
+labels: image
 ---
 
 Please make sure that the boxes below are checked before you submit your issue.

@@ -1,7 +1,7 @@
 ---
 name: a) Issues related to NLP
 about: Select this if your issue is related to natural language processing (NLP).
-label: text
+labels: text
 ---
 
 Please make sure that the boxes below are checked before you submit your issue.
