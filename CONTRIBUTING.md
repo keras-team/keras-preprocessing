@@ -46,8 +46,9 @@ We love pull requests. Here's a quick guide:
     - You will need to install the test requirements as well: `pip install -e .[tests]`.
 
 7. Make sure all tests are passing:
-    - with the Theano backend, on Python 2.7 and Python 3.5
-    - with the TensorFlow backend, on Python 2.7
+    - with the Theano backend, on Python 2.7 and Python 3.6. Make sure you have the development version of Theano.
+    - with the TensorFlow backend, on Python 2.7 and Python 3.6. Make sure you have the development version of TensorFlow.
+    - with the CNTK backend, on Python 2.7 and Python 3.6. Make sure you have the development version of CNTK.
     - **Please Note:** all tests run on top of the very latest Keras master branch.
 
 8. We use PEP8 syntax conventions, but we aren't dogmatic when it comes to line length. Make sure your lines stay reasonably sized, though. To make your life easier, we recommend running a PEP8 linter:
