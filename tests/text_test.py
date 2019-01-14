@@ -277,9 +277,9 @@ def test_sequences_to_matrix():
         tokenizer.fit_on_texts(texts)
         encoded_docs = tokenizer.texts_to_matrix(texts, mode=mode)
         if mode == 'binary':
-            encoded_docs.dtype == np.bool_
+            assert encoded_docs.dtype == np.bool_
         else:
-            encoded_docs.dtype == np.float64
+            assert encoded_docs.dtype == np.float64
 
 def test_tokenizer_lower_flag():
     """Tests for `lower` flag in text.Tokenizer
