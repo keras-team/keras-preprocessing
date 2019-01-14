@@ -11,7 +11,6 @@ from .iterator import Iterator
 from .utils import (array_to_img,
                     get_extension,
                     img_to_array,
-                    _list_valid_filenames_in_directory,
                     load_img)
 
 
