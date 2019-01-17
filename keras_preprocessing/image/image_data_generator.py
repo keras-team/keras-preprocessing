@@ -597,7 +597,6 @@ class ImageDataGenerator(object):
                 `model.predict_generator()`, `model.evaluate_generator()`, etc.).
             batch_size: size of the batches of data (default: 32).
             shuffle: whether to shuffle the data (default: True)
-                If set to False, sorts the data in alphanumeric order.
             seed: optional random seed for shuffling and transformations.
             save_to_dir: None or str (default: None).
                 This allows you to optionally specify a directory
