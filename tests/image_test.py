@@ -502,7 +502,7 @@ class TestImage(object):
 
         df = pd.DataFrame({
             "filename": filenames,
-            "class": [random.randint(0, 1) for _ in filenames],
+            "class": [str(random.randint(0, 1)) for _ in filenames],
             "filepaths": filepaths
         })
 
@@ -553,7 +553,7 @@ class TestImage(object):
         _, batch_y = next(generator.flow_from_dataframe(df, str(tmpdir),
                                                         shuffle=False,
                                                         class_mode="sparse"))
-        assert (batch_y == df['class'].tolist()[:len(batch_y)]).all()
+        assert (batch_y == df['class'].astype('float')[:len(batch_y)]).all()
         # Test invalid use cases
         with pytest.raises(ValueError):
             generator.flow_from_dataframe(df, str(tmpdir), color_mode='cmyk')
@@ -707,7 +707,7 @@ class TestImage(object):
                 count += 1
 
         df = pd.DataFrame({"filename": filenames,
-                           "class": [random.randint(0, 1) for _ in filenames]})
+                           "class": [str(random.randint(0, 1)) for _ in filenames]})
         # create iterator
         generator = image.ImageDataGenerator(validation_split=validation_split)
         df_sparse_iterator = generator.flow_from_dataframe(df,
@@ -749,6 +749,7 @@ class TestImage(object):
 
         # create dataframes
         classes = np.random.randint(num_classes, size=len(filenames))
+        classes = [str(c) for c in classes]
         df = pd.DataFrame({"filename": filenames,
                            "class": classes})
         df2 = pd.DataFrame({"filename": filenames,
@@ -796,6 +797,7 @@ class TestImage(object):
 
         # create dataframes
         classes = np.random.randint(2, size=len(input_filenames))
+        classes = [str(c) for c in classes]
         df = pd.DataFrame({"filename": input_filenames})
         df2 = pd.DataFrame({"filename": input_filenames,
                             "class": classes})
@@ -830,6 +832,7 @@ class TestImage(object):
 
         # create dataframes
         classes = np.random.randint(2, size=len(file_paths))
+        classes = [str(c) for c in classes]
         df = pd.DataFrame({"filename": file_paths})
         df2 = pd.DataFrame({"filename": file_paths,
                             "class": classes})
@@ -953,6 +956,7 @@ class TestImage(object):
 
         # create dataframe
         classes = np.random.randint(num_classes, size=len(filenames))
+        classes = [str(c) for c in classes]
         df = pd.DataFrame({"filename": filenames,
                            "class": classes})
 
