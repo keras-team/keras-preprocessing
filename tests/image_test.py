@@ -670,7 +670,6 @@ class TestImage(object):
             "class": [['b', 'a']] + ['b'] + [['c']] + [random.choice(label_opt)
                                                        for _ in filenames[:-3]]
         })
-        print(df)
         generator = image.ImageDataGenerator()
         df_iterator = generator.flow_from_dataframe(df, str(tmpdir), shuffle=False)
         batch_x, batch_y = next(df_iterator)
