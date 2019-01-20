@@ -570,22 +570,20 @@ class ImageDataGenerator(object):
                 images in a string column. It should include other column/s
                 depending on the `class_mode`:
                     - if `class_mode` is `"categorical"` (default value) it must
-                    include the `y_col` column with the class/es of each image.
-                    Values in column can be string/list/tuple if a single class
-                    or list/tuple if multiple classes.
+                        include the `y_col` column with the class/es of each image.
+                        Values in column can be string/list/tuple if a single class
+                        or list/tuple if multiple classes.
                     - if `class_mode` is `"binary"` or `"sparse"` it must include
-                    the given `y_col` column with class values as strings.
+                        the given `y_col` column with class values as strings.
                     - if `class_mode` is `"other"` it should contain the columns
-                    specified in `y_col`.
-                    - if `class_mode` is `input` or None no extra column is needed.
-            directory: string, path to the directory to read images from.
-                Directory to under which all the images are present. If None,
-                data in `x_col` column should be absolute paths. If None,
-                data in x_col column should be absolute paths.
-            x_col: string, column in the dataframe that contains
-                the filenames of the target images.
-            y_col: string or list of strings,columns in
-                the dataframe that will be the target data.
+                        specified in `y_col`.
+                    - if `class_mode` is `"input"` or `None` no extra column is
+                        needed.
+            directory: string, path to the directory to read images from. If `None`,
+                data in `x_col` column should be absolute paths.
+            x_col: string, column in `dataframe` that contains the filenames (or
+                absolute paths if `directory` is `None`).
+            y_col: string or list, column/s in `dataframe` that has the target data.
             target_size: tuple of integers `(height, width)`, default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
             color_mode: one of "grayscale", "rgb". Default: "rgb".
