@@ -668,7 +668,15 @@ class ImageDataGenerator(object):
         )
 
     def standardize(self, x):
-        """Applies the normalization configuration to a batch of inputs.
+        """Applies the normalization configuration in-place to a batch of inputs.
+
+        `x` is changed in-place since the function is mainly used internally
+        to standarize images and feed them to your network. If a copy of `x`
+        would be created instead it would have a significant performance cost.
+        If you want to apply this method without changing the input in-place
+        you can call the method creating a copy before:
+
+        standarize(np.copy(x))
 
         # Arguments
             x: Batch of inputs to be normalized.
