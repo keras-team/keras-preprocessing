@@ -61,7 +61,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             - `"other"`: numpy array of `y_col` data,
             - `None`, no targets are returned (the generator will only yield
                 batches of image data, which is useful to use in
-            `model.predict_generator()`, `model.evaluate_generator()`, etc.).
+                `model.predict_generator()`).
         batch_size: Integer, size of a batch.
         shuffle: Boolean, whether to shuffle the data between epochs.
         seed: Random seed for data shuffling.

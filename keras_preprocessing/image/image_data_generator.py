@@ -483,8 +483,7 @@ class ImageDataGenerator(object):
                     to input images (mainly used to work with autoencoders).
                 - If None, no labels are returned
                   (the generator will only yield batches of image data,
-                  which is useful to use with `model.predict_generator()`,
-                  `model.evaluate_generator()`, etc.).
+                  which is useful to use with `model.predict_generator()`).
                   Please note that in case of class_mode None,
                   the data still needs to reside in a subdirectory
                   of `directory` for it to work correctly.
@@ -607,9 +606,9 @@ class ImageDataGenerator(object):
                 - `"input"`: images identical to input images (mainly used to
                     work with autoencoders),
                 - `"other"`: numpy array of `y_col` data,
-                - `None`, no labels are returned (the generator will only yield
+                - `None`, no targets are returned (the generator will only yield
                     batches of image data, which is useful to use in
-                `model.predict_generator()`, `model.evaluate_generator()`, etc.).
+                    `model.predict_generator()`).
             batch_size: size of the batches of data (default: 32).
             shuffle: whether to shuffle the data (default: True)
             seed: optional random seed for shuffling and transformations.
