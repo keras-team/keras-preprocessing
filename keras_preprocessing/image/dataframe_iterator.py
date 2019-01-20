@@ -170,8 +170,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         if not all(df[x_col].apply(lambda x: isinstance(x, str))):
             raise ValueError('All values in column x_col={} must be strings.'
                              .format(x_col))
-        # check labels are string or numeric if class_mode is binary or sparse
-        # Note: categorical class_mode supports numeric, string, list and tuple
+        # check labels are string if class_mode is binary or sparse
         if self.class_mode in {'binary', 'sparse'}:
             if not all(df[y_col].apply(lambda x: isinstance(x, str))):
                 raise TypeError('If class_mode="{}", y_col="{}" column '
@@ -188,14 +187,14 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             elif df[y_col].nunique() != 2:
                 raise ValueError('If class_mode="binary" there must be 2 classes. '
                                  'Found {} classes.'.format(df[y_col].nunique()))
-
+        # check values are string, list or tuple if class_mode is categorical
         if self.class_mode == 'categorical':
             types = (str, list, tuple)
             if not all(df[y_col].apply(lambda x: isinstance(x, types))):
                 raise TypeError('If class_mode="{}", y_col="{}" column '
                                 'values must be type string, list or tuple.'
                                 .format(self.class_mode, y_col))
-        # check that no classes are given if class_mode other or input
+        # raise warning if classes are given and class_mode other or input
         if classes and self.class_mode in {"other", "input", None}:
             warnings.warn('`classes` will be ignored given the class_mode="{}"'
                           .format(self.class_mode))
