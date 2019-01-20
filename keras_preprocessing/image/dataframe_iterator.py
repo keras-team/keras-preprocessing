@@ -25,25 +25,24 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             in a column and classes in another column/s that can be fed as raw
             target data.
         directory: string, path to the directory to read images from. Directory to
-            under which all the images are present. If None, data in x_col column
+            under which all the images are present. If None, data in `x_col` column
             should be absolute paths.
         image_data_generator: Instance of `ImageDataGenerator` to use for
             random transformations and normalization. If None, no transformations
             and normalizations are made.
-        x_col: string, column in dataframe that contains the filenames (or absolute
-            paths, if directory is None).
-        y_col: Column/s in dataframe that has the target data.
+        x_col: string, column in `dataframe` that contains the filenames (or
+            absolute paths if `directory` is None).
+        y_col: string or list, column/s in `dataframe` that has the target data.
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
             Color mode to read images.
-        classes: Optional list of strings, names of
-            each class (e.g. `["dogs", "cats"]`).
-            It will be computed automatically if not set.
+        classes: Optional list of strings, classes to use (e.g. `["dogs", "cats"]`).
+            If None, all classes in `y_col` will be used.
         class_mode: Mode for yielding the targets:
             `"binary"`: binary targets (if there are only two classes),
             `"categorical"`: categorical targets, supports multi-label output
                 if class values per observation are stored in a list or tuple
-                in the y_col column,
+                in the `y_col` column,
             `"sparse"`: integer targets,
             `"input"`: targets are images identical to input images (mainly
                 used to work with autoencoders),
@@ -158,8 +157,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         if not all(df[x_col].apply(lambda x: isinstance(x, str))):
             raise ValueError('All values in column x_col={} must be strings.'
                              .format(x_col))
-        # check that labels are string or numeric if binary and sparse output
-        # Note: sparse class_mode supports numeric, string, list and tuple
+        # check labels are string or numeric if class_mode is binary or sparse
+        # Note: categorical class_mode supports numeric, string, list and tuple
         if self.class_mode in {'binary', 'sparse'}:
             if not (is_numeric_dtype(df[y_col]) or
                     all(df[y_col].apply(lambda x: isinstance(x, str)))):
@@ -178,7 +177,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                 raise ValueError('If class_mode="binary" there must be 2 classes. '
                                  'Found {} classes.'.format(df[y_col].nunique()))
         # check that no classes are given if class_mode other or input
-        if classes and self.class_mode in ["other", "input", None]:
+        if classes and self.class_mode in {"other", "input", None}:
             raise ValueError('classes cannot be set if class_mode'
                              ' is either "other" or "input" or None.')
 
