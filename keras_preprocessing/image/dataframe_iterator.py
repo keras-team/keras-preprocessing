@@ -30,8 +30,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         image_data_generator: Instance of `ImageDataGenerator` to use for
             random transformations and normalization. If None, no transformations
             and normalizations are made.
-        x_col: Column in dataframe that contains all the filenames (or absolute
-            paths, if directory is set to None).
+        x_col: string, column in dataframe that contains the filenames (or absolute
+            paths, if directory is None).
         y_col: Column/s in dataframe that has the target data.
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
@@ -224,6 +224,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
 
         # Arguments
             df: Pandas dataframe containing filenames in a column
+            x_col: string, column in `df` that contains the filenames or filepaths
 
         # Returns
             absolute paths to image files
