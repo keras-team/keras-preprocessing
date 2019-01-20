@@ -146,7 +146,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         self.filenames = df[x_col].tolist()
         # create numpy array of raw input if class_mode="other"
         if class_mode == "other":
-            self.data = df[y_col].values
+            self._data = df[y_col].values
             if isinstance(y_col, str):
                 y_col = [y_col]
             if "object" in list(df[y_col].dtypes):
