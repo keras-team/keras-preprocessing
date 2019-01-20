@@ -5,6 +5,8 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import warnings
+
 import numpy as np
 from pandas.api.types import is_numeric_dtype
 
@@ -21,9 +23,18 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
 
     # Arguments
         dataframe: Pandas dataframe containing the filepaths relative to
-            `directory` or absolute paths if `directory` is None of the images
-            in a column and classes in another column/s that can be fed as raw
-            target data.
+            `directory` (or absolute paths if `directory` is None) of the
+            images in a string column. It should include other column/s
+            depending on the `class_mode`:
+                - if `class_mode` is `"categorical"` (default value) it must
+                include the `y_col` column with the class/es of each image.
+                Values in column can be string/list/tuple if a single class
+                or list/tuple if multiple classes.
+                - if `class_mode` is `"binary"` or `"sparse"` it must include
+                the given `y_col` column with class values as strings.
+                - if `class_mode` is `"other"` it should contain the columns
+                specified in `y_col`.
+                - if `class_mode` is `input` or None no extra column is needed.
         directory: string, path to the directory to read images from. Directory to
             under which all the images are present. If None, data in `x_col` column
             should be absolute paths.
@@ -160,10 +171,9 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         # check labels are string or numeric if class_mode is binary or sparse
         # Note: categorical class_mode supports numeric, string, list and tuple
         if self.class_mode in {'binary', 'sparse'}:
-            if not (is_numeric_dtype(df[y_col]) or
-                    all(df[y_col].apply(lambda x: isinstance(x, str)))):
+            if not all(df[y_col].apply(lambda x: isinstance(x, str))):
                 raise TypeError('If class_mode="{}", y_col="{}" column '
-                                'values must be numeric or string. '
+                                'values must be strings.'
                                 .format(self.class_mode, y_col))
         # check that if binary there are only 2 different classes
         if self.class_mode == 'binary':
@@ -171,15 +181,22 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                 classes = set(classes)
                 if len(classes) != 2:
                     raise ValueError('If class_mode="binary" there must be 2 '
-                                     'classes. {} class(es) were given.'
+                                     'classes. {} class/es were given.'
                                      .format(len(classes)))
             elif df[y_col].nunique() != 2:
                 raise ValueError('If class_mode="binary" there must be 2 classes. '
                                  'Found {} classes.'.format(df[y_col].nunique()))
+
+        if self.class_mode == 'categorical':
+            types = (str, list, tuple)
+            if not all(df[y_col].apply(lambda x: isinstance(x, types))):
+                raise TypeError('If class_mode="{}", y_col="{}" column '
+                                'values must be type string, list or tuple.'
+                                .format(self.class_mode, y_col))
         # check that no classes are given if class_mode other or input
         if classes and self.class_mode in {"other", "input", None}:
-            raise ValueError('classes cannot be set if class_mode'
-                             ' is either "other" or "input" or None.')
+            warnings.warn('`classes` will be ignored given the class_mode="{}"'
+                          .format(self.class_mode))
 
     def get_classes(self, df, y_col):
         labels = []
