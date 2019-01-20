@@ -490,6 +490,7 @@ class ImageDataGenerator(object):
                   of `directory` for it to work correctly.
             batch_size: Size of the batches of data (default: 32).
             shuffle: Whether to shuffle the data (default: True)
+                If set to False, sorts the data in alphanumeric order.
             seed: Optional random seed for shuffling and transformations.
             save_to_dir: None or str (default: None).
                 This allows you to optionally specify
