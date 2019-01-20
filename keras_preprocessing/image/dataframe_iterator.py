@@ -7,14 +7,14 @@ from __future__ import print_function
 import os
 import numpy as np
 
-from .iterator import Iterator
+from .iterator import BatchFromFilesMixin, Iterator
 from .utils import (array_to_img,
                     get_extension,
                     img_to_array,
                     load_img)
 
 
-class DataFrameIterator(Iterator):
+class DataFrameIterator(BatchFromFilesMixin, Iterator):
     """Iterator capable of reading images from a directory on disk
         through a dataframe.
 
@@ -93,15 +93,15 @@ class DataFrameIterator(Iterator):
                  interpolation='nearest',
                  dtype='float32',
                  drop_duplicates=True):
-        super(DataFrameIterator, self).common_init(image_data_generator,
-                                                   target_size,
-                                                   color_mode,
-                                                   data_format,
-                                                   save_to_dir,
-                                                   save_prefix,
-                                                   save_format,
-                                                   subset,
-                                                   interpolation)
+        super(DataFrameIterator, self).set_processing_attrs(image_data_generator,
+                                                            target_size,
+                                                            color_mode,
+                                                            data_format,
+                                                            save_to_dir,
+                                                            save_prefix,
+                                                            save_format,
+                                                            subset,
+                                                            interpolation)
         self.df = dataframe.copy()
         if drop_duplicates:
             self.df.drop_duplicates(x_col, inplace=True)
@@ -136,7 +136,7 @@ class DataFrameIterator(Iterator):
             classes = self.df[y_col].values
             self.classes = np.array([self.class_indices[cls] for cls in classes])
         elif class_mode == "other":
-            self.data = self.df[y_col].values
+            self._data = self.df[y_col].values
             if type(y_col) == str:
                 y_col = [y_col]
             if "object" in list(self.df[y_col].dtypes):
@@ -153,60 +153,6 @@ class DataFrameIterator(Iterator):
                                                 shuffle,
                                                 seed)
 
-    def _get_batches_of_transformed_samples(self, index_array):
-        batch_x = np.zeros(
-            (len(index_array),) + self.image_shape,
-            dtype=self.dtype)
-        # build batch of image data
-        for i, j in enumerate(index_array):
-            fname = self.filenames[j]
-            if self.directory is not None:
-                img_path = os.path.join(self.directory, fname)
-            else:
-                img_path = fname
-            img = load_img(img_path,
-                           color_mode=self.color_mode,
-                           target_size=self.target_size,
-                           interpolation=self.interpolation)
-            x = img_to_array(img, data_format=self.data_format)
-            # Pillow images should be closed after `load_img`,
-            # but not PIL images.
-            if hasattr(img, 'close'):
-                img.close()
-            if self.image_data_generator:
-                params = self.image_data_generator.get_random_transform(x.shape)
-                x = self.image_data_generator.apply_transform(x, params)
-                x = self.image_data_generator.standardize(x)
-            batch_x[i] = x
-        # optionally save augmented images to disk for debugging purposes
-        if self.save_to_dir:
-            for i, j in enumerate(index_array):
-                img = array_to_img(batch_x[i], self.data_format, scale=True)
-                fname = '{prefix}_{index}_{hash}.{format}'.format(
-                    prefix=self.save_prefix,
-                    index=j,
-                    hash=np.random.randint(1e7),
-                    format=self.save_format)
-                img.save(os.path.join(self.save_to_dir, fname))
-        # build batch of labels
-        if self.class_mode == 'input':
-            batch_y = batch_x.copy()
-        elif self.class_mode == 'sparse':
-            batch_y = self.classes[index_array]
-        elif self.class_mode == 'binary':
-            batch_y = self.classes[index_array].astype(self.dtype)
-        elif self.class_mode == 'categorical':
-            batch_y = np.zeros(
-                (len(batch_x), self.num_classes),
-                dtype=self.dtype)
-            for i, label in enumerate(self.classes[index_array]):
-                batch_y[i, label] = 1.
-        elif self.class_mode == 'other':
-            batch_y = self.data[index_array]
-        else:
-            return batch_x
-        return batch_x, batch_y
-
     def _filter_valid_filepaths(self, df):
         """Keep only dataframe rows with valid filenames
 
@@ -222,3 +168,16 @@ class DataFrameIterator(Iterator):
         format_check = filepaths.map(get_extension).isin(self.white_list_formats)
         existence_check = filepaths.map(os.path.isfile)
         return df[format_check & existence_check]
+
+    @property
+    def filepaths(self):
+        root = self.directory or ''
+        return [os.path.join(root, fname) for fname in self.filenames]
+
+    @property
+    def labels(self):
+        return self.classes
+
+    @property
+    def data(self):
+        return self._data

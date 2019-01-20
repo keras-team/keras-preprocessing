@@ -13,6 +13,10 @@ try:
 except ImportError:
     IteratorType = object
 
+from .utils import (array_to_img,
+                    img_to_array,
+                    load_img)
+
 
 class Iterator(IteratorType):
     """Base class for image data iterators.
@@ -59,16 +63,107 @@ class Iterator(IteratorType):
                                        self.batch_size * (idx + 1)]
         return self._get_batches_of_transformed_samples(index_array)
 
-    def common_init(self,
-                    image_data_generator,
-                    target_size,
-                    color_mode,
-                    data_format,
-                    save_to_dir,
-                    save_prefix,
-                    save_format,
-                    subset,
-                    interpolation):
+    def __len__(self):
+        return (self.n + self.batch_size - 1) // self.batch_size  # round up
+
+    def on_epoch_end(self):
+        self._set_index_array()
+
+    def reset(self):
+        self.batch_index = 0
+
+    def _flow_index(self):
+        # Ensure self.batch_index is 0.
+        self.reset()
+        while 1:
+            if self.seed is not None:
+                np.random.seed(self.seed + self.total_batches_seen)
+            if self.batch_index == 0:
+                self._set_index_array()
+
+            current_index = (self.batch_index * self.batch_size) % self.n
+            if self.n > current_index + self.batch_size:
+                self.batch_index += 1
+            else:
+                self.batch_index = 0
+            self.total_batches_seen += 1
+            yield self.index_array[current_index:
+                                   current_index + self.batch_size]
+
+    def __iter__(self):
+        # Needed if we want to do something like:
+        # for x, y in data_gen.flow(...):
+        return self
+
+    def __next__(self, *args, **kwargs):
+        return self.next(*args, **kwargs)
+
+    def next(self):
+        """For python 2.x.
+
+        # Returns
+            The next batch.
+        """
+        with self.lock:
+            index_array = next(self.index_generator)
+        # The transformation of images is not under thread lock
+        # so it can be done in parallel
+        return self._get_batches_of_transformed_samples(index_array)
+
+    def _get_batches_of_transformed_samples(self, index_array):
+        """Gets a batch of transformed samples.
+
+        # Arguments
+            index_array: Array of sample indices to include in batch.
+
+        # Returns
+            A batch of transformed samples.
+        """
+        raise NotImplementedError
+
+
+class BatchFromFilesMixin():
+    """Adds methods related to getting batches from filenames
+
+    It includes the logic to transform image files to batches.
+    """
+
+    def set_processing_attrs(self,
+                             image_data_generator,
+                             target_size,
+                             color_mode,
+                             data_format,
+                             save_to_dir,
+                             save_prefix,
+                             save_format,
+                             subset,
+                             interpolation):
+        """Sets attributes to use later for processing files into a batch.
+
+        # Arguments
+            image_data_generator: Instance of `ImageDataGenerator`
+                to use for random transformations and normalization.
+            target_size: tuple of integers, dimensions to resize input images to.
+            color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
+                Color mode to read images.
+            data_format: String, one of `channels_first`, `channels_last`.
+            save_to_dir: Optional directory where to save the pictures
+                being yielded, in a viewable format. This is useful
+                for visualizing the random transformations being
+                applied, for debugging purposes.
+            save_prefix: String prefix to use for saving sample
+                images (if `save_to_dir` is set).
+            save_format: Format to use for saving sample images
+                (if `save_to_dir` is set).
+            subset: Subset of data (`"training"` or `"validation"`) if
+                validation_split is set in ImageDataGenerator.
+            interpolation: Interpolation method used to resample the image if the
+                target size is different from that of the loaded image.
+                Supported methods are "nearest", "bilinear", and "bicubic".
+                If PIL version 1.1.3 or newer is installed, "lanczos" is also
+                supported. If PIL version 3.4.0 or newer is installed, "box" and
+                "hamming" are also supported. By default, "nearest" is used.
+        """
         self.image_data_generator = image_data_generator
         self.target_size = tuple(target_size)
         if color_mode not in {'rgb', 'rgba', 'grayscale'}:
@@ -110,41 +205,6 @@ class Iterator(IteratorType):
         self.split = split
         self.subset = subset
 
-    def __len__(self):
-        return (self.n + self.batch_size - 1) // self.batch_size  # round up
-
-    def on_epoch_end(self):
-        self._set_index_array()
-
-    def reset(self):
-        self.batch_index = 0
-
-    def _flow_index(self):
-        # Ensure self.batch_index is 0.
-        self.reset()
-        while 1:
-            if self.seed is not None:
-                np.random.seed(self.seed + self.total_batches_seen)
-            if self.batch_index == 0:
-                self._set_index_array()
-
-            current_index = (self.batch_index * self.batch_size) % self.n
-            if self.n > current_index + self.batch_size:
-                self.batch_index += 1
-            else:
-                self.batch_index = 0
-            self.total_batches_seen += 1
-            yield self.index_array[current_index:
-                                   current_index + self.batch_size]
-
-    def __iter__(self):
-        # Needed if we want to do something like:
-        # for x, y in data_gen.flow(...):
-        return self
-
-    def __next__(self, *args, **kwargs):
-        return self.next(*args, **kwargs)
-
     def _get_batches_of_transformed_samples(self, index_array):
         """Gets a batch of transformed samples.
 
@@ -154,16 +214,75 @@ class Iterator(IteratorType):
         # Returns
             A batch of transformed samples.
         """
-        raise NotImplementedError
+        batch_x = np.zeros(
+            (len(index_array),) + self.image_shape,
+            dtype=self.dtype)
+        # build batch of image data
+        # self.filepaths is dynamic, is better to call it once outside the loop
+        filepaths = self.filepaths
+        for i, j in enumerate(index_array):
+            img = load_img(filepaths[j],
+                           color_mode=self.color_mode,
+                           target_size=self.target_size,
+                           interpolation=self.interpolation)
+            x = img_to_array(img, data_format=self.data_format)
+            # Pillow images should be closed after `load_img`,
+            # but not PIL images.
+            if hasattr(img, 'close'):
+                img.close()
+            if self.image_data_generator:
+                params = self.image_data_generator.get_random_transform(x.shape)
+                x = self.image_data_generator.apply_transform(x, params)
+                x = self.image_data_generator.standardize(x)
+            batch_x[i] = x
+        # optionally save augmented images to disk for debugging purposes
+        if self.save_to_dir:
+            for i, j in enumerate(index_array):
+                img = array_to_img(batch_x[i], self.data_format, scale=True)
+                fname = '{prefix}_{index}_{hash}.{format}'.format(
+                    prefix=self.save_prefix,
+                    index=j,
+                    hash=np.random.randint(1e7),
+                    format=self.save_format)
+                img.save(os.path.join(self.save_to_dir, fname))
+        # build batch of labels
+        if self.class_mode == 'input':
+            batch_y = batch_x.copy()
+        elif self.class_mode == 'sparse':
+            batch_y = self.classes[index_array]
+        elif self.class_mode == 'binary':
+            batch_y = self.classes[index_array].astype(self.dtype)
+        elif self.class_mode == 'categorical':
+            batch_y = np.zeros(
+                (len(batch_x), len(set(self.labels))),
+                dtype=self.dtype)
+            for i, label in enumerate(self.labels[index_array]):
+                batch_y[i, label] = 1.
+        elif self.class_mode == 'other':
+            batch_y = self.data[index_array]
+        else:
+            return batch_x
+        return batch_x, batch_y
 
-    def next(self):
-        """For python 2.x.
+    @property
+    def filepaths(self):
+        """List of absolute paths to image files"""
+        raise NotImplementedError(
+            '`filepaths` property method has not been implemented in {}.'
+            .format(type(self).__name__)
+        )
 
-        # Returns
-            The next batch.
-        """
-        with self.lock:
-            index_array = next(self.index_generator)
-        # The transformation of images is not under thread lock
-        # so it can be done in parallel
-        return self._get_batches_of_transformed_samples(index_array)
+    @property
+    def labels(self):
+        """Class labels of every observation"""
+        raise NotImplementedError(
+            '`labels` property method has not been implemented in {}.'
+            .format(type(self).__name__)
+        )
+
+    @property
+    def data(self):
+        raise NotImplementedError(
+            '`data` property method has not been implemented in {}.'
+            .format(type(self).__name__)
+        )
