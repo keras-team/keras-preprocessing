@@ -49,16 +49,19 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             Color mode to read images.
         classes: Optional list of strings, classes to use (e.g. `["dogs", "cats"]`).
             If None, all classes in `y_col` will be used.
-        class_mode: Mode for yielding the targets:
-            `"binary"`: binary targets (if there are only two classes),
-            `"categorical"`: categorical targets, supports multi-label output
-                if class values per observation are stored in a list or tuple
-                in the `y_col` column,
-            `"sparse"`: integer targets,
-            `"input"`: targets are images identical to input images (mainly
-                used to work with autoencoders),
-            `"other"`: targets are the data(numpy array) of y_col data
-            `None`: no targets get yielded (only input images are yielded).
+        class_mode: one of "categorical", "binary", "sparse", "input",
+            "other" or None. Default: "categorical".
+            Mode for yielding the targets:
+            - `"binary"`: 1D numpy array of binary labels,
+            - `"categorical"`: 2D numpy array of one-hot encoded labels.
+                Supports multi-label output.
+            - `"sparse"`: 1D numpy array of integer labels,
+            - `"input"`: images identical to input images (mainly used to
+                work with autoencoders),
+            - `"other"`: numpy array of `y_col` data,
+            - `None`, no targets are returned (the generator will only yield
+                batches of image data, which is useful to use in
+            `model.predict_generator()`, `model.evaluate_generator()`, etc.).
         batch_size: Integer, size of a batch.
         shuffle: Boolean, whether to shuffle the data between epochs.
         seed: Random seed for data shuffling.
