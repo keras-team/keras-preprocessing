@@ -261,7 +261,6 @@ class BatchFromFilesMixin():
             return batch_x
         return batch_x, batch_y
 
-
     @property
     def filepaths(self):
         """List of absolute paths to image files"""
