@@ -483,8 +483,7 @@ class ImageDataGenerator(object):
                     to input images (mainly used to work with autoencoders).
                 - If None, no labels are returned
                   (the generator will only yield batches of image data,
-                  which is useful to use with `model.predict_generator()`,
-                  `model.evaluate_generator()`, etc.).
+                  which is useful to use with `model.predict_generator()`).
                   Please note that in case of class_mode None,
                   the data still needs to reside in a subdirectory
                   of `directory` for it to work correctly.
@@ -566,13 +565,25 @@ class ImageDataGenerator(object):
                                     http://bit.ly/keras_flow_from_dataframe).
 
         # Arguments
-            directory: string, path to the directory to read images from.
-                Directory to under which all the images are present.
-                If None, data in x_col column should be absolute paths.
-            x_col: string, column in the dataframe that contains
-                the filenames of the target images.
-            y_col: string or list of strings,columns in
-                the dataframe that will be the target data.
+            dataframe: Pandas dataframe containing the filepaths relative to
+                `directory` (or absolute paths if `directory` is None) of the
+                images in a string column. It should include other column/s
+                depending on the `class_mode`:
+                    - if `class_mode` is `"categorical"` (default value) it must
+                        include the `y_col` column with the class/es of each image.
+                        Values in column can be string/list/tuple if a single class
+                        or list/tuple if multiple classes.
+                    - if `class_mode` is `"binary"` or `"sparse"` it must include
+                        the given `y_col` column with class values as strings.
+                    - if `class_mode` is `"other"` it should contain the columns
+                        specified in `y_col`.
+                    - if `class_mode` is `"input"` or `None` no extra column is
+                        needed.
+            directory: string, path to the directory to read images from. If `None`,
+                data in `x_col` column should be absolute paths.
+            x_col: string, column in `dataframe` that contains the filenames (or
+                absolute paths if `directory` is `None`).
+            y_col: string or list, column/s in `dataframe` that has the target data.
             target_size: tuple of integers `(height, width)`, default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
             color_mode: one of "grayscale", "rgb". Default: "rgb".
@@ -583,18 +594,19 @@ class ImageDataGenerator(object):
                 which will map to the label indices, will be alphanumeric).
                 The dictionary containing the mapping from class names to class
                 indices can be obtained via the attribute `class_indices`.
-            class_mode: one of "categorical", "binary", "sparse",
-                "input", "other" or None. Default: "categorical".
-                Determines the type of label arrays that are returned:
-                - `"categorical"` will be 2D one-hot encoded labels,
-                - `"binary"` will be 1D binary labels,
-                - `"sparse"` will be 1D integer labels,
-                - `"input"` will be images identical
-                    to input images (mainly used to work with autoencoders).
-                - `"other"` will be numpy array of `y_col` data
-                - None, no labels are returned (the generator will only
-                    yield batches of image data, which is useful to use
-                `model.predict_generator()`, `model.evaluate_generator()`, etc.).
+            class_mode: one of "categorical", "binary", "sparse", "input",
+                "other" or None. Default: "categorical".
+                Mode for yielding the targets:
+                - `"binary"`: 1D numpy array of binary labels,
+                - `"categorical"`: 2D numpy array of one-hot encoded labels.
+                    Supports multi-label output.
+                - `"sparse"`: 1D numpy array of integer labels,
+                - `"input"`: images identical to input images (mainly used to
+                    work with autoencoders),
+                - `"other"`: numpy array of `y_col` data,
+                - `None`, no targets are returned (the generator will only yield
+                    batches of image data, which is useful to use in
+                    `model.predict_generator()`).
             batch_size: size of the batches of data (default: 32).
             shuffle: whether to shuffle the data (default: True)
             seed: optional random seed for shuffling and transformations.

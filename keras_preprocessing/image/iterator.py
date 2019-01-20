@@ -214,9 +214,7 @@ class BatchFromFilesMixin():
         # Returns
             A batch of transformed samples.
         """
-        batch_x = np.zeros(
-            (len(index_array),) + self.image_shape,
-            dtype=self.dtype)
+        batch_x = np.zeros((len(index_array),) + self.image_shape, dtype=self.dtype)
         # build batch of image data
         # self.filepaths is dynamic, is better to call it once outside the loop
         filepaths = self.filepaths
@@ -248,16 +246,15 @@ class BatchFromFilesMixin():
         # build batch of labels
         if self.class_mode == 'input':
             batch_y = batch_x.copy()
-        elif self.class_mode == 'sparse':
-            batch_y = self.classes[index_array]
-        elif self.class_mode == 'binary':
-            batch_y = self.classes[index_array].astype(self.dtype)
+        elif self.class_mode in {'binary', 'sparse'}:
+            batch_y = np.empty(len(batch_x), dtype=self.dtype)
+            for i, n_observation in enumerate(index_array):
+                batch_y[i] = self.classes[n_observation]
         elif self.class_mode == 'categorical':
-            batch_y = np.zeros(
-                (len(batch_x), len(set(self.labels))),
-                dtype=self.dtype)
-            for i, label in enumerate(self.labels[index_array]):
-                batch_y[i, label] = 1.
+            batch_y = np.zeros((len(batch_x), len(self.class_indices)),
+                               dtype=self.dtype)
+            for i, n_observation in enumerate(index_array):
+                batch_y[i, self.classes[n_observation]] = 1.
         elif self.class_mode == 'other':
             batch_y = self.data[index_array]
         else:
