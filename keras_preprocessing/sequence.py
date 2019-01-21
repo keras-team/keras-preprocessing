@@ -365,7 +365,8 @@ class TimeseriesGenerator(object):
             rows = np.arange(i, min(i + self.batch_size *
                                     self.stride, self.end_index + 1), self.stride)
 
-        samples = np.array([self.data[row - self.length:row:self.sampling_rate] for row in rows])
+        samples = np.array([self.data[row - self.length:row:self.sampling_rate] 
+                           for row in rows])
         targets = np.array([self.targets[row] for row in rows])
 
         if self.reverse:
