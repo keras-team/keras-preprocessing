@@ -356,13 +356,6 @@ class TimeseriesGenerator(object):
         return (self.end_index - self.start_index +
                 self.batch_size * self.stride) // (self.batch_size * self.stride)
 
-    def _empty_batch(self, num_rows):
-        samples_shape = [num_rows, self.length // self.sampling_rate]
-        samples_shape.extend(self.data.shape[1:])
-        targets_shape = [num_rows]
-        targets_shape.extend(self.targets.shape[1:])
-        return np.empty(samples_shape), np.empty(targets_shape)
-
     def __getitem__(self, index):
         if self.shuffle:
             rows = np.random.randint(
@@ -372,11 +365,10 @@ class TimeseriesGenerator(object):
             rows = np.arange(i, min(i + self.batch_size *
                                     self.stride, self.end_index + 1), self.stride)
 
-        samples, targets = self._empty_batch(len(rows))
-        for j, row in enumerate(rows):
-            indices = range(rows[j] - self.length, rows[j], self.sampling_rate)
-            samples[j] = self.data[indices]
-            targets[j] = self.targets[rows[j]]
+        samples = np.array([self.data[row - self.length:row:self.sampling_rate]
+                            for row in rows])
+        targets = np.array([self.targets[row] for row in rows])
+
         if self.reverse:
             return samples[:, ::-1, ...], targets
         return samples, targets
