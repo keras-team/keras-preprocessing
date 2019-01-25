@@ -237,7 +237,7 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
         raise ValueError('Invalid data_format: %s' % data_format)
 
     if x.ndim == 2:
-        x = x[:,:,None]
+        x = x[:, :, None]
     # Original Numpy array x has format (height, width, channel)
     # or (channel, height, width)
     # but target PIL image has format (width, height, channel)
