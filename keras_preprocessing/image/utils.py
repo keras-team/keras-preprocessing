@@ -224,17 +224,20 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
         ImportError: if PIL is not available.
         ValueError: if invalid `x` or `data_format` is passed.
     """
+    allowed_dimensions = [2, 3]
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
                           'The use of `array_to_img` requires PIL.')
     x = np.asarray(x, dtype=dtype)
-    if x.ndim != 3:
-        raise ValueError('Expected image array to have rank 3 (single image). '
+    if x.ndim not in allowed_dimensions:
+        raise ValueError('Expected image array to have rank 2 or 3. '
                          'Got array with shape: %s' % (x.shape,))
 
     if data_format not in {'channels_first', 'channels_last'}:
         raise ValueError('Invalid data_format: %s' % data_format)
 
+    if x.ndim == 2:
+        x = x[:,:,None]
     # Original Numpy array x has format (height, width, channel)
     # or (channel, height, width)
     # but target PIL image has format (width, height, channel)
