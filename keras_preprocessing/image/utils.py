@@ -236,13 +236,15 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     if data_format not in {'channels_first', 'channels_last'}:
         raise ValueError('Invalid data_format: %s' % data_format)
 
-    if x.ndim == 2:
-        x = x[:, :, None]
     # Original Numpy array x has format (height, width, channel)
     # or (channel, height, width)
     # but target PIL image has format (width, height, channel)
-    if data_format == 'channels_first':
+    if data_format == 'channels_first' and x.ndim == 3:
         x = x.transpose(1, 2, 0)
+
+    if x.ndim == 2:
+        x = x[:, :, None]
+
     if scale:
         x = x + max(-np.min(x), 0)
         x_max = np.max(x)
