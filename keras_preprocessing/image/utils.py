@@ -207,7 +207,7 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
 
 
 def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
-    """Converts a 3D Numpy array to a PIL Image instance.
+    """Converts a 2D-3D Numpy array to a PIL Image instance.
 
     # Arguments
         x: Input Numpy array.
