@@ -991,6 +991,12 @@ class TestImage(object):
         assert img.size == (width, height)
         x = image.img_to_array(img, data_format='channels_first')
         assert x.shape == (1, height, width)
+        # Test 2D-Array
+        x = np.random.random((height, width))
+        img = image.array_to_img(x, data_format='channels_first')
+        assert img.size == (width, height)
+        x = image.img_to_array(img, data_format='channels_first')
+        assert x.shape == (1, height, width)
 
         # Test tf data format
         # Test RGB 3D
@@ -1011,11 +1017,14 @@ class TestImage(object):
         assert img.size == (width, height)
         x = image.img_to_array(img, data_format='channels_last')
         assert x.shape == (height, width, 1)
+        # Test 2D- Array
+        x = np.random.random((height, width))
+        img = image.array_to_img(x, data_format='channels_last')
+        assert img.size == (width, height)
+        x = image.img_to_array(img, data_format='channels_last')
+        assert x.shape == (height, width, 1)
 
         # Test invalid use case
-        with pytest.raises(ValueError):
-            x = np.random.random((height, width))  # not 3D
-            img = image.array_to_img(x, data_format='channels_first')
         with pytest.raises(ValueError):
             x = np.random.random((height, width, 3))
             # unknown data_format
