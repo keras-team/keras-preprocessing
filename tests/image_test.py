@@ -8,13 +8,6 @@ import keras
 import pandas as pd
 import random
 
-# TODO: remove the 3 lines below once the Keras release
-# is configured to use keras_preprocessing
-import keras_preprocessing
-keras_preprocessing.set_keras_submodules(
-    backend=keras.backend, utils=keras.utils)
-
-# This enables this import
 from keras_preprocessing import image
 
 
