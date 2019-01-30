@@ -45,6 +45,7 @@ install:
       pip install --no-deps git+https://github.com/keras-team/keras.git ;
     fi
   - if [["$TEST_MODE" == "PEP8"]]; then
+      conda uninstall pandas
       conda install pytest;
     else
       conda install pandas;
