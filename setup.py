@@ -31,6 +31,7 @@ setup(name='Keras_Preprocessing',
                    'keras-preprocessing/tarball/1.0.6',
       license='MIT',
       install_requires=['numpy>=1.9.1',
+                        'pandas>=0.18',
                         'six>=1.9.0'],
       extras_require={
           'tests': ['pytest',
