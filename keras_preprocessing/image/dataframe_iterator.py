@@ -8,7 +8,6 @@ import os
 import warnings
 
 import numpy as np
-from pandas.api.types import is_numeric_dtype
 
 from .iterator import BatchFromFilesMixin, Iterator
 from .utils import (array_to_img,
