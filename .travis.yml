@@ -20,6 +20,13 @@ matrix:
         # run tests with keras from PyPI and Python 3.6
         - python: 3.6
           env: TEST_MODE=TESTS
+        # run import test and Python 2.7
+        - python: 2.7
+          env: TEST_MODE=IMPORTS
+        # run import test and Python 3.6
+        - python: 3.6
+          env: TEST_MODE=IMPORTS
+
 
 before_install:
   - sudo apt-get update
@@ -48,6 +55,8 @@ install:
       pip install -e .[pep8]
     elif [[ "$TEST_MODE" == "TESTS" ]]; then
       pip install -e .[tests]
+    elif [[ "$TEST_MODE" == "IMPORTS" ]]; then
+      pip install .
     fi
 
 script:
@@ -57,4 +66,9 @@ script:
       py.test --cov-config .coveragerc \
               --cov=keras_preprocessing \
               tests;
+    elif [[ "$TEST_MODE" == "IMPORTS" ]]; then
+      python -c "import keras_preprocessing; \
+      from keras_preprocessing import image; \
+      from keras_preprocessing import sequence; \
+      from keras_preprocessing import text";
     fi
