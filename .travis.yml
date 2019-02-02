@@ -61,15 +61,12 @@ install:
 
 script:
   - if [[ "$TEST_MODE" == "PEP8" ]]; then
-      flake8 --count;
+      flake8 -v --count;
     elif [[ "$TEST_MODE" == "TESTS" ]]; then
-      py.test tests
+      PYTHONPATH=$PWD:$PYTHONPATH py.test tests
               --cov-config .coveragerc \
               --cov=keras_preprocessing \
               tests;
     elif [[ "$TEST_MODE" == "IMPORTS" ]]; then
-      python -c "import keras_preprocessing; \
-      from keras_preprocessing import image; \
-      from keras_preprocessing import sequence; \
-      from keras_preprocessing import text";
+      python -c "import keras_preprocessing; from keras_preprocessing import image; from keras_preprocessing import sequence; from keras_preprocessing import text";
     fi
