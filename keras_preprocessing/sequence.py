@@ -384,7 +384,7 @@ class TimeseriesGenerator(object):
             data = self.data.tolist()
         try:
             json_data = json.dumps(data)
-        except:
+        except TypeError:
             raise TypeError('Data not JSON Serializable:', data)
 
         targets = self.targets
@@ -392,7 +392,7 @@ class TimeseriesGenerator(object):
             targets = self.targets.tolist()
         try:
             json_targets = json.dumps(targets)
-        except:
+        except TypeError:
             raise TypeError('Targets not JSON Serializable:', targets)
 
         return {

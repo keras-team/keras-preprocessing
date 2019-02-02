@@ -7,13 +7,8 @@ from __future__ import print_function
 import os
 import warnings
 
-import numpy as np
-
 from .iterator import BatchFromFilesMixin, Iterator
-from .utils import (array_to_img,
-                    get_extension,
-                    img_to_array,
-                    load_img)
+from .utils import get_extension
 
 
 class DataFrameIterator(BatchFromFilesMixin, Iterator):
@@ -220,7 +215,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             else:
                 raise TypeError(
                     "Expect string, list or tuple but found {} in {} column "
-                    .format(type(x), y_col)
+                    .format(type(labels), y_col)
                 )
 
         if classes:

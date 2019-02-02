@@ -11,10 +11,7 @@ from six.moves import range
 import numpy as np
 
 from .iterator import BatchFromFilesMixin, Iterator
-from .utils import (array_to_img,
-                    img_to_array,
-                    _list_valid_filenames_in_directory,
-                    load_img)
+from .utils import _list_valid_filenames_in_directory
 
 
 class DirectoryIterator(BatchFromFilesMixin, Iterator):

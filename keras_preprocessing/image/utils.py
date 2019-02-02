@@ -156,7 +156,7 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
                 warnings.warn('Using ".tiff" files with multiple bands '
                               'will cause distortion. Please verify your output.')
             if get_extension(fname) in white_list_formats:
-                    yield root, fname
+                yield root, fname
 
 
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,

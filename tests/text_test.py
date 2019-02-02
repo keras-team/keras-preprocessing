@@ -3,13 +3,6 @@ import numpy as np
 import pytest
 
 import keras
-
-# TODO: remove the 3 lines below once the Keras release
-# is configured to use keras_preprocessing
-import keras_preprocessing
-keras_preprocessing.set_keras_submodules(
-    backend=keras.backend, utils=keras.utils)
-
 from keras_preprocessing import text
 from collections import OrderedDict
 
@@ -54,7 +47,7 @@ def test_tokenizer():
     tokenizer.fit_on_sequences(sequences)
 
     for mode in ['binary', 'count', 'tfidf', 'freq']:
-        matrix = tokenizer.texts_to_matrix(sample_texts, mode)
+        tokenizer.texts_to_matrix(sample_texts, mode)
 
 
 def test_tokenizer_serde_no_fitting():
