@@ -52,11 +52,11 @@ install:
       pip install --no-deps git+https://github.com/keras-team/keras.git --upgrade;
     fi
   - if [[ "$TEST_MODE" == "PEP8" ]]; then
-      pip install -e .[pep8]
+      pip install -e .[pep8];
     elif [[ "$TEST_MODE" == "TESTS" ]]; then
-      pip install -e .[tests]
+      pip install -e .[tests];
     elif [[ "$TEST_MODE" == "IMPORTS" ]]; then
-      pip install .
+      pip install .;
     fi
 
 script:
