@@ -4,10 +4,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-import re
-import warnings
-
 import numpy as np
 
 from .utils import (array_to_img,
@@ -15,8 +11,6 @@ from .utils import (array_to_img,
 
 try:
     import scipy
-    # scipy.linalg cannot be accessed until explicitly imported
-    from scipy import linalg
     # scipy.ndimage cannot be accessed until explicitly imported
     from scipy import ndimage
 except ImportError:
@@ -327,7 +321,7 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
         final_affine_matrix = transform_matrix[:2, :2]
         final_offset = transform_matrix[:2, 2]
 
-        channel_images = [scipy.ndimage.interpolation.affine_transform(
+        channel_images = [ndimage.interpolation.affine_transform(
             x_channel,
             final_affine_matrix,
             final_offset,

@@ -1,9 +1,7 @@
 """Enables dynamic setting of underlying Keras module.
 """
 from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
+# flake8: noqa:F401
 from .affine_transformations import *
 from .dataframe_iterator import DataFrameIterator
 from .directory_iterator import DirectoryIterator
