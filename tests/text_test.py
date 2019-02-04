@@ -47,7 +47,7 @@ def test_tokenizer():
     tokenizer.fit_on_sequences(sequences)
 
     for mode in ['binary', 'count', 'tfidf', 'freq']:
-        matrix = tokenizer.texts_to_matrix(sample_texts, mode)
+        tokenizer.texts_to_matrix(sample_texts, mode)
 
 
 def test_tokenizer_serde_no_fitting():

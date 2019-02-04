@@ -5,7 +5,6 @@ from numpy.testing import assert_allclose
 from numpy.testing import assert_equal
 from numpy.testing import assert_raises
 
-import keras
 from keras_preprocessing import sequence
 
 

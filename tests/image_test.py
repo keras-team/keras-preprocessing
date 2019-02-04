@@ -4,7 +4,6 @@ import numpy as np
 import os
 import tempfile
 import shutil
-import keras
 import pandas as pd
 import random
 
@@ -255,7 +254,7 @@ class TestImage(object):
 
     def test_image_data_generator_with_split_value_error(self):
         with pytest.raises(ValueError):
-            generator = image.ImageDataGenerator(validation_split=5)
+            image.ImageDataGenerator(validation_split=5)
 
     def test_image_data_generator_invalid_data(self):
         generator = image.ImageDataGenerator(
@@ -528,12 +527,14 @@ class TestImage(object):
                                      dtype=str)
         batch_x, batch_y = next(df_multiple_y_iterator)
         with pytest.raises(TypeError):
-            df_multiple_y_iterator = generator.flow_from_dataframe(
+            generator.flow_from_dataframe(
                 df_regression, str(tmpdir), y_col=["col1", "col2"],
-                class_mode="other")
+                class_mode="other"
+            )
         with pytest.raises(TypeError):
-            df_single_y_iterator = generator.flow_from_dataframe(
-                df_regression, str(tmpdir), y_col="col1", class_mode="other")
+            generator.flow_from_dataframe(
+                df_regression, str(tmpdir), y_col="col1", class_mode="other"
+            )
         # check number of classes and images
         assert len(df_iterator.class_indices) == num_classes
         assert len(df_iterator.classes) == count
@@ -906,12 +907,12 @@ class TestImage(object):
         # create iterators
         generator = image.ImageDataGenerator()
         df_drop_iterator = generator.flow_from_dataframe(
-            df2, str(tmpdir), class_mode=None, drop_duplicates=True)
+            df, str(tmpdir), class_mode=None, drop_duplicates=True)
         df_no_drop_iterator = generator.flow_from_dataframe(
             df2, str(tmpdir), class_mode=None, drop_duplicates=False)
 
         # Test drop_duplicates
-        assert df_drop_iterator.n == len(set(input_filenames2))
+        assert df_drop_iterator.n == len(set(input_filenames))
         assert df_no_drop_iterator.n == len(input_filenames2)
 
     def test_dataframe_iterator_with_subdirs(self, tmpdir):
@@ -1222,6 +1223,7 @@ class TestImage(object):
         with pytest.raises(ValueError):
             loaded_im = image.load_img(filename_rgb, target_size=(25, 25),
                                        interpolation="unsupported")
+
 
 if __name__ == '__main__':
     pytest.main([__file__])

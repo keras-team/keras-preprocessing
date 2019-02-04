@@ -3,20 +3,37 @@ dist: trusty
 language: python
 matrix:
     include:
+        # check code style and Python 2.7
         - python: 2.7
           env: TEST_MODE=PEP8
+        # run tests with keras from source and Python 2.7
         - python: 2.7
           env: KERAS_HEAD=true
+          env: TEST_MODE=TESTS
+        # run tests with keras from source and Python 3.6
         - python: 3.6
           env: KERAS_HEAD=true
+          env: TEST_MODE=TESTS
+        # run tests with keras from PyPI and Python 2.7
         - python: 2.7
+          env: TEST_MODE=TESTS
+        # run tests with keras from PyPI and Python 3.6
         - python: 3.6
-install:
-  # code below is taken from http://conda.pydata.org/docs/travis.html
+          env: TEST_MODE=TESTS
+        # run import test and Python 2.7
+        - python: 2.7
+          env: TEST_MODE=IMPORTS
+        # run import test and Python 3.6
+        - python: 3.6
+          env: TEST_MODE=IMPORTS
+
+
+before_install:
+  - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
     else
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
@@ -27,32 +44,26 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest pandas
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
   - source activate test-environment
-  - pip install --only-binary=numpy,scipy numpy nose scipy keras
 
-  # set library path
-  - export LD_LIBRARY_PATH=$HOME/miniconda/envs/test-environment/lib/:$LD_LIBRARY_PATH
-
-  # install PIL for image tests
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      conda install pil;
-    elif [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
-      conda install Pillow;
-    fi
+install:
   - if [[ $KERAS_HEAD == "true" ]]; then
-      pip install --no-deps git+https://github.com/keras-team/keras.git ;
+      pip install --no-deps git+https://github.com/keras-team/keras.git --upgrade;
     fi
-  - pip install -e .[tests]
+  - if [[ "$TEST_MODE" == "PEP8" ]]; then
+      pip install -e .[pep8];
+    elif [[ "$TEST_MODE" == "TESTS" ]]; then
+      pip install -e .[tests];
+    elif [[ "$TEST_MODE" == "IMPORTS" ]]; then
+      pip install .;
+    fi
 
-  # install TensorFlow (CPU version).
-  - pip install tensorflow==1.7
-
-# command to run tests
 script:
   - if [[ "$TEST_MODE" == "PEP8" ]]; then
-      PYTHONPATH=$PWD:$PYTHONPATH py.test --pep8 -m pep8 -n0;
-    else
-      PYTHONPATH=$PWD:$PYTHONPATH py.test tests/ --cov-config .coveragerc --cov=keras_preprocessing tests/;
+      flake8 -v --count;
+    elif [[ "$TEST_MODE" == "TESTS" ]]; then
+      py.test tests --cov-config .coveragerc --cov=keras_preprocessing tests;
+    elif [[ "$TEST_MODE" == "IMPORTS" ]]; then
+      python -c "import keras_preprocessing; from keras_preprocessing import image; from keras_preprocessing import sequence; from keras_preprocessing import text";
     fi

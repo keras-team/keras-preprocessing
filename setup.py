@@ -1,3 +1,5 @@
+import sys
+
 from setuptools import setup
 from setuptools import find_packages
 
@@ -21,22 +23,26 @@ and is distributed under the MIT license.
 '''
 
 setup(name='Keras_Preprocessing',
-      version='1.0.5',
+      version='1.0.8',
       description='Easy data preprocessing and data augmentation '
                   'for deep learning models',
       long_description=long_description,
       author='Keras Team',
       url='https://github.com/keras-team/keras-preprocessing',
       download_url='https://github.com/keras-team/'
-                   'keras-preprocessing/tarball/1.0.5',
+                   'keras-preprocessing/tarball/1.0.8',
       license='MIT',
       install_requires=['numpy>=1.9.1',
                         'six>=1.9.0'],
       extras_require={
-          'tests': ['pytest',
-                    'pytest-pep8',
+          'tests': ['pandas',
+                    'Pillow' if sys.version_info >= (3, 0) else 'pillow',
+                    'tensorflow==1.7',  # CPU version
+                    'keras',
+                    'pytest',
                     'pytest-xdist',
                     'pytest-cov'],
+          'pep8': ['flake8'],
           'image': ['scipy>=0.14',
                     'Pillow>=5.2.0'],
       },

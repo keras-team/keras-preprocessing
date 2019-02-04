@@ -14,7 +14,6 @@ try:
     # scipy.linalg cannot be accessed until explicitly imported
     from scipy import linalg
     # scipy.ndimage cannot be accessed until explicitly imported
-    from scipy import ndimage
 except ImportError:
     scipy = None
 
@@ -957,6 +956,6 @@ class ImageDataGenerator(object):
             flat_x = np.reshape(
                 x, (x.shape[0], x.shape[1] * x.shape[2] * x.shape[3]))
             sigma = np.dot(flat_x.T, flat_x) / flat_x.shape[0]
-            u, s, _ = scipy.linalg.svd(sigma)
+            u, s, _ = linalg.svd(sigma)
             s_inv = 1. / np.sqrt(s[np.newaxis] + self.zca_epsilon)
             self.principal_components = (u * s_inv).dot(u.T)
