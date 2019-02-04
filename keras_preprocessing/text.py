@@ -43,25 +43,27 @@ def text_to_word_sequence(text,
     if lower:
         text = text.lower()
 
-    if sys.version_info < (3,):
-        if isinstance(text, unicode):
-            translate_map = dict((ord(c), unicode(split)) for c in filters)
-            text = text.translate(translate_map)
-        elif len(split) == 1:
-            translate_map = maketrans(filters, split * len(filters))
-            text = text.translate(translate_map)
-        else:
-            for c in filters:
-                text = text.replace(c, split)
-    else:
-        translate_dict = dict((c, split) for c in filters)
-        translate_map = maketrans(translate_dict)
-        text = text.translate(translate_map)
-
     if callable(split):
+        if filters not in {None, ''}:
+            warnings.warn("""The `filters` argument is ignored if `split`
+                argument is a function""")
         seq = split(text)
     elif isinstance(split, str):
-        seq = text.split(split)
+        if sys.version_info < (3,):
+            if isinstance(text, unicode):
+                translate_map = dict((ord(c), unicode(split)) for c in filters)
+                text = text.translate(translate_map)
+            elif len(split) == 1:
+                translate_map = maketrans(filters, split * len(filters))
+                text = text.translate(translate_map)
+            else:
+                for c in filters:
+                    text = text.replace(c, split)
+        else:
+            translate_dict = dict((c, split) for c in filters)
+            translate_map = maketrans(translate_dict)
+            text = text.translate(translate_map)
+            seq = text.split(split)
     else:
         raise TypeError('''`split` should either be a string or a function.
                     Found a {}'''.format(type(split)))
