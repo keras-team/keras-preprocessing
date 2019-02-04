@@ -34,7 +34,8 @@ def text_to_word_sequence(text,
             punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\\t\\n``,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to convert the input to lowercase.
-        split: str. Separator for word splitting.
+        split: Either a string separator or a function that accepts a string
+            and returns sequence of strings which have been split.
 
     # Returns
         A list of words (or tokens).
@@ -57,7 +58,14 @@ def text_to_word_sequence(text,
         translate_map = maketrans(translate_dict)
         text = text.translate(translate_map)
 
-    seq = text.split(split)
+    if callable(split):
+        seq = split(text)
+    elif isinstance(split, str):
+        seq = text.split(split)
+    else:
+        raise TypeError('''`split` should either be a string or a function.
+                    Found a {}'''.format(type(split)))
+
     return [i for i in seq if i]
 
 
@@ -77,7 +85,8 @@ def one_hot(text, n,
             punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\\t\\n``,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to set the text to lowercase.
-        split: str. Separator for word splitting.
+        split: Either a separator string or a function that accepts a string
+            and returns sequence of strings which have been split.
 
     # Returns
         List of integers in [1, n]. Each integer encodes a word
@@ -109,7 +118,8 @@ def hashing_trick(text, n,
             punctuation. Default: ``!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\\t\\n``,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to set the text to lowercase.
-        split: str. Separator for word splitting.
+        split: Either a separator string or a function that accepts a string
+            and returns sequence of strings which have been split.
 
     # Returns
         A list of integer word indices (unicity non-guaranteed).
@@ -152,7 +162,8 @@ class Tokenizer(object):
             filtered from the texts. The default is all punctuation, plus
             tabs and line breaks, minus the `'` character.
         lower: boolean. Whether to convert the texts to lowercase.
-        split: str. Separator for word splitting.
+        split: Either a separator string or a function that accepts a string
+            and returns sequence of strings which have been split.
         char_level: if True, every character will be treated as a token.
         oov_token: if given, it will be added to word_index and used to
             replace out-of-vocabulary words during text_to_sequence calls
