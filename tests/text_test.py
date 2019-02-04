@@ -118,6 +118,16 @@ def test_text_to_word_sequence():
     assert text.text_to_word_sequence(sample_text) == ['hello', 'world']
 
 
+def test_text_to_word_sequence_split_function():
+    sample_text = "How're you"
+
+    def custom_split(text):
+        text = text.replace("'", " '")
+        return text.split()
+
+    assert text.text_to_word_sequence(sample_text, split=custom_split) == ['how', "'re", "you"]
+
+
 def test_text_to_word_sequence_multichar_split():
     sample_text = 'hello!stop?world!'
     assert text.text_to_word_sequence(
