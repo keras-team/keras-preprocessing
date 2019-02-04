@@ -125,7 +125,8 @@ def test_text_to_word_sequence_split_function():
         text = text.replace("'", " '")
         return text.split()
 
-    assert text.text_to_word_sequence(sample_text, split=custom_split) == ['how', "'re", "you"]
+    assert text.text_to_word_sequence(
+        sample_text, split=custom_split) == ['how', "'re", "you"]
 
 
 def test_text_to_word_sequence_multichar_split():
