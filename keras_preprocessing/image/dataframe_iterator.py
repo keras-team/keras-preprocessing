@@ -7,6 +7,8 @@ from __future__ import print_function
 import os
 import warnings
 
+import numpy as np
+
 from .iterator import BatchFromFilesMixin, Iterator
 from .utils import get_extension
 
@@ -37,6 +39,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         x_col: string, column in `dataframe` that contains the filenames (or
             absolute paths if `directory` is `None`).
         y_col: string or list, column/s in `dataframe` that has the target data.
+        weight_col: string, column in `dataframe` that contains the sample
+            wights. Default: `None`.
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
             Color mode to read images.
@@ -87,6 +91,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  image_data_generator=None,
                  x_col="filename",
                  y_col="class",
+                 weight_col=None,
                  target_size=(256, 256),
                  color_mode='rgb',
                  classes=None,
@@ -117,7 +122,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         self.class_mode = class_mode
         self.dtype = dtype
         # check that inputs match the required class_mode
-        self._check_params(df, x_col, y_col, classes)
+        self._check_params(df, x_col, y_col, weight_col, classes)
         if drop_duplicates:
             df.drop_duplicates(x_col, inplace=True)
         # check which image files are valid and keep them
@@ -155,7 +160,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                 shuffle,
                                                 seed)
 
-    def _check_params(self, df, x_col, y_col, classes):
+    def _check_params(self, df, x_col, y_col, weight_col, classes):
         # check class mode is one of the currently supported
         if self.class_mode not in self.allowed_class_modes:
             raise ValueError('Invalid class_mode: {}; expected one of: {}'
@@ -192,6 +197,12 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         if classes and self.class_mode in {"other", "input", None}:
             warnings.warn('`classes` will be ignored given the class_mode="{}"'
                           .format(self.class_mode))
+        # check that if weight column that the values are numerical
+        if (weight_col and
+            issubclass(df[weight_col].dtype, np.number) and not
+                issubclass(df[weight_col].dtype, (np.datetime64, np.timedelta64))):
+            raise ValueError('Column weight_col={} must be numeric.'
+                             .format(weight_col))
 
     def get_classes(self, df, y_col):
         labels = []
