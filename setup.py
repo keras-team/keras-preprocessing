@@ -23,7 +23,7 @@ and is distributed under the MIT license.
 '''
 
 setup(name='Keras_Preprocessing',
-      version='1.0.8',
+      version='1.0.9',
       description='Easy data preprocessing and data augmentation '
                   'for deep learning models',
       long_description=long_description,
