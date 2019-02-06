@@ -55,6 +55,8 @@ install:
     fi
   - if [[ $KERAS_HEAD == "true" ]]; then
       pip install --no-deps git+https://github.com/keras-team/keras.git --upgrade;
+      pip uninstall tensorflow;
+      pip install --no-deps tf-nightly --upgrade;
     fi
 
 script:
