@@ -8,12 +8,10 @@ matrix:
           env: TEST_MODE=PEP8
         # run tests with keras from source and Python 2.7
         - python: 2.7
-          env: KERAS_HEAD=true
-          env: TEST_MODE=TESTS
+          env: KERAS_HEAD=true TEST_MODE=TESTS
         # run tests with keras from source and Python 3.6
         - python: 3.6
-          env: KERAS_HEAD=true
-          env: TEST_MODE=TESTS
+          env: KERAS_HEAD=true TEST_MODE=TESTS
         # run tests with keras from PyPI and Python 2.7
         - python: 2.7
           env: TEST_MODE=TESTS
