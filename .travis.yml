@@ -69,7 +69,6 @@ script:
       source .travis/integration.sh;
       run_integration 'https://raw.githubusercontent.com/keras-team/keras/master/tests/integration_tests/preprocessing';
       run_integration 'https://raw.githubusercontent.com/tensorflow/tensorflow/master/tensorflow/python/keras/preprocessing';
-    fi
     elif [[ "$TEST_MODE" == "IMPORTS" ]]; then
       # Sanity check
       python -c "import keras_preprocessing; from keras_preprocessing import image; from keras_preprocessing import sequence; from keras_preprocessing import text";
