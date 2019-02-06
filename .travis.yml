@@ -44,13 +44,10 @@ before_install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION curl
   - source activate test-environment
 
 install:
-  - if [[ $KERAS_HEAD == "true" ]]; then
-      pip install --no-deps git+https://github.com/keras-team/keras.git --upgrade;
-    fi
   - if [[ "$TEST_MODE" == "PEP8" ]]; then
       pip install -e .[pep8];
     elif [[ "$TEST_MODE" == "TESTS" ]]; then
@@ -58,12 +55,28 @@ install:
     elif [[ "$TEST_MODE" == "IMPORTS" ]]; then
       pip install .;
     fi
+  - if [[ $KERAS_HEAD == "true" ]]; then
+      pip install --no-deps git+https://github.com/keras-team/keras.git --upgrade;
+      pip install --no-deps tf-nightly --upgrade;
+    fi
+  - function run_integration() {
+      mkdir -p test_keras;
+      curl "$1/image_test.py" -L -o test_keras/image_test.py;
+      curl "$1/sequence_test.py" -L -o test_keras/sequence_test.py;
+      curl "$1/text_test.py" -L -o test_keras/text_test.py;
+      py.test test_keras;
+    }
 
 script:
   - if [[ "$TEST_MODE" == "PEP8" ]]; then
       flake8 -v --count;
     elif [[ "$TEST_MODE" == "TESTS" ]]; then
       py.test tests --cov-config .coveragerc --cov=keras_preprocessing tests;
+    elif [[ $KERAS_HEAD == "true" ]]; then
+      run_integration 'https://raw.githubusercontent.com/keras-team/keras/master/tests/integration_tests/preprocessing'
+      run_integration 'https://raw.githubusercontent.com/tensorflow/tensorflow/master/tensorflow/python/keras/preprocessing'
+    fi
     elif [[ "$TEST_MODE" == "IMPORTS" ]]; then
+      # Sanity check
       python -c "import keras_preprocessing; from keras_preprocessing import image; from keras_preprocessing import sequence; from keras_preprocessing import text";
     fi
