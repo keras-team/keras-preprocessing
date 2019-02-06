@@ -58,6 +58,7 @@ install:
   - if [[ $KERAS_HEAD == "true" ]]; then
       pip install --no-deps git+https://github.com/keras-team/keras.git --upgrade;
       pip install --no-deps tf-nightly --upgrade;
+    fi
 
 script:
   - if [[ "$TEST_MODE" == "PEP8" ]]; then
@@ -65,7 +66,7 @@ script:
     elif [[ "$TEST_MODE" == "TESTS" ]]; then
       py.test tests --cov-config .coveragerc --cov=keras_preprocessing tests;
     elif [[ $KERAS_HEAD == "true" ]]; then
-      source .travis/define.sh
+      source .travis/integration.sh
       run_integration 'https://raw.githubusercontent.com/keras-team/keras/master/tests/integration_tests/preprocessing'
       run_integration 'https://raw.githubusercontent.com/tensorflow/tensorflow/master/tensorflow/python/keras/preprocessing'
     fi
