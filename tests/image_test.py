@@ -590,6 +590,38 @@ class TestImage(object):
         with pytest.raises(ValueError):
             image.ImageDataGenerator(brightness_range=0.1)
 
+    def test_dataframe_iterator_sample_weights(self, tmpdir):
+        # save the images in the paths
+        count = 0
+        filenames = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = 'image-{}.png'.format(count)
+                im.save(str(tmpdir / filename))
+                filenames.append(filename)
+                count += 1
+        df = pd.DataFrame({"filename": filenames})
+        df['weight'] = ([2, 5] * len(df))[:len(df)]
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(df, str(tmpdir),
+                                                    x_col="filename",
+                                                    y_col=None,
+                                                    shuffle=False,
+                                                    batch_size=5,
+                                                    weight_col='weight',
+                                                    class_mode="input")
+
+        batch = next(df_iterator)
+        assert len(batch) == 3  # (x, y, weights)
+        # check if input and output have the same shape and they're the same
+        assert(batch[0].all() == batch[1].all())
+        # check if the input and output images are not the same numpy array
+        input_img = batch[0][0]
+        output_img = batch[1][0]
+        output_img[0][0][0] += 1
+        assert input_img[0][0][0] != output_img[0][0][0]
+        assert np.array_equal(np.array([2, 5, 2, 5, 2]), batch[2])
+
     def test_dataframe_iterator_class_mode_input(self, tmpdir):
         # save the images in the paths
         count = 0
