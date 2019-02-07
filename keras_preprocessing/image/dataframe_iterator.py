@@ -40,7 +40,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             absolute paths if `directory` is `None`).
         y_col: string or list, column/s in `dataframe` that has the target data.
         weight_col: string, column in `dataframe` that contains the sample
-            wights. Default: `None`.
+            weights. Default: `None`.
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
             Color mode to read images.
@@ -200,9 +200,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             warnings.warn('`classes` will be ignored given the class_mode="{}"'
                           .format(self.class_mode))
         # check that if weight column that the values are numerical
-        if (weight_col and
-            issubclass(df[weight_col].dtype, np.number) and not
-                issubclass(df[weight_col].dtype, (np.datetime64, np.timedelta64))):
+        if weight_col and not issubclass(df[weight_col].dtype.type, np.number):
             raise ValueError('Column weight_col={} must be numeric.'
                              .format(weight_col))
 
