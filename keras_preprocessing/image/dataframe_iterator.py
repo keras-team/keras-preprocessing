@@ -142,6 +142,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         if class_mode not in ["other", "input", None]:
             self.classes = self.get_classes(df, y_col)
         self.filenames = df[x_col].tolist()
+        if weight_col:
+            self._sample_weight = df[weight_col].values
         # create numpy array of raw input if class_mode="other"
         if class_mode == "other":
             self._data = df[y_col].values
@@ -266,6 +268,13 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
     @property
     def labels(self):
         return self.classes
+
+    @property
+    def sample_weight(self):
+        if hasattr(self, '_sample_weight'):
+            return self._sample_weight
+        else:
+            return None
 
     @property
     def data(self):
