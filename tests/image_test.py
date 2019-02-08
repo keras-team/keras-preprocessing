@@ -622,6 +622,13 @@ class TestImage(object):
         assert input_img[0][0][0] != output_img[0][0][0]
         assert np.array_equal(np.array([2, 5, 2, 5, 2]), batch[2])
 
+        # fail
+        df['weight'] = (['2', '5'] * len(df))[:len(df)]
+        with pytest.raises(TypeError):
+            image.ImageDataGenerator().flow_from_dataframe(df,
+                                                           weight_col='weight',
+                                                           class_mode="input")
+
     def test_dataframe_iterator_class_mode_input(self, tmpdir):
         # save the images in the paths
         count = 0
