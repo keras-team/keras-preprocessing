@@ -517,24 +517,6 @@ class TestImage(object):
                                                for _ in filenames],
                                       "col2": [random.randrange(0, 1)
                                                for _ in filenames]})
-        df_multiple_y_iterator = generator.flow_from_dataframe(
-            df_regression, str(tmpdir), y_col=["col1", "col2"], class_mode="other")
-        df_regression = pd.DataFrame({"filename": filenames,
-                                      "col1": [random.randrange(0, 1)
-                                               for _ in filenames],
-                                      "col2": [random.randrange(0, 1)
-                                               for _ in filenames]},
-                                     dtype=str)
-        batch_x, batch_y = next(df_multiple_y_iterator)
-        with pytest.raises(TypeError):
-            generator.flow_from_dataframe(
-                df_regression, str(tmpdir), y_col=["col1", "col2"],
-                class_mode="other"
-            )
-        with pytest.raises(TypeError):
-            generator.flow_from_dataframe(
-                df_regression, str(tmpdir), y_col="col1", class_mode="other"
-            )
         # check number of classes and images
         assert len(df_iterator.class_indices) == num_classes
         assert len(df_iterator.classes) == count
@@ -542,8 +524,7 @@ class TestImage(object):
         assert len(df_iterator_dir.class_indices) == num_classes
         assert len(df_iterator_dir.classes) == count
         assert set(df_iterator_dir.filenames) == set(filenames)
-        assert batch_y.shape[1] == 2
-        # test shuffle=False
+        # test without shuffle
         _, batch_y = next(generator.flow_from_dataframe(df, str(tmpdir),
                                                         shuffle=False,
                                                         class_mode="sparse"))
@@ -718,7 +699,6 @@ class TestImage(object):
         for labels in batch_y:
             assert all(l in {0, 1} for l in labels)
 
-        # use OrderedDict to mantain order in python 2.7 and allow for checks
         # on first 3 batches
         df = pd.DataFrame({
             "filename": filenames,
@@ -737,6 +717,74 @@ class TestImage(object):
         assert (batch_y[0] == np.array([1, 1, 0])).all()
         assert (batch_y[1] == np.array([0, 1, 0])).all()
         assert (batch_y[2] == np.array([0, 0, 1])).all()
+
+    def test_dataframe_iterator_class_mode_multi_output(self, tmpdir):
+        # save the images in the paths
+        filenames = []
+        count = 0
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = 'image-{}.png'.format(count)
+                im.save(str(tmpdir / filename))
+                filenames.append(filename)
+                count += 1
+        # fit both outputs are a single number
+        df = pd.DataFrame({"filename": filenames}).assign(
+            output_0=np.random.uniform(size=len(filenames)),
+            output_1=np.random.uniform(size=len(filenames))
+        )
+        df_iterator = image.ImageDataGenerator().flow_from_dataframe(
+            df, y_col=['output_0', 'output_1'], directory=str(tmpdir),
+            batch_size=3, shuffle=False, class_mode='multi_output'
+        )
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, list)
+        assert len(batch_y) == 2
+        assert np.array_equal(batch_y[0],
+                              np.array(df['output_0'].tolist()[:3]))
+        assert np.array_equal(batch_y[1],
+                              np.array(df['output_1'].tolist()[:3]))
+        # if one of the outputs is a 1D array
+        df['output_1'] = [np.random.uniform(size=(2, 2, 1)).flatten()
+                          for _ in range(len(df))]
+        df_iterator = image.ImageDataGenerator().flow_from_dataframe(
+            df, y_col=['output_0', 'output_1'], directory=str(tmpdir),
+            batch_size=3, shuffle=False, class_mode='multi_output'
+        )
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, list)
+        assert len(batch_y) == 2
+        assert np.array_equal(batch_y[0],
+                              np.array(df['output_0'].tolist()[:3]))
+        assert np.array_equal(batch_y[1],
+                              np.array(df['output_1'].tolist()[:3]))
+        # if one of the outputs is a 2D array
+        df['output_1'] = [np.random.uniform(size=(2, 2, 1))
+                          for _ in range(len(df))]
+        df_iterator = image.ImageDataGenerator().flow_from_dataframe(
+            df, y_col=['output_0', 'output_1'], directory=str(tmpdir),
+            batch_size=3, shuffle=False, class_mode='multi_output'
+        )
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, list)
+        assert len(batch_y) == 2
+        assert np.array_equal(batch_y[0],
+                              np.array(df['output_0'].tolist()[:3]))
+        assert np.array_equal(batch_y[1],
+                              np.array(df['output_1'].tolist()[:3]))
+        # fail if single column
+        with pytest.raises(TypeError):
+            image.ImageDataGenerator().flow_from_dataframe(
+                df, y_col='output_0',
+                directory=str(tmpdir),
+                class_mode='multi_output'
+            )
 
     @pytest.mark.parametrize('validation_split,num_training', [
         (0.25, 18),
