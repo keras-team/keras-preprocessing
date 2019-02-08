@@ -257,7 +257,7 @@ class BatchFromFilesMixin():
             for i, n_observation in enumerate(index_array):
                 batch_y[i, self.classes[n_observation]] = 1.
         elif self.class_mode == 'multi_output':
-            batch_y = [np.vstack(col) for col in self.labels[index_array].T]
+            batch_y = [output[index_array] for output in self.labels]
         else:
             return batch_x
         if self.sample_weight is None:

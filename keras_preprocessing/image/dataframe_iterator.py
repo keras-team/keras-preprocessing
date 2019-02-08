@@ -150,7 +150,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
 
         # create numpy array of raw input if class_mode="other"
         if class_mode == "multi_output":
-            self._targets = df[list(y_col)].values
+            self._targets = [np.array(df[col].tolist()) for col in y_col]
         self.samples = len(self.filenames)
         validated_string = 'validated' if validate_filenames else 'non-validated'
         if class_mode in ["input", "multi_output", None]:
@@ -169,6 +169,12 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         if self.class_mode not in self.allowed_class_modes:
             raise ValueError('Invalid class_mode: {}; expected one of: {}'
                              .format(self.class_mode, self.allowed_class_modes))
+        # check that y_col has several column names if class_mode is multi_output
+        if (self.class_mode == 'multi_output') and not isinstance(y_col, list):
+            raise TypeError(
+                'If class_mode="{}", y_col must be a list. Received {}.'
+                .format(self.class_mode, type(y_col).__name__)
+            )
         # check that filenames/filepaths column values are all strings
         if not all(df[x_col].apply(lambda x: isinstance(x, str))):
             raise TypeError('All values in column x_col={} must be strings.'
