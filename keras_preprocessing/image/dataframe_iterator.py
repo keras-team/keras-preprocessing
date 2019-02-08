@@ -271,8 +271,6 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
     def sample_weight(self):
         if hasattr(self, '_sample_weight'):
             return self._sample_weight
-        else:
-            return None
 
     @property
     def data(self):
