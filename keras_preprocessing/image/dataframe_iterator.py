@@ -55,7 +55,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             - `"sparse"`: 1D numpy array of integer labels,
             - `"input"`: images identical to input images (mainly used to
                 work with autoencoders),
-            - `"other"`: numpy array of `y_col` data,
+            - `"multi_output"`: list with the values of the different columns,
             - `None`, no targets are returned (the generator will only yield
                 batches of image data, which is useful to use in
                 `model.predict_generator()`).
@@ -85,7 +85,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         can lead to speed-up in the instantiation of this class. Default: `True`.
     """
     allowed_class_modes = {
-        'categorical', 'binary', 'sparse', 'input', 'other', None
+        'binary', 'categorical', 'input', 'multi_output', 'sparse', None
     }
 
     def __init__(self,
@@ -131,7 +131,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             df.drop_duplicates(x_col, inplace=True)
         if validate_filenames:  # check which image files are valid and keep them
             df = self._filter_valid_filepaths(df, x_col)
-        if class_mode not in ["other", "input", None]:
+        if class_mode not in ["input", "multi_output", None]:
             df, classes = self._filter_classes(df, y_col, classes)
             num_classes = len(classes)
             # build an index of all the unique classes
@@ -143,21 +143,17 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             stop = int(self.split[1] * num_files)
             df = df.iloc[start: stop, :]
         # get labels for each observation
-        if class_mode not in ["other", "input", None]:
+        if class_mode not in ["input", "multi_output", None]:
             self.classes = self.get_classes(df, y_col)
         self.filenames = df[x_col].tolist()
         self._sample_weight = df[weight_col].values if weight_col else None
 
         # create numpy array of raw input if class_mode="other"
-        if class_mode == "other":
-            self._data = df[y_col].values
-            if isinstance(y_col, str):
-                y_col = [y_col]
-            if "object" in list(df[y_col].dtypes):
-                raise TypeError("y_col column/s must be numeric datatypes.")
+        if class_mode == "multi_output":
+            self._targets = df[list(y_col)].values
         self.samples = len(self.filenames)
         validated_string = 'validated' if validate_filenames else 'non-validated'
-        if class_mode in ["other", "input", None]:
+        if class_mode in ["input", "multi_output", None]:
             print('Found {} {} image filenames.'
                   .format(self.samples, validated_string))
         else:
@@ -202,7 +198,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                 'values must be type string, list or tuple.'
                                 .format(self.class_mode, y_col))
         # raise warning if classes are given and class_mode other or input
-        if classes and self.class_mode in {"other", "input", None}:
+        if classes and self.class_mode in {"input", None}:
             warnings.warn('`classes` will be ignored given the class_mode="{}"'
                           .format(self.class_mode))
         # check that if weight column that the values are numerical
@@ -277,12 +273,11 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
 
     @property
     def labels(self):
-        return self.classes
+        if self.class_mode != "multi_output":
+            return self.classes
+        else:
+            return self._targets
 
     @property
     def sample_weight(self):
         return self._sample_weight
-
-    @property
-    def data(self):
-        return self._data
