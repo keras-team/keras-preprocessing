@@ -512,11 +512,6 @@ class TestImage(object):
         if np.isnan(df_sparse_iterator.classes).any():
             raise ValueError('Invalid values.')
 
-        df_regression = pd.DataFrame({"filename": filenames,
-                                      "col1": [random.randrange(0, 1)
-                                               for _ in filenames],
-                                      "col2": [random.randrange(0, 1)
-                                               for _ in filenames]})
         # check number of classes and images
         assert len(df_iterator.class_indices) == num_classes
         assert len(df_iterator.classes) == count
