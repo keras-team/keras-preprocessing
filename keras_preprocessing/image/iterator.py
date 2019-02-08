@@ -256,8 +256,8 @@ class BatchFromFilesMixin():
                                dtype=self.dtype)
             for i, n_observation in enumerate(index_array):
                 batch_y[i, self.classes[n_observation]] = 1.
-        elif self.class_mode == 'other':
-            batch_y = self.data[index_array]
+        elif self.class_mode == 'multi_output':
+            batch_y = [np.vstack(col) for col in self.labels[index_array].T]
         else:
             return batch_x
         if self.sample_weight is None:
@@ -285,12 +285,5 @@ class BatchFromFilesMixin():
     def sample_weight(self):
         raise NotImplementedError(
             '`sample_weight` property method has not been implemented in {}.'
-            .format(type(self).__name__)
-        )
-
-    @property
-    def data(self):
-        raise NotImplementedError(
-            '`data` property method has not been implemented in {}.'
             .format(type(self).__name__)
         )
