@@ -606,7 +606,7 @@ class ImageDataGenerator(object):
                 - `"sparse"`: 1D numpy array of integer labels,
                 - `"input"`: images identical to input images (mainly used to
                     work with autoencoders),
-                - `"other"`: numpy array of `y_col` data,
+                - `"multi_output"`: list with the values of the different columns,
                 - `None`, no targets are returned (the generator will only yield
                     batches of image data, which is useful to use in
                     `model.predict_generator()`).
