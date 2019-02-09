@@ -543,6 +543,7 @@ class ImageDataGenerator(object):
                             directory=None,
                             x_col="filename",
                             y_col="class",
+                            weight_col=None,
                             target_size=(256, 256),
                             color_mode='rgb',
                             classes=None,
@@ -583,6 +584,8 @@ class ImageDataGenerator(object):
             x_col: string, column in `dataframe` that contains the filenames (or
                 absolute paths if `directory` is `None`).
             y_col: string or list, column/s in `dataframe` that has the target data.
+            weight_col: string, column in `dataframe` that contains the sample
+                weights. Default: `None`.
             target_size: tuple of integers `(height, width)`, default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
             color_mode: one of "grayscale", "rgb". Default: "rgb".
@@ -650,6 +653,7 @@ class ImageDataGenerator(object):
             self,
             x_col=x_col,
             y_col=y_col,
+            weight_col=weight_col,
             target_size=target_size,
             color_mode=color_mode,
             classes=classes,

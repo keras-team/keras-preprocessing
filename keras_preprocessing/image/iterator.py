@@ -260,7 +260,10 @@ class BatchFromFilesMixin():
             batch_y = self.data[index_array]
         else:
             return batch_x
-        return batch_x, batch_y
+        if self.sample_weight is None:
+            return batch_x, batch_y
+        else:
+            return batch_x, batch_y, self.sample_weight[index_array]
 
     @property
     def filepaths(self):
@@ -275,6 +278,13 @@ class BatchFromFilesMixin():
         """Class labels of every observation"""
         raise NotImplementedError(
             '`labels` property method has not been implemented in {}.'
+            .format(type(self).__name__)
+        )
+
+    @property
+    def sample_weight(self):
+        raise NotImplementedError(
+            '`sample_weight` property method has not been implemented in {}.'
             .format(type(self).__name__)
         )
 
