@@ -6,6 +6,7 @@ import tempfile
 import shutil
 import pandas as pd
 import random
+import string
 
 from keras_preprocessing import image
 
@@ -1224,6 +1225,21 @@ class TestImage(object):
             loaded_im = image.load_img(filename_rgb, target_size=(25, 25),
                                        interpolation="unsupported")
 
+
+    def test_list_pictures(self, tmpdir):
+        vocab = list(string.ascii_lowercase + string.ascii_uppercase +
+                     string.digits + '-')
+        images = []
+
+        for i in range(100):
+            images.append(os.path.join(tmpdir,
+                                       f'{"".join(np.random.choice(vocab,
+                                                                   10))}.png'))
+            image.array_to_img(np.array(255 * np.random.rand(100, 100, 3),
+                               dtype=np.uint8), scale=False).save(images[-1])
+
+        found_images = image.list_pictures(tmpdir)
+        assert len(found_images) == len(images)
 
 if __name__ == '__main__':
     pytest.main([__file__])
