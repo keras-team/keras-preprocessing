@@ -1227,16 +1227,15 @@ class TestImage(object):
 
 
     def test_list_pictures(self, tmpdir):
-        vocab = list(string.ascii_lowercase + string.ascii_uppercase +
-                     string.digits + '-')
-        images = []
+        images.append(os.path.join(tmpdir, 'test.png'))
+        images.append(os.path.join(tmpdir, 'test0.jpg'))
+        images.append(os.path.join(tmpdir, 'test-1.jpeg'))
+        images.append(os.path.join(tmpdir, '2test.bmp'))
+        images.append(os.path.join(tmpdir, '2-test.ppm'))
+        images.append(os.path.join(tmpdir, '3.png'))
 
-        for i in range(100):
-            images.append(os.path.join(tmpdir,
-                                       f'{"".join(np.random.choice(vocab,
-                                                                   10))}.png'))
-            image.array_to_img(np.array(255 * np.random.rand(100, 100, 3),
-                               dtype=np.uint8), scale=False).save(images[-1])
+        for img in images:
+            Image.new('RGB', (32, 32)).save(img)
 
         found_images = image.list_pictures(tmpdir)
         assert len(found_images) == len(images)
