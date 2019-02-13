@@ -1225,20 +1225,15 @@ class TestImage(object):
             loaded_im = image.load_img(filename_rgb, target_size=(25, 25),
                                        interpolation="unsupported")
 
-
     def test_list_pictures(self, tmpdir):
         os.mkdir(os.path.join(tmpdir, 'class1'))
         os.mkdir(os.path.join(tmpdir, 'class2'))
 
         filenames = ['test.png', 'test0.jpg', 'test-1.jpeg', '2test.bmp',
-                     '2-test.ppm', '3.png']
-        images = [os.path.join(tmpdir, f) for f in filenames]
-
-        class1 = ['test.png', 'test0.jpg', '1.jpeg']
-        images += [os.path.join(tmpdir, 'class1', f) for f in class1]
-
-        class2 = ['test.bmp', 'test0.ppm', '1.jpeg']
-        images += [os.path.join(tmpdir, 'class2', f) for f in class2]
+                     '2-test.ppm', '3.png', '1.jpeg', 'test.bmp', 'test0.ppm']
+        subdirs = ['', 'subdir1', 'subdir2']
+        images = [os.path.join(tmpdir, subdir, f) for subdir in subdirs
+                  for f in filenames]
 
         for img in images:
             with open(img, 'w') as f:
@@ -1249,6 +1244,7 @@ class TestImage(object):
 
         found_images = image.list_pictures(tmpdir, ext='png')
         assert len(found_images) == 3
+
 
 if __name__ == '__main__':
     pytest.main([__file__])
