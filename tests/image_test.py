@@ -1229,8 +1229,8 @@ class TestImage(object):
         filenames = ['test.png', 'test0.jpg', 'test-1.jpeg', '2test.bmp',
                      '2-test.ppm', '3.png', '1.jpeg', 'test.bmp', 'test0.ppm']
         subdirs = ['', 'subdir1', 'subdir2']
-        images = [tmpdir.makedirs(subdir, exist_ok=True).join(f)
-                  for subdir in subdirs for f in filenames]
+        images = [tmpdir.ensure(subdir, dir=True).join(f) for subdir in subdirs
+                  for f in filenames]
 
         for img in images:
             with open(img, 'w') as f:
@@ -1240,7 +1240,7 @@ class TestImage(object):
         assert len(found_images) == len(images)
 
         found_images = image.list_pictures(tmpdir, ext='png')
-        assert len(found_images) == 3
+        assert len(found_images) == 6
 
 
 if __name__ == '__main__':
