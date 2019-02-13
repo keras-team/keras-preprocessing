@@ -127,7 +127,8 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     return img
 
 
-def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm')):
+def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif',
+                                  'tiff')):
     """Lists all pictures in a directory, including all subdirectories.
 
     # Arguments
