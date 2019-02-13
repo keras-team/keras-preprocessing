@@ -1227,28 +1227,28 @@ class TestImage(object):
 
 
     def test_list_pictures(self, tmpdir):
-        images = [os.path.join(tmpdir, 'test.png')]
-        images.append(os.path.join(tmpdir, 'test0.jpg'))
-        images.append(os.path.join(tmpdir, 'test-1.jpeg'))
-        images.append(os.path.join(tmpdir, '2test.bmp'))
-        images.append(os.path.join(tmpdir, '2-test.ppm'))
-        images.append(os.path.join(tmpdir, '3.png'))
-
         os.mkdir(os.path.join(tmpdir, 'class1'))
-        images.append(os.path.join(tmpdir, 'class1', 'test.png'))
-        images.append(os.path.join(tmpdir, 'class1', 'test0.jpg'))
-        images.append(os.path.join(tmpdir, 'class1', '1.jpeg'))
-
         os.mkdir(os.path.join(tmpdir, 'class2'))
-        images.append(os.path.join(tmpdir, 'class2', 'test.bmp'))
-        images.append(os.path.join(tmpdir, 'class2', 'test0.ppm'))
-        images.append(os.path.join(tmpdir, 'class2', '1.jpeg'))
+
+        filenames = ['test.png', 'test0.jpg', 'test-1.jpeg', '2test.bmp',
+                     '2-test.ppm', '3.png']
+        images = [os.path.join(tmpdir, f) for f in filenames]
+
+        class1 = ['test.png', 'test0.jpg', '1.jpeg']
+        images += [os.path.join(tmpdir, 'class1', f) for f in class1]
+
+        class2 = ['test.bmp', 'test0.ppm', '1.jpeg']
+        images += [os.path.join(tmpdir, 'class2', f) for f in class2]
 
         for img in images:
-            os.mknod(img)
+            with open(img, 'w') as f:
+                f.write('\n')
 
         found_images = image.list_pictures(tmpdir)
         assert len(found_images) == len(images)
+
+        found_images = image.list_pictures(tmpdir, ext='png')
+        assert len(found_images) == 3
 
 if __name__ == '__main__':
     pytest.main([__file__])
