@@ -127,18 +127,21 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     return img
 
 
-def list_pictures(directory, ext='jpg|jpeg|bmp|png|ppm'):
+def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm')):
     """Lists all pictures in a directory, including all subdirectories.
 
     # Arguments
-        directory: Absolute path to the directory
-        ext: extensions of the pictures, separated by '|'
+        directory: string, absolute path to the directory
+        ext: tuple of strings, extensions of the pictures, separated by '|'
     # Returns
         a list of paths
     """
+    if not isinstance(ext, tuple):
+        ext = tuple(ext)
+    ext = tuple(f'.{e}' for e in ext)
     return [os.path.join(root, f)
             for root, _, files in os.walk(directory) for f in files
-            if re.match(r'.*(' + ext + ')$', f.lower())]
+            if f.lower().endswith(ext)]
 
 
 def _iter_valid_files(directory, white_list_formats, follow_links):
