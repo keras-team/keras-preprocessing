@@ -1232,7 +1232,7 @@ class TestImage(object):
         filenames = ['test.png', 'test0.jpg', 'test-1.jpeg', '2test.bmp',
                      '2-test.ppm', '3.png', '1.jpeg', 'test.bmp', 'test0.ppm']
         subdirs = ['', 'subdir1', 'subdir2']
-        images = [os.path.join(tmpdir, subdir, f) for subdir in subdirs
+        images = [tmpdir.mkdir(subdir).join(f) for subdir in subdirs
                   for f in filenames]
 
         for img in images:
