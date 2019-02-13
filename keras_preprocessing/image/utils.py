@@ -138,7 +138,7 @@ def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm')):
     """
     if not isinstance(ext, tuple):
         ext = tuple(ext)
-    ext = tuple(f'.{e}' for e in ext)
+    ext = tuple('.%s' % e for e in ext)
     return [os.path.join(root, f)
             for root, _, files in os.walk(directory) for f in files
             if f.lower().endswith(ext)]
