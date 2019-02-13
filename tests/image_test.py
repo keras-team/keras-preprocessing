@@ -1234,8 +1234,18 @@ class TestImage(object):
         images.append(os.path.join(tmpdir, '2-test.ppm'))
         images.append(os.path.join(tmpdir, '3.png'))
 
+        os.mkdir(os.path.join(tmpdir, 'class1'))
+        images.append(os.path.join(tmpdir, 'class1', 'test.png'))
+        images.append(os.path.join(tmpdir, 'class1', 'test0.jpg'))
+        images.append(os.path.join(tmpdir, 'class1', '1.jpeg'))
+
+        os.mkdir(os.path.join(tmpdir, 'class2'))
+        images.append(os.path.join(tmpdir, 'class2', 'test.bmp'))
+        images.append(os.path.join(tmpdir, 'class2', 'test0.ppm'))
+        images.append(os.path.join(tmpdir, 'class2', '1.jpeg'))
+
         for img in images:
-            Image.new('RGB', (32, 32)).save(img)
+            os.mknod(img)
 
         found_images = image.list_pictures(tmpdir)
         assert len(found_images) == len(images)
