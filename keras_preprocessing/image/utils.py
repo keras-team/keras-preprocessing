@@ -137,7 +137,7 @@ def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm')):
         a list of paths
     """
     if not isinstance(ext, tuple):
-        ext = tuple(ext)
+        ext = (ext,)
     ext = tuple('.%s' % e for e in ext)
     return [os.path.join(root, f)
             for root, _, files in os.walk(directory) for f in files
