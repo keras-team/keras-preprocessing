@@ -1227,7 +1227,7 @@ class TestImage(object):
 
 
     def test_list_pictures(self, tmpdir):
-        images.append(os.path.join(tmpdir, 'test.png'))
+        images = [os.path.join(tmpdir, 'test.png')]
         images.append(os.path.join(tmpdir, 'test0.jpg'))
         images.append(os.path.join(tmpdir, 'test-1.jpeg'))
         images.append(os.path.join(tmpdir, '2test.bmp'))
