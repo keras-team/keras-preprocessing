@@ -6,7 +6,6 @@ import tempfile
 import shutil
 import pandas as pd
 import random
-import string
 
 from keras_preprocessing import image
 
