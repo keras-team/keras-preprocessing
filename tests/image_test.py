@@ -1233,7 +1233,7 @@ class TestImage(object):
                   for f in filenames]
 
         for img in images:
-            with open(img, 'w') as f:
+            with open(str(img), 'w') as f:
                 f.write('\n')
 
         found_images = image.list_pictures(tmpdir)
