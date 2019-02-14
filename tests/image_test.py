@@ -1227,19 +1227,17 @@ class TestImage(object):
 
     def test_list_pictures(self, tmpdir):
         filenames = ['test.png', 'test0.jpg', 'test-1.jpeg', '2test.bmp',
-                     '2-test.ppm', '3.png', '1.jpeg', 'test.bmp', 'test0.ppm']
+                     '2-test.ppm', '3.png', '1.jpeg', 'test.bmp', 'test0.ppm',
+                     'test4.tiff', '5-test.tif', 'test.txt', 'foo.csv',
+                     'face.gif', 'bar.txt']
         subdirs = ['', 'subdir1', 'subdir2']
-        images = [tmpdir.ensure(subdir, dir=True).join(f) for subdir in subdirs
+        images = [tmpdir.ensure(subdir, f) for subdir in subdirs
                   for f in filenames]
 
-        for img in images:
-            with open(str(img), 'w') as f:
-                f.write('\n')
+        found_images = image.list_pictures(str(tmpdir))
+        assert len(found_images) == 33
 
-        found_images = image.list_pictures(tmpdir)
-        assert len(found_images) == len(images)
-
-        found_images = image.list_pictures(tmpdir, ext='png')
+        found_images = image.list_pictures(str(tmpdir), ext='png')
         assert len(found_images) == 6
 
 
