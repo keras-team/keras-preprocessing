@@ -1231,8 +1231,8 @@ class TestImage(object):
                      'test4.tiff', '5-test.tif', 'test.txt', 'foo.csv',
                      'face.gif', 'bar.txt']
         subdirs = ['', 'subdir1', 'subdir2']
-        images = [tmpdir.ensure(subdir, f) for subdir in subdirs
-                  for f in filenames]
+        filenames = [tmpdir.ensure(subdir, f) for subdir in subdirs
+                     for f in filenames]
 
         found_images = image.list_pictures(str(tmpdir))
         assert len(found_images) == 33
