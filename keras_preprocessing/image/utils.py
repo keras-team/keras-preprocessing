@@ -5,7 +5,6 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import re
 import warnings
 
 import numpy as np
@@ -127,10 +126,20 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     return img
 
 
-def list_pictures(directory, ext='jpg|jpeg|bmp|png|ppm'):
+def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif',
+                                  'tiff')):
+    """Lists all pictures in a directory, including all subdirectories.
+
+    # Arguments
+        directory: string, absolute path to the directory
+        ext: tuple of strings or single string, extensions of the pictures
+    # Returns
+        a list of paths
+    """
+    ext = tuple('.%s' % e for e in ((ext,) if isinstance(ext, str) else ext))
     return [os.path.join(root, f)
             for root, _, files in os.walk(directory) for f in files
-            if re.match(r'([\w]+\.(?:' + ext + '))', f.lower())]
+            if f.lower().endswith(ext)]
 
 
 def _iter_valid_files(directory, white_list_formats, follow_links):

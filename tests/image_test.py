@@ -1263,6 +1263,21 @@ class TestImage(object):
             loaded_im = image.load_img(filename_rgb, target_size=(25, 25),
                                        interpolation="unsupported")
 
+    def test_list_pictures(self, tmpdir):
+        filenames = ['test.png', 'test0.jpg', 'test-1.jpeg', '2test.bmp',
+                     '2-test.ppm', '3.png', '1.jpeg', 'test.bmp', 'test0.ppm',
+                     'test4.tiff', '5-test.tif', 'test.txt', 'foo.csv',
+                     'face.gif', 'bar.txt']
+        subdirs = ['', 'subdir1', 'subdir2']
+        filenames = [tmpdir.ensure(subdir, f) for subdir in subdirs
+                     for f in filenames]
+
+        found_images = image.list_pictures(str(tmpdir))
+        assert len(found_images) == 33
+
+        found_images = image.list_pictures(str(tmpdir), ext='png')
+        assert len(found_images) == 6
+
 
 if __name__ == '__main__':
     pytest.main([__file__])
