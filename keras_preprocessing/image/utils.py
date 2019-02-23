@@ -43,7 +43,8 @@ def validate_filename(filename, white_list_formats):
     # Returns
         A boolean value indicating if the filename is valid or not
     """
-    return filename.endswith(white_list_formats) and os.path.isfile(filename)
+    return (filename.lower().endswith(white_list_formats) and
+            os.path.isfile(filename))
 
 
 def save_img(path,
