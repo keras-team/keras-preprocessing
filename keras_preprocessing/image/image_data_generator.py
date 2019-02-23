@@ -634,8 +634,9 @@ class ImageDataGenerator(object):
             drop_duplicates: Boolean, whether to drop duplicate rows
                 based on filename.
             validate_images: Boolean, whether to validate image filenames in
-                `x_col`. Disabling this option can lead to speed-up in the
-                execution of this function. Default: `True`.
+                `x_col`. If `True`, invalid images will be ignored. Disabling this
+                option can lead to speed-up in the execution of this function.
+                Default: `True`.
 
         # Returns
             A `DataFrameIterator` yielding tuples of `(x, y)`

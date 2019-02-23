@@ -80,9 +80,9 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
         drop_duplicates: Boolean, whether to drop duplicate rows based on filename.
-        validate_images: Boolean, whether to validate image filenames in `x_col`.
-            Disabling this option can lead to speed-up in the instantiation of
-            this class. Default: `True`.
+        validate_images: Boolean, whether to validate image filenames in `x_col`. If
+        `True`, invalid images will be ignored. Disabling this option can lead to
+        speed-up in the instantiation of this class. Default: `True`.
     """
     allowed_class_modes = {
         'categorical', 'binary', 'sparse', 'input', 'other', None
