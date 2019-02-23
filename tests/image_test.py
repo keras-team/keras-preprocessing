@@ -590,6 +590,28 @@ class TestImage(object):
         with pytest.raises(ValueError):
             image.ImageDataGenerator(brightness_range=0.1)
 
+    def test_dataframe_iterator_validate_validate_filenames(self, tmpdir):
+        # save the images in the paths
+        count = 0
+        filenames = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = 'image-{}.png'.format(count)
+                im.save(str(tmpdir / filename))
+                filenames.append(filename)
+                count += 1
+        df = pd.DataFrame({"filename": filenames + ['test.jpp', 'test.jpg']})
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(df,
+                                                    str(tmpdir),
+                                                    class_mode="input")
+        assert len(df_iterator.filenames) == len(df['filename']) - 2
+        df_iterator = generator.flow_from_dataframe(df,
+                                                    str(tmpdir),
+                                                    class_mode="input",
+                                                    validate_filenames=False)
+        assert len(df_iterator.filenames) == len(df['filename'])
+
     def test_dataframe_iterator_sample_weights(self, tmpdir):
         # save the images in the paths
         count = 0

@@ -557,7 +557,7 @@ class ImageDataGenerator(object):
                             subset=None,
                             interpolation='nearest',
                             drop_duplicates=True,
-                            validate_images=True,
+                            validate_filenames=True,
                             **kwargs):
         """Takes the dataframe and the path to a directory
          and generates batches of augmented/normalized data.
@@ -633,7 +633,7 @@ class ImageDataGenerator(object):
                 `"hamming"` are also supported. By default, `"nearest"` is used.
             drop_duplicates: Boolean, whether to drop duplicate rows
                 based on filename.
-            validate_images: Boolean, whether to validate image filenames in
+            validate_filenames: Boolean, whether to validate image filenames in
                 `x_col`. If `True`, invalid images will be ignored. Disabling this
                 option can lead to speed-up in the execution of this function.
                 Default: `True`.
@@ -673,7 +673,7 @@ class ImageDataGenerator(object):
             subset=subset,
             interpolation=interpolation,
             drop_duplicates=drop_duplicates,
-            validate_images=True
+            validate_filenames=validate_filenames
         )
 
     def standardize(self, x):

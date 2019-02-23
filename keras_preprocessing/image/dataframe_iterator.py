@@ -80,9 +80,9 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
         drop_duplicates: Boolean, whether to drop duplicate rows based on filename.
-        validate_images: Boolean, whether to validate image filenames in `x_col`. If
-        `True`, invalid images will be ignored. Disabling this option can lead to
-        speed-up in the instantiation of this class. Default: `True`.
+        validate_filenames: Boolean, whether to validate image filenames in
+        `x_col`. If `True`, invalid images will be ignored. Disabling this option
+        can lead to speed-up in the instantiation of this class. Default: `True`.
     """
     allowed_class_modes = {
         'categorical', 'binary', 'sparse', 'input', 'other', None
@@ -110,7 +110,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  interpolation='nearest',
                  dtype='float32',
                  drop_duplicates=True,
-                 validate_images=True):
+                 validate_filenames=True):
 
         super(DataFrameIterator, self).set_processing_attrs(image_data_generator,
                                                             target_size,
@@ -129,7 +129,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         self._check_params(df, x_col, y_col, weight_col, classes)
         if drop_duplicates:
             df.drop_duplicates(x_col, inplace=True)
-        if validate_images:  # check which image files are valid and keep them
+        if validate_filenames:  # check which image files are valid and keep them
             df = self._filter_valid_filepaths(df, x_col)
         if class_mode not in ["other", "input", None]:
             df, classes = self._filter_classes(df, y_col, classes)
@@ -156,7 +156,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             if "object" in list(df[y_col].dtypes):
                 raise TypeError("y_col column/s must be numeric datatypes.")
         self.samples = len(self.filenames)
-        validated_string = 'validated' if validate_images else 'non-validated'
+        validated_string = 'validated' if validate_filenames else 'non-validated'
         if class_mode in ["other", "input", None]:
             print('Found {} {} image filenames.'
                   .format(self.samples, validated_string))
