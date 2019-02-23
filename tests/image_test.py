@@ -1300,6 +1300,16 @@ class TestImage(object):
         found_images = image.list_pictures(str(tmpdir), ext='png')
         assert len(found_images) == 6
 
+    def test_validate_filename(self, tmpdir):
+        valid_extensions = ('png', 'jpg')
+        filename = tmpdir.ensure('test.png')
+        assert image.validate_filename(str(filename), valid_extensions)
+        filename = tmpdir.ensure('test.PnG')
+        assert image.validate_filename(str(filename), valid_extensions)
+        filename = tmpdir.ensure('test.some_extension')
+        assert not image.validate_filename(str(filename), valid_extensions)
+        assert not image.validate_filename('some_test_file.png', valid_extensions)
+
 
 if __name__ == '__main__':
     pytest.main([__file__])
