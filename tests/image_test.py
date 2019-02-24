@@ -590,7 +590,7 @@ class TestImage(object):
         with pytest.raises(ValueError):
             image.ImageDataGenerator(brightness_range=0.1)
 
-    def test_dataframe_iterator_validate_validate_filenames(self, tmpdir):
+    def test_dataframe_iterator_validate_filenames(self, tmpdir):
         # save the images in the paths
         count = 0
         filenames = []
