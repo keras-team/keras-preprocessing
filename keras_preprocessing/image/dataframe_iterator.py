@@ -10,7 +10,7 @@ import warnings
 import numpy as np
 
 from .iterator import BatchFromFilesMixin, Iterator
-from .utils import get_extension
+from .utils import validate_filename
 
 
 class DataFrameIterator(BatchFromFilesMixin, Iterator):
@@ -80,6 +80,9 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
         drop_duplicates: Boolean, whether to drop duplicate rows based on filename.
+        validate_filenames: Boolean, whether to validate image filenames in
+        `x_col`. If `True`, invalid images will be ignored. Disabling this option
+        can lead to speed-up in the instantiation of this class. Default: `True`.
     """
     allowed_class_modes = {
         'categorical', 'binary', 'sparse', 'input', 'other', None
@@ -106,7 +109,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  subset=None,
                  interpolation='nearest',
                  dtype='float32',
-                 drop_duplicates=True):
+                 drop_duplicates=True,
+                 validate_filenames=True):
 
         super(DataFrameIterator, self).set_processing_attrs(image_data_generator,
                                                             target_size,
@@ -125,8 +129,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         self._check_params(df, x_col, y_col, weight_col, classes)
         if drop_duplicates:
             df.drop_duplicates(x_col, inplace=True)
-        # check which image files are valid and keep them
-        df = self._filter_valid_filepaths(df, x_col)
+        if validate_filenames:  # check which image files are valid and keep them
+            df = self._filter_valid_filepaths(df, x_col)
         if class_mode not in ["other", "input", None]:
             df, classes = self._filter_classes(df, y_col, classes)
             num_classes = len(classes)
@@ -152,11 +156,13 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             if "object" in list(df[y_col].dtypes):
                 raise TypeError("y_col column/s must be numeric datatypes.")
         self.samples = len(self.filenames)
+        validated_string = 'validated' if validate_filenames else 'non-validated'
         if class_mode in ["other", "input", None]:
-            print('Found {} images.'.format(self.samples))
+            print('Found {} {} image filenames.'
+                  .format(self.samples, validated_string))
         else:
-            print('Found {} images belonging to {} classes.'
-                  .format(self.samples, num_classes))
+            print('Found {} {} image filenames belonging to {} classes.'
+                  .format(self.samples, validated_string, num_classes))
         super(DataFrameIterator, self).__init__(self.samples,
                                                 batch_size,
                                                 shuffle,
@@ -254,9 +260,15 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         filepaths = df[x_col].map(
             lambda fname: os.path.join(self.directory or '', fname)
         )
-        format_check = filepaths.map(get_extension).isin(self.white_list_formats)
-        existence_check = filepaths.map(os.path.isfile)
-        return df[format_check & existence_check]
+        mask = filepaths.apply(validate_filename, args=(self.white_list_formats,))
+        n_invalid = (~mask).sum()
+        if n_invalid:
+            warnings.warn(
+                'Found {} invalid image filename(s) in x_col="{}". '
+                'These filename(s) will be ignored.'
+                .format(n_invalid, x_col)
+            )
+        return df[mask]
 
     @property
     def filepaths(self):

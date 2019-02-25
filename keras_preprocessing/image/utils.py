@@ -33,12 +33,18 @@ if pil_image is not None:
         _PIL_INTERPOLATION_METHODS['lanczos'] = pil_image.LANCZOS
 
 
-def get_extension(filename):
-    """Get extension of the filename
+def validate_filename(filename, white_list_formats):
+    """Check if a filename refers to a valid file
 
-    There are newer methods to achieve this but this method is backwards compatible.
+    # Arguments
+        filename: String, absolute path to a file
+        white_list_formats: Set, allowed file extensions
+
+    # Returns
+        A boolean value indicating if the filename is valid or not
     """
-    return os.path.splitext(filename)[1].strip('.').lower()
+    return (filename.lower().endswith(white_list_formats) and
+            os.path.isfile(filename))
 
 
 def save_img(path,
@@ -164,7 +170,7 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
             if fname.lower().endswith('.tiff'):
                 warnings.warn('Using ".tiff" files with multiple bands '
                               'will cause distortion. Please verify your output.')
-            if get_extension(fname) in white_list_formats:
+            if fname.lower().endswith(white_list_formats):
                 yield root, fname
 
 
