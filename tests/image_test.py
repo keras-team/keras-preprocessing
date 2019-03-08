@@ -781,6 +781,46 @@ class TestImage(object):
                 class_mode='multi_output'
             )
 
+    def test_dataframe_iterator_class_mode_raw(self, tmpdir):
+        # save the images in the paths
+        filenames = []
+        count = 0
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = 'image-{}.png'.format(count)
+                im.save(str(tmpdir / filename))
+                filenames.append(filename)
+                count += 1
+        # case for 1D output
+        df = pd.DataFrame({"filename": filenames}).assign(
+            output_0=np.random.uniform(size=len(filenames)),
+            output_1=np.random.uniform(size=len(filenames))
+        )
+        df_iterator = image.ImageDataGenerator().flow_from_dataframe(
+            df, y_col='output_0', directory=str(tmpdir),
+            batch_size=3, shuffle=False, class_mode='raw'
+        )
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, np.ndarray)
+        assert batch_y.shape == (3,)
+        assert np.array_equal(batch_y, df['output_0'].values[:3])
+        # case with a 2D output
+        df_iterator = image.ImageDataGenerator().flow_from_dataframe(
+            df, y_col=['output_0', 'output_1'], directory=str(tmpdir),
+            batch_size=3, shuffle=False, class_mode='raw'
+        )
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, np.ndarray)
+        assert batch_y.shape == (3, 2)
+        print(batch_y)
+        print(df[['output_0', 'output_0']].values[:3])
+        assert np.array_equal(batch_y,
+                              df[['output_0', 'output_1']].values[:3])
+
     @pytest.mark.parametrize('validation_split,num_training', [
         (0.25, 18),
         (0.50, 12),
