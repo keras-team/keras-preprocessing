@@ -556,7 +556,6 @@ class ImageDataGenerator(object):
                             save_format='png',
                             subset=None,
                             interpolation='nearest',
-                            drop_duplicates=True,
                             validate_filenames=True,
                             **kwargs):
         """Takes the dataframe and the path to a directory
@@ -632,8 +631,6 @@ class ImageDataGenerator(object):
                 If PIL version 1.1.3 or newer is installed, `"lanczos"` is also
                 supported. If PIL version 3.4.0 or newer is installed, `"box"` and
                 `"hamming"` are also supported. By default, `"nearest"` is used.
-            drop_duplicates: Boolean, whether to drop duplicate rows
-                based on filename.
             validate_filenames: Boolean, whether to validate image filenames in
                 `x_col`. If `True`, invalid images will be ignored. Disabling this
                 option can lead to speed-up in the execution of this function.
@@ -657,6 +654,8 @@ class ImageDataGenerator(object):
             warnings.warn('`class_mode` "other" is deprecated, please use '
                           '`class_mode` "raw".', DeprecationWarning)
             class_mode = 'raw'
+        if 'drop_duplicates' in kwargs:
+            warnings.warn('drop_duplicates is deprecated.', DeprecationWarning)
 
         return DataFrameIterator(
             dataframe,
@@ -678,7 +677,6 @@ class ImageDataGenerator(object):
             save_format=save_format,
             subset=subset,
             interpolation=interpolation,
-            drop_duplicates=drop_duplicates,
             validate_filenames=validate_filenames
         )
 
