@@ -46,8 +46,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             Color mode to read images.
         classes: Optional list of strings, classes to use (e.g. `["dogs", "cats"]`).
             If None, all classes in `y_col` will be used.
-        class_mode: one of "categorical", "binary", "sparse", "input",
-            "other" or None. Default: "categorical".
+        class_mode: one of "binary", "categorical", "input", "multi_output",
+            "raw", sparse" or None. Default: "categorical".
             Mode for yielding the targets:
             - `"binary"`: 1D numpy array of binary labels,
             - `"categorical"`: 2D numpy array of one-hot encoded labels.
