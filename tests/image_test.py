@@ -1022,7 +1022,7 @@ class TestImage(object):
             assert np.array_equal(a1, a2)
             assert np.array_equal(a1, a3)
             assert np.array_equal(a1, a4)
-            assert np.array_equal(a1, a5)f
+            assert np.array_equal(a1, a5)
 
     def test_dataframe_iterator_with_subdirs(self, tmpdir):
         num_classes = 2
