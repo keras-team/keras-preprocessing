@@ -174,7 +174,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         # check that y_col has several column names if class_mode is multi_output
         if (self.class_mode == 'multi_output') and not isinstance(y_col, list):
             raise TypeError(
-                'If class_mode="{}", y_col must be a list. Received {}.'
+                'If class_mode="{}", y_col must be a list. Received {}. '
+                'For regression use class_mode="raw".'
                 .format(self.class_mode, type(y_col).__name__)
             )
         # check that filenames/filepaths column values are all strings
@@ -205,8 +206,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                 raise TypeError('If class_mode="{}", y_col="{}" column '
                                 'values must be type string, list or tuple.'
                                 .format(self.class_mode, y_col))
-        # raise warning if classes are given and class_mode other or input
-        if classes and self.class_mode in {"input", None}:
+        # raise warning if classes are given but will be unused
+        if classes and self.class_mode in {"input", "multi_output", "raw", None}:
             warnings.warn('`classes` will be ignored given the class_mode="{}"'
                           .format(self.class_mode))
         # check that if weight column that the values are numerical
