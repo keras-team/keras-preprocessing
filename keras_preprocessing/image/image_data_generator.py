@@ -651,7 +651,7 @@ class ImageDataGenerator(object):
         if 'sort' in kwargs:
             warnings.warn('sort is deprecated, batches will be created in the'
                           'same order than the filenames provided if shuffle'
-                          'is set to False.')
+                          'is set to False.', DeprecationWarning)
         return DataFrameIterator(
             dataframe,
             directory,
