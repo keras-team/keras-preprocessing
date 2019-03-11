@@ -816,8 +816,6 @@ class TestImage(object):
         assert len(batch_x.shape) == 4
         assert isinstance(batch_y, np.ndarray)
         assert batch_y.shape == (3, 2)
-        print(batch_y)
-        print(df[['output_0', 'output_0']].values[:3])
         assert np.array_equal(batch_y,
                               df[['output_0', 'output_1']].values[:3])
 
