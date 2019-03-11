@@ -174,8 +174,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         # check that y_col has several column names if class_mode is multi_output
         if (self.class_mode == 'multi_output') and not isinstance(y_col, list):
             raise TypeError(
-                'If class_mode="{}", y_col must be a list. Received {}. '
-                'For regression use class_mode="raw".'
+                'If class_mode="{}", y_col must be a list. Received {}.'
                 .format(self.class_mode, type(y_col).__name__)
             )
         # check that filenames/filepaths column values are all strings
