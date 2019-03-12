@@ -597,16 +597,17 @@ class ImageDataGenerator(object):
                 which will map to the label indices, will be alphanumeric).
                 The dictionary containing the mapping from class names to class
                 indices can be obtained via the attribute `class_indices`.
-            class_mode: one of "categorical", "binary", "sparse", "input",
-                "other" or None. Default: "categorical".
+            class_mode: one of "binary", "categorical", "input", "multi_output",
+                "raw", sparse" or None. Default: "categorical".
                 Mode for yielding the targets:
                 - `"binary"`: 1D numpy array of binary labels,
                 - `"categorical"`: 2D numpy array of one-hot encoded labels.
                     Supports multi-label output.
-                - `"sparse"`: 1D numpy array of integer labels,
                 - `"input"`: images identical to input images (mainly used to
                     work with autoencoders),
-                - `"other"`: numpy array of `y_col` data,
+                - `"multi_output"`: list with the values of the different columns,
+                - `"raw"`: numpy array of values in `y_col` column(s),
+                - `"sparse"`: 1D numpy array of integer labels,
                 - `None`, no targets are returned (the generator will only yield
                     batches of image data, which is useful to use in
                     `model.predict_generator()`).
@@ -652,6 +653,11 @@ class ImageDataGenerator(object):
             warnings.warn('sort is deprecated, batches will be created in the'
                           'same order than the filenames provided if shuffle'
                           'is set to False.', DeprecationWarning)
+        if class_mode == 'other':
+            warnings.warn('`class_mode` "other" is deprecated, please use '
+                          '`class_mode` "raw".', DeprecationWarning)
+            class_mode = 'raw'
+
         return DataFrameIterator(
             dataframe,
             directory,
