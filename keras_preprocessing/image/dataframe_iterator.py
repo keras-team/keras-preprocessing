@@ -80,7 +80,6 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
-        drop_duplicates: Boolean, whether to drop duplicate rows based on filename.
         validate_filenames: Boolean, whether to validate image filenames in
         `x_col`. If `True`, invalid images will be ignored. Disabling this option
         can lead to speed-up in the instantiation of this class. Default: `True`.
@@ -110,7 +109,6 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  subset=None,
                  interpolation='nearest',
                  dtype='float32',
-                 drop_duplicates=True,
                  validate_filenames=True):
 
         super(DataFrameIterator, self).set_processing_attrs(image_data_generator,
@@ -128,8 +126,6 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         self.dtype = dtype
         # check that inputs match the required class_mode
         self._check_params(df, x_col, y_col, weight_col, classes)
-        if drop_duplicates:
-            df.drop_duplicates(x_col, inplace=True)
         if validate_filenames:  # check which image files are valid and keep them
             df = self._filter_valid_filepaths(df, x_col)
         if class_mode not in ["input", "multi_output", "raw", None]:
