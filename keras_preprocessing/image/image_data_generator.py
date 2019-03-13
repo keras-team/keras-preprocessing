@@ -655,7 +655,9 @@ class ImageDataGenerator(object):
                           '`class_mode` "raw".', DeprecationWarning)
             class_mode = 'raw'
         if 'drop_duplicates' in kwargs:
-            warnings.warn('drop_duplicates is deprecated.', DeprecationWarning)
+            warnings.warn('drop_duplicates is deprecated, you can drop duplicates '
+                          'by using the pandas.DataFrame.drop_duplicates method.',
+                          DeprecationWarning)
 
         return DataFrameIterator(
             dataframe,
