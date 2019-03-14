@@ -55,6 +55,8 @@ class Iterator(IteratorType):
                              'but the Sequence '
                              'has length {length}'.format(idx=idx,
                                                           length=len(self)))
+        elif idx < 0:
+            raise ValueError('Could not retrieve item with negative index')
         if self.seed is not None:
             np.random.seed(self.seed + self.total_batches_seen)
         self.total_batches_seen += 1
