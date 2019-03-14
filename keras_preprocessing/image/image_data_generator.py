@@ -575,8 +575,8 @@ class ImageDataGenerator(object):
                     or list/tuple if multiple classes.
                 - if `class_mode` is `"binary"` or `"sparse"` it must include
                     the given `y_col` column with class values as strings.
-                - if `class_mode` is `"other"` it should contain the columns
-                    specified in `y_col`.
+                - if `class_mode` is `"raw"` or `"multi_output"` it should contain
+                the columns specified in `y_col`.
                 - if `class_mode` is `"input"` or `None` no extra column is needed.
             directory: string, path to the directory to read images from. If `None`,
                 data in `x_col` column should be absolute paths.
