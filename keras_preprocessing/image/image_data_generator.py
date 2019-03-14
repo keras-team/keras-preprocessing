@@ -569,16 +569,15 @@ class ImageDataGenerator(object):
                 `directory` (or absolute paths if `directory` is None) of the
                 images in a string column. It should include other column/s
                 depending on the `class_mode`:
-                    - if `class_mode` is `"categorical"` (default value) it must
-                        include the `y_col` column with the class/es of each image.
-                        Values in column can be string/list/tuple if a single class
-                        or list/tuple if multiple classes.
-                    - if `class_mode` is `"binary"` or `"sparse"` it must include
-                        the given `y_col` column with class values as strings.
-                    - if `class_mode` is `"other"` it should contain the columns
-                        specified in `y_col`.
-                    - if `class_mode` is `"input"` or `None` no extra column is
-                        needed.
+                - if `class_mode` is `"categorical"` (default value) it must
+                    include the `y_col` column with the class/es of each image.
+                    Values in column can be string/list/tuple if a single class
+                    or list/tuple if multiple classes.
+                - if `class_mode` is `"binary"` or `"sparse"` it must include
+                    the given `y_col` column with class values as strings.
+                - if `class_mode` is `"other"` it should contain the columns
+                    specified in `y_col`.
+                - if `class_mode` is `"input"` or `None` no extra column is needed.
             directory: string, path to the directory to read images from. If `None`,
                 data in `x_col` column should be absolute paths.
             x_col: string, column in `dataframe` that contains the filenames (or
