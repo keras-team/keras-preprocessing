@@ -202,7 +202,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                 'values must be type string, list or tuple.'
                                 .format(self.class_mode, y_col))
         # raise warning if classes are given but will be unused
-        if classes and self.class_mode in {"input", "multi_output", "raw", None}:
+        if classes != None and self.class_mode in {"input", "multi_output", "raw", None}:
             warnings.warn('`classes` will be ignored given the class_mode="{}"'
                           .format(self.class_mode))
         # check that if weight column that the values are numerical
