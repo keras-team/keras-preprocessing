@@ -1072,6 +1072,21 @@ class TestImage(object):
         assert df_iterator.n == len(filenames)
         assert set(df_iterator.filenames) == set(filenames)
 
+    def test_dataframe_iterator_classes_with_numpy_array(self, tmpdir):
+        # create dataframe
+        df = pd.DataFrame({"filename": ['image-1.png'],
+                           "class": ['cat']})
+
+        # create numpy array of class names
+        classes = np.array(['dog', 'cat'])
+
+        # create iterator
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(
+            df, str(tmpdir), classes=classes, class_mode='binary')
+
+        assert len(df_iterator.class_indices) == len(classes)
+
     def test_img_utils(self):
         height, width = 10, 8
 

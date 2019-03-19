@@ -44,7 +44,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
             Color mode to read images.
-        classes: Optional list of strings, classes to use (e.g. `["dogs", "cats"]`).
+        classes: Optional numpy array/list of strings, classes to use (e.g. `["dogs", "cats"]`).
             If None, all classes in `y_col` will be used.
         class_mode: one of "binary", "categorical", "input", "multi_output",
             "raw", "sparse" or None. Default: "categorical".
@@ -185,7 +185,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                 .format(self.class_mode, y_col))
         # check that if binary there are only 2 different classes
         if self.class_mode == 'binary':
-            if classes:
+            if classes is not None:
                 classes = set(classes)
                 if len(classes) != 2:
                     raise ValueError('If class_mode="binary" there must be 2 '
@@ -202,7 +202,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                 'values must be type string, list or tuple.'
                                 .format(self.class_mode, y_col))
         # raise warning if classes are given but will be unused
-        if classes and self.class_mode in {"input", "multi_output", "raw", None}:
+        if classes is not None and self.class_mode in {"input", "multi_output", "raw", None}:
             warnings.warn('`classes` will be ignored given the class_mode="{}"'
                           .format(self.class_mode))
         # check that if weight column that the values are numerical
@@ -235,7 +235,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                     .format(type(labels), y_col)
                 )
 
-        if classes:
+        if classes is not None:
             classes = set(classes)  # sort and prepare for membership lookup
             df[y_col] = df[y_col].apply(lambda x: remove_classes(x, classes))
         else:
