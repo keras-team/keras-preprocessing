@@ -44,7 +44,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
             Color mode to read images.
-        classes: Optional list of strings, classes to use (e.g. `["dogs", "cats"]`).
+        classes: Optional numpy array/list of strings, classes to use (e.g. `["dogs", "cats"]`).
             If None, all classes in `y_col` will be used.
         class_mode: one of "binary", "categorical", "input", "multi_output",
             "raw", "sparse" or None. Default: "categorical".
