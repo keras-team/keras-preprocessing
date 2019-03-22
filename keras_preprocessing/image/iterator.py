@@ -31,7 +31,7 @@ class Iterator(IteratorType):
         shuffle: Boolean, whether to shuffle the data between epochs.
         seed: Random seeding for data shuffling.
     """
-    white_list_formats = {'png', 'jpg', 'jpeg', 'bmp', 'ppm', 'tif', 'tiff'}
+    white_list_formats = ('png', 'jpg', 'jpeg', 'bmp', 'ppm', 'tif', 'tiff')
 
     def __init__(self, n, batch_size, shuffle, seed):
         self.n = n
@@ -256,11 +256,16 @@ class BatchFromFilesMixin():
                                dtype=self.dtype)
             for i, n_observation in enumerate(index_array):
                 batch_y[i, self.classes[n_observation]] = 1.
-        elif self.class_mode == 'other':
-            batch_y = self.data[index_array]
+        elif self.class_mode == 'multi_output':
+            batch_y = [output[index_array] for output in self.labels]
+        elif self.class_mode == 'raw':
+            batch_y = self.labels[index_array]
         else:
             return batch_x
-        return batch_x, batch_y
+        if self.sample_weight is None:
+            return batch_x, batch_y
+        else:
+            return batch_x, batch_y, self.sample_weight[index_array]
 
     @property
     def filepaths(self):
@@ -279,8 +284,8 @@ class BatchFromFilesMixin():
         )
 
     @property
-    def data(self):
+    def sample_weight(self):
         raise NotImplementedError(
-            '`data` property method has not been implemented in {}.'
+            '`sample_weight` property method has not been implemented in {}.'
             .format(type(self).__name__)
         )

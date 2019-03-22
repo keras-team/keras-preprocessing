@@ -512,29 +512,6 @@ class TestImage(object):
         if np.isnan(df_sparse_iterator.classes).any():
             raise ValueError('Invalid values.')
 
-        df_regression = pd.DataFrame({"filename": filenames,
-                                      "col1": [random.randrange(0, 1)
-                                               for _ in filenames],
-                                      "col2": [random.randrange(0, 1)
-                                               for _ in filenames]})
-        df_multiple_y_iterator = generator.flow_from_dataframe(
-            df_regression, str(tmpdir), y_col=["col1", "col2"], class_mode="other")
-        df_regression = pd.DataFrame({"filename": filenames,
-                                      "col1": [random.randrange(0, 1)
-                                               for _ in filenames],
-                                      "col2": [random.randrange(0, 1)
-                                               for _ in filenames]},
-                                     dtype=str)
-        batch_x, batch_y = next(df_multiple_y_iterator)
-        with pytest.raises(TypeError):
-            generator.flow_from_dataframe(
-                df_regression, str(tmpdir), y_col=["col1", "col2"],
-                class_mode="other"
-            )
-        with pytest.raises(TypeError):
-            generator.flow_from_dataframe(
-                df_regression, str(tmpdir), y_col="col1", class_mode="other"
-            )
         # check number of classes and images
         assert len(df_iterator.class_indices) == num_classes
         assert len(df_iterator.classes) == count
@@ -542,8 +519,7 @@ class TestImage(object):
         assert len(df_iterator_dir.class_indices) == num_classes
         assert len(df_iterator_dir.classes) == count
         assert set(df_iterator_dir.filenames) == set(filenames)
-        assert batch_y.shape[1] == 2
-        # test shuffle=False
+        # test without shuffle
         _, batch_y = next(generator.flow_from_dataframe(df, str(tmpdir),
                                                         shuffle=False,
                                                         class_mode="sparse"))
@@ -589,6 +565,67 @@ class TestImage(object):
     def test_valid_args(self):
         with pytest.raises(ValueError):
             image.ImageDataGenerator(brightness_range=0.1)
+
+    def test_dataframe_iterator_validate_filenames(self, tmpdir):
+        # save the images in the paths
+        count = 0
+        filenames = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = 'image-{}.png'.format(count)
+                im.save(str(tmpdir / filename))
+                filenames.append(filename)
+                count += 1
+        df = pd.DataFrame({"filename": filenames + ['test.jpp', 'test.jpg']})
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(df,
+                                                    str(tmpdir),
+                                                    class_mode="input")
+        assert len(df_iterator.filenames) == len(df['filename']) - 2
+        df_iterator = generator.flow_from_dataframe(df,
+                                                    str(tmpdir),
+                                                    class_mode="input",
+                                                    validate_filenames=False)
+        assert len(df_iterator.filenames) == len(df['filename'])
+
+    def test_dataframe_iterator_sample_weights(self, tmpdir):
+        # save the images in the paths
+        count = 0
+        filenames = []
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = 'image-{}.png'.format(count)
+                im.save(str(tmpdir / filename))
+                filenames.append(filename)
+                count += 1
+        df = pd.DataFrame({"filename": filenames})
+        df['weight'] = ([2, 5] * len(df))[:len(df)]
+        generator = image.ImageDataGenerator()
+        df_iterator = generator.flow_from_dataframe(df, str(tmpdir),
+                                                    x_col="filename",
+                                                    y_col=None,
+                                                    shuffle=False,
+                                                    batch_size=5,
+                                                    weight_col='weight',
+                                                    class_mode="input")
+
+        batch = next(df_iterator)
+        assert len(batch) == 3  # (x, y, weights)
+        # check if input and output have the same shape and they're the same
+        assert(batch[0].all() == batch[1].all())
+        # check if the input and output images are not the same numpy array
+        input_img = batch[0][0]
+        output_img = batch[1][0]
+        output_img[0][0][0] += 1
+        assert input_img[0][0][0] != output_img[0][0][0]
+        assert np.array_equal(np.array([2, 5, 2, 5, 2]), batch[2])
+
+        # fail
+        df['weight'] = (['2', '5'] * len(df))[:len(df)]
+        with pytest.raises(TypeError):
+            image.ImageDataGenerator().flow_from_dataframe(df,
+                                                           weight_col='weight',
+                                                           class_mode="input")
 
     def test_dataframe_iterator_class_mode_input(self, tmpdir):
         # save the images in the paths
@@ -657,7 +694,6 @@ class TestImage(object):
         for labels in batch_y:
             assert all(l in {0, 1} for l in labels)
 
-        # use OrderedDict to mantain order in python 2.7 and allow for checks
         # on first 3 batches
         df = pd.DataFrame({
             "filename": filenames,
@@ -676,6 +712,112 @@ class TestImage(object):
         assert (batch_y[0] == np.array([1, 1, 0])).all()
         assert (batch_y[1] == np.array([0, 1, 0])).all()
         assert (batch_y[2] == np.array([0, 0, 1])).all()
+
+    def test_dataframe_iterator_class_mode_multi_output(self, tmpdir):
+        # save the images in the paths
+        filenames = []
+        count = 0
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = 'image-{}.png'.format(count)
+                im.save(str(tmpdir / filename))
+                filenames.append(filename)
+                count += 1
+        # fit both outputs are a single number
+        df = pd.DataFrame({"filename": filenames}).assign(
+            output_0=np.random.uniform(size=len(filenames)),
+            output_1=np.random.uniform(size=len(filenames))
+        )
+        df_iterator = image.ImageDataGenerator().flow_from_dataframe(
+            df, y_col=['output_0', 'output_1'], directory=str(tmpdir),
+            batch_size=3, shuffle=False, class_mode='multi_output'
+        )
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, list)
+        assert len(batch_y) == 2
+        assert np.array_equal(batch_y[0],
+                              np.array(df['output_0'].tolist()[:3]))
+        assert np.array_equal(batch_y[1],
+                              np.array(df['output_1'].tolist()[:3]))
+        # if one of the outputs is a 1D array
+        df['output_1'] = [np.random.uniform(size=(2, 2, 1)).flatten()
+                          for _ in range(len(df))]
+        df_iterator = image.ImageDataGenerator().flow_from_dataframe(
+            df, y_col=['output_0', 'output_1'], directory=str(tmpdir),
+            batch_size=3, shuffle=False, class_mode='multi_output'
+        )
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, list)
+        assert len(batch_y) == 2
+        assert np.array_equal(batch_y[0],
+                              np.array(df['output_0'].tolist()[:3]))
+        assert np.array_equal(batch_y[1],
+                              np.array(df['output_1'].tolist()[:3]))
+        # if one of the outputs is a 2D array
+        df['output_1'] = [np.random.uniform(size=(2, 2, 1))
+                          for _ in range(len(df))]
+        df_iterator = image.ImageDataGenerator().flow_from_dataframe(
+            df, y_col=['output_0', 'output_1'], directory=str(tmpdir),
+            batch_size=3, shuffle=False, class_mode='multi_output'
+        )
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, list)
+        assert len(batch_y) == 2
+        assert np.array_equal(batch_y[0],
+                              np.array(df['output_0'].tolist()[:3]))
+        assert np.array_equal(batch_y[1],
+                              np.array(df['output_1'].tolist()[:3]))
+        # fail if single column
+        with pytest.raises(TypeError):
+            image.ImageDataGenerator().flow_from_dataframe(
+                df, y_col='output_0',
+                directory=str(tmpdir),
+                class_mode='multi_output'
+            )
+
+    def test_dataframe_iterator_class_mode_raw(self, tmpdir):
+        # save the images in the paths
+        filenames = []
+        count = 0
+        for test_images in self.all_test_images:
+            for im in test_images:
+                filename = 'image-{}.png'.format(count)
+                im.save(str(tmpdir / filename))
+                filenames.append(filename)
+                count += 1
+        # case for 1D output
+        df = pd.DataFrame({"filename": filenames}).assign(
+            output_0=np.random.uniform(size=len(filenames)),
+            output_1=np.random.uniform(size=len(filenames))
+        )
+        df_iterator = image.ImageDataGenerator().flow_from_dataframe(
+            df, y_col='output_0', directory=str(tmpdir),
+            batch_size=3, shuffle=False, class_mode='raw'
+        )
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, np.ndarray)
+        assert batch_y.shape == (3,)
+        assert np.array_equal(batch_y, df['output_0'].values[:3])
+        # case with a 2D output
+        df_iterator = image.ImageDataGenerator().flow_from_dataframe(
+            df, y_col=['output_0', 'output_1'], directory=str(tmpdir),
+            batch_size=3, shuffle=False, class_mode='raw'
+        )
+        batch_x, batch_y = next(df_iterator)
+        assert isinstance(batch_x, np.ndarray)
+        assert len(batch_x.shape) == 4
+        assert isinstance(batch_y, np.ndarray)
+        assert batch_y.shape == (3, 2)
+        assert np.array_equal(batch_y,
+                              df[['output_0', 'output_1']].values[:3])
 
     @pytest.mark.parametrize('validation_split,num_training', [
         (0.25, 18),
@@ -881,39 +1023,6 @@ class TestImage(object):
             assert np.array_equal(a1, a3)
             assert np.array_equal(a1, a4)
             assert np.array_equal(a1, a5)
-
-    def test_dataframe_iterator_with_drop_duplicates(self, tmpdir):
-
-        # save the images in the tmpdir
-        count = 0
-        filenames = []
-        for test_images in self.all_test_images:
-            for im in test_images:
-                filename = "image-{:0>5}.png".format(count)
-                filenames.append(filename)
-                im.save(str(tmpdir / filename))
-                count += 1
-
-        # prepare input_filenames
-        n_files = len(filenames)
-        idx_rand, idx_rand2 = np.random.randint(1, n_files, size=2)
-        input_filenames = filenames[::-1]  # reversed
-        input_filenames2 = filenames[:idx_rand] + filenames[:idx_rand2]
-
-        # create dataframes
-        df = pd.DataFrame({"filename": input_filenames})
-        df2 = pd.DataFrame({"filename": input_filenames2})
-
-        # create iterators
-        generator = image.ImageDataGenerator()
-        df_drop_iterator = generator.flow_from_dataframe(
-            df, str(tmpdir), class_mode=None, drop_duplicates=True)
-        df_no_drop_iterator = generator.flow_from_dataframe(
-            df2, str(tmpdir), class_mode=None, drop_duplicates=False)
-
-        # Test drop_duplicates
-        assert df_drop_iterator.n == len(set(input_filenames))
-        assert df_no_drop_iterator.n == len(input_filenames2)
 
     def test_dataframe_iterator_with_subdirs(self, tmpdir):
         num_classes = 2
@@ -1223,6 +1332,31 @@ class TestImage(object):
         with pytest.raises(ValueError):
             loaded_im = image.load_img(filename_rgb, target_size=(25, 25),
                                        interpolation="unsupported")
+
+    def test_list_pictures(self, tmpdir):
+        filenames = ['test.png', 'test0.jpg', 'test-1.jpeg', '2test.bmp',
+                     '2-test.ppm', '3.png', '1.jpeg', 'test.bmp', 'test0.ppm',
+                     'test4.tiff', '5-test.tif', 'test.txt', 'foo.csv',
+                     'face.gif', 'bar.txt']
+        subdirs = ['', 'subdir1', 'subdir2']
+        filenames = [tmpdir.ensure(subdir, f) for subdir in subdirs
+                     for f in filenames]
+
+        found_images = image.list_pictures(str(tmpdir))
+        assert len(found_images) == 33
+
+        found_images = image.list_pictures(str(tmpdir), ext='png')
+        assert len(found_images) == 6
+
+    def test_validate_filename(self, tmpdir):
+        valid_extensions = ('png', 'jpg')
+        filename = tmpdir.ensure('test.png')
+        assert image.validate_filename(str(filename), valid_extensions)
+        filename = tmpdir.ensure('test.PnG')
+        assert image.validate_filename(str(filename), valid_extensions)
+        filename = tmpdir.ensure('test.some_extension')
+        assert not image.validate_filename(str(filename), valid_extensions)
+        assert not image.validate_filename('some_test_file.png', valid_extensions)
 
 
 if __name__ == '__main__':

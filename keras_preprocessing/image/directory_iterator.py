@@ -149,3 +149,8 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
     @property
     def labels(self):
         return self.classes
+
+    @property  # mixin needs this property to work
+    def sample_weight(self):
+        # no sample weights will be returned
+        return None

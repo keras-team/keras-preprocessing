@@ -543,6 +543,7 @@ class ImageDataGenerator(object):
                             directory=None,
                             x_col="filename",
                             y_col="class",
+                            weight_col=None,
                             target_size=(256, 256),
                             color_mode='rgb',
                             classes=None,
@@ -555,7 +556,7 @@ class ImageDataGenerator(object):
                             save_format='png',
                             subset=None,
                             interpolation='nearest',
-                            drop_duplicates=True,
+                            validate_filenames=True,
                             **kwargs):
         """Takes the dataframe and the path to a directory
          and generates batches of augmented/normalized data.
@@ -568,24 +569,25 @@ class ImageDataGenerator(object):
                 `directory` (or absolute paths if `directory` is None) of the
                 images in a string column. It should include other column/s
                 depending on the `class_mode`:
-                    - if `class_mode` is `"categorical"` (default value) it must
-                        include the `y_col` column with the class/es of each image.
-                        Values in column can be string/list/tuple if a single class
-                        or list/tuple if multiple classes.
-                    - if `class_mode` is `"binary"` or `"sparse"` it must include
-                        the given `y_col` column with class values as strings.
-                    - if `class_mode` is `"other"` it should contain the columns
-                        specified in `y_col`.
-                    - if `class_mode` is `"input"` or `None` no extra column is
-                        needed.
+                - if `class_mode` is `"categorical"` (default value) it must
+                    include the `y_col` column with the class/es of each image.
+                    Values in column can be string/list/tuple if a single class
+                    or list/tuple if multiple classes.
+                - if `class_mode` is `"binary"` or `"sparse"` it must include
+                    the given `y_col` column with class values as strings.
+                - if `class_mode` is `"raw"` or `"multi_output"` it should contain
+                the columns specified in `y_col`.
+                - if `class_mode` is `"input"` or `None` no extra column is needed.
             directory: string, path to the directory to read images from. If `None`,
                 data in `x_col` column should be absolute paths.
             x_col: string, column in `dataframe` that contains the filenames (or
                 absolute paths if `directory` is `None`).
             y_col: string or list, column/s in `dataframe` that has the target data.
+            weight_col: string, column in `dataframe` that contains the sample
+                weights. Default: `None`.
             target_size: tuple of integers `(height, width)`, default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
-            color_mode: one of "grayscale", "rgb". Default: "rgb".
+            color_mode: one of "grayscale", "rgb", "rgba". Default: "rgb".
                 Whether the images will be converted to have 1 or 3 color channels.
             classes: optional list of classes (e.g. `['dogs', 'cats']`).
                 Default: None. If not provided, the list of classes will be
@@ -593,16 +595,17 @@ class ImageDataGenerator(object):
                 which will map to the label indices, will be alphanumeric).
                 The dictionary containing the mapping from class names to class
                 indices can be obtained via the attribute `class_indices`.
-            class_mode: one of "categorical", "binary", "sparse", "input",
-                "other" or None. Default: "categorical".
+            class_mode: one of "binary", "categorical", "input", "multi_output",
+                "raw", sparse" or None. Default: "categorical".
                 Mode for yielding the targets:
                 - `"binary"`: 1D numpy array of binary labels,
                 - `"categorical"`: 2D numpy array of one-hot encoded labels.
                     Supports multi-label output.
-                - `"sparse"`: 1D numpy array of integer labels,
                 - `"input"`: images identical to input images (mainly used to
                     work with autoencoders),
-                - `"other"`: numpy array of `y_col` data,
+                - `"multi_output"`: list with the values of the different columns,
+                - `"raw"`: numpy array of values in `y_col` column(s),
+                - `"sparse"`: 1D numpy array of integer labels,
                 - `None`, no targets are returned (the generator will only yield
                     batches of image data, which is useful to use in
                     `model.predict_generator()`).
@@ -627,8 +630,10 @@ class ImageDataGenerator(object):
                 If PIL version 1.1.3 or newer is installed, `"lanczos"` is also
                 supported. If PIL version 3.4.0 or newer is installed, `"box"` and
                 `"hamming"` are also supported. By default, `"nearest"` is used.
-            drop_duplicates: Boolean, whether to drop duplicate rows
-                based on filename.
+            validate_filenames: Boolean, whether to validate image filenames in
+                `x_col`. If `True`, invalid images will be ignored. Disabling this
+                option can lead to speed-up in the execution of this function.
+                Default: `True`.
 
         # Returns
             A `DataFrameIterator` yielding tuples of `(x, y)`
@@ -643,13 +648,23 @@ class ImageDataGenerator(object):
         if 'sort' in kwargs:
             warnings.warn('sort is deprecated, batches will be created in the'
                           'same order than the filenames provided if shuffle'
-                          'is set to False.')
+                          'is set to False.', DeprecationWarning)
+        if class_mode == 'other':
+            warnings.warn('`class_mode` "other" is deprecated, please use '
+                          '`class_mode` "raw".', DeprecationWarning)
+            class_mode = 'raw'
+        if 'drop_duplicates' in kwargs:
+            warnings.warn('drop_duplicates is deprecated, you can drop duplicates '
+                          'by using the pandas.DataFrame.drop_duplicates method.',
+                          DeprecationWarning)
+
         return DataFrameIterator(
             dataframe,
             directory,
             self,
             x_col=x_col,
             y_col=y_col,
+            weight_col=weight_col,
             target_size=target_size,
             color_mode=color_mode,
             classes=classes,
@@ -663,7 +678,7 @@ class ImageDataGenerator(object):
             save_format=save_format,
             subset=subset,
             interpolation=interpolation,
-            drop_duplicates=drop_duplicates
+            validate_filenames=validate_filenames
         )
 
     def standardize(self, x):

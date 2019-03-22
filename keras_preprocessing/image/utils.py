@@ -5,7 +5,6 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import re
 import warnings
 
 import numpy as np
@@ -34,12 +33,18 @@ if pil_image is not None:
         _PIL_INTERPOLATION_METHODS['lanczos'] = pil_image.LANCZOS
 
 
-def get_extension(filename):
-    """Get extension of the filename
+def validate_filename(filename, white_list_formats):
+    """Check if a filename refers to a valid file
 
-    There are newer methods to achieve this but this method is backwards compatible.
+    # Arguments
+        filename: String, absolute path to a file
+        white_list_formats: Set, allowed file extensions
+
+    # Returns
+        A boolean value indicating if the filename is valid or not
     """
-    return os.path.splitext(filename)[1].strip('.').lower()
+    return (filename.lower().endswith(white_list_formats) and
+            os.path.isfile(filename))
 
 
 def save_img(path,
@@ -100,7 +105,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
         color_mode = 'grayscale'
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
-                          'The use of `array_to_img` requires PIL.')
+                          'The use of `load_img` requires PIL.')
     img = pil_image.open(path)
     if color_mode == 'grayscale':
         if img.mode != 'L':
@@ -127,10 +132,20 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     return img
 
 
-def list_pictures(directory, ext='jpg|jpeg|bmp|png|ppm'):
+def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif',
+                                  'tiff')):
+    """Lists all pictures in a directory, including all subdirectories.
+
+    # Arguments
+        directory: string, absolute path to the directory
+        ext: tuple of strings or single string, extensions of the pictures
+    # Returns
+        a list of paths
+    """
+    ext = tuple('.%s' % e for e in ((ext,) if isinstance(ext, str) else ext))
     return [os.path.join(root, f)
             for root, _, files in os.walk(directory) for f in files
-            if re.match(r'([\w]+\.(?:' + ext + '))', f.lower())]
+            if f.lower().endswith(ext)]
 
 
 def _iter_valid_files(directory, white_list_formats, follow_links):
@@ -155,7 +170,7 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
             if fname.lower().endswith('.tiff'):
                 warnings.warn('Using ".tiff" files with multiple bands '
                               'will cause distortion. Please verify your output.')
-            if get_extension(fname) in white_list_formats:
+            if fname.lower().endswith(white_list_formats):
                 yield root, fname
 
 

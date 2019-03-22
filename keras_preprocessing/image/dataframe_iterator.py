@@ -7,8 +7,10 @@ from __future__ import print_function
 import os
 import warnings
 
+import numpy as np
+
 from .iterator import BatchFromFilesMixin, Iterator
-from .utils import get_extension
+from .utils import validate_filename
 
 
 class DataFrameIterator(BatchFromFilesMixin, Iterator):
@@ -20,15 +22,15 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             `directory` (or absolute paths if `directory` is None) of the
             images in a string column. It should include other column/s
             depending on the `class_mode`:
-                - if `class_mode` is `"categorical"` (default value) it must
-                    include the `y_col` column with the class/es of each image.
-                    Values in column can be string/list/tuple if a single class
-                    or list/tuple if multiple classes.
-                - if `class_mode` is `"binary"` or `"sparse"` it must include
-                    the given `y_col` column with class values as strings.
-                - if `class_mode` is `"other"` it should contain the columns
-                    specified in `y_col`.
-                - if `class_mode` is `"input"` or `None` no extra column is needed.
+            - if `class_mode` is `"categorical"` (default value) it must
+                include the `y_col` column with the class/es of each image.
+                Values in column can be string/list/tuple if a single class
+                or list/tuple if multiple classes.
+            - if `class_mode` is `"binary"` or `"sparse"` it must include
+                the given `y_col` column with class values as strings.
+            - if `class_mode` is `"raw"` or `"multi_output"` it should contain
+                the columns specified in `y_col`.
+            - if `class_mode` is `"input"` or `None` no extra column is needed.
         directory: string, path to the directory to read images from. If `None`,
             data in `x_col` column should be absolute paths.
         image_data_generator: Instance of `ImageDataGenerator` to use for
@@ -37,21 +39,24 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         x_col: string, column in `dataframe` that contains the filenames (or
             absolute paths if `directory` is `None`).
         y_col: string or list, column/s in `dataframe` that has the target data.
+        weight_col: string, column in `dataframe` that contains the sample
+            weights. Default: `None`.
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
             Color mode to read images.
         classes: Optional list of strings, classes to use (e.g. `["dogs", "cats"]`).
             If None, all classes in `y_col` will be used.
-        class_mode: one of "categorical", "binary", "sparse", "input",
-            "other" or None. Default: "categorical".
+        class_mode: one of "binary", "categorical", "input", "multi_output",
+            "raw", "sparse" or None. Default: "categorical".
             Mode for yielding the targets:
             - `"binary"`: 1D numpy array of binary labels,
             - `"categorical"`: 2D numpy array of one-hot encoded labels.
                 Supports multi-label output.
-            - `"sparse"`: 1D numpy array of integer labels,
             - `"input"`: images identical to input images (mainly used to
                 work with autoencoders),
-            - `"other"`: numpy array of `y_col` data,
+            - `"multi_output"`: list with the values of the different columns,
+            - `"raw"`: numpy array of values in `y_col` column(s),
+            - `"sparse"`: 1D numpy array of integer labels,
             - `None`, no targets are returned (the generator will only yield
                 batches of image data, which is useful to use in
                 `model.predict_generator()`).
@@ -75,10 +80,12 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
-        drop_duplicates: Boolean, whether to drop duplicate rows based on filename.
+        validate_filenames: Boolean, whether to validate image filenames in
+        `x_col`. If `True`, invalid images will be ignored. Disabling this option
+        can lead to speed-up in the instantiation of this class. Default: `True`.
     """
     allowed_class_modes = {
-        'categorical', 'binary', 'sparse', 'input', 'other', None
+        'binary', 'categorical', 'input', 'multi_output', 'raw', 'sparse', None
     }
 
     def __init__(self,
@@ -87,6 +94,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  image_data_generator=None,
                  x_col="filename",
                  y_col="class",
+                 weight_col=None,
                  target_size=(256, 256),
                  color_mode='rgb',
                  classes=None,
@@ -101,7 +109,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  subset=None,
                  interpolation='nearest',
                  dtype='float32',
-                 drop_duplicates=True):
+                 validate_filenames=True):
 
         super(DataFrameIterator, self).set_processing_attrs(image_data_generator,
                                                             target_size,
@@ -117,12 +125,10 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         self.class_mode = class_mode
         self.dtype = dtype
         # check that inputs match the required class_mode
-        self._check_params(df, x_col, y_col, classes)
-        if drop_duplicates:
-            df.drop_duplicates(x_col, inplace=True)
-        # check which image files are valid and keep them
-        df = self._filter_valid_filepaths(df, x_col)
-        if class_mode not in ["other", "input", None]:
+        self._check_params(df, x_col, y_col, weight_col, classes)
+        if validate_filenames:  # check which image files are valid and keep them
+            df = self._filter_valid_filepaths(df, x_col)
+        if class_mode not in ["input", "multi_output", "raw", None]:
             df, classes = self._filter_classes(df, y_col, classes)
             num_classes = len(classes)
             # build an index of all the unique classes
@@ -134,22 +140,23 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             stop = int(self.split[1] * num_files)
             df = df.iloc[start: stop, :]
         # get labels for each observation
-        if class_mode not in ["other", "input", None]:
+        if class_mode not in ["input", "multi_output", "raw", None]:
             self.classes = self.get_classes(df, y_col)
         self.filenames = df[x_col].tolist()
-        # create numpy array of raw input if class_mode="other"
-        if class_mode == "other":
-            self._data = df[y_col].values
-            if isinstance(y_col, str):
-                y_col = [y_col]
-            if "object" in list(df[y_col].dtypes):
-                raise TypeError("y_col column/s must be numeric datatypes.")
+        self._sample_weight = df[weight_col].values if weight_col else None
+
+        if class_mode == "multi_output":
+            self._targets = [np.array(df[col].tolist()) for col in y_col]
+        if class_mode == "raw":
+            self._targets = df[y_col].values
         self.samples = len(self.filenames)
-        if class_mode in ["other", "input", None]:
-            print('Found {} images.'.format(self.samples))
+        validated_string = 'validated' if validate_filenames else 'non-validated'
+        if class_mode in ["input", "multi_output", "raw", None]:
+            print('Found {} {} image filenames.'
+                  .format(self.samples, validated_string))
         else:
-            print('Found {} images belonging to {} classes.'
-                  .format(self.samples, num_classes))
+            print('Found {} {} image filenames belonging to {} classes.'
+                  .format(self.samples, validated_string, num_classes))
         super(DataFrameIterator, self).__init__(self.samples,
                                                 batch_size,
                                                 shuffle,
@@ -157,15 +164,21 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         root = self.directory or ''
         self.path_to_files = [os.path.join(root, fname) for fname in self.filenames]
 
-    def _check_params(self, df, x_col, y_col, classes):
+    def _check_params(self, df, x_col, y_col, weight_col, classes):
         # check class mode is one of the currently supported
         if self.class_mode not in self.allowed_class_modes:
             raise ValueError('Invalid class_mode: {}; expected one of: {}'
                              .format(self.class_mode, self.allowed_class_modes))
+        # check that y_col has several column names if class_mode is multi_output
+        if (self.class_mode == 'multi_output') and not isinstance(y_col, list):
+            raise TypeError(
+                'If class_mode="{}", y_col must be a list. Received {}.'
+                .format(self.class_mode, type(y_col).__name__)
+            )
         # check that filenames/filepaths column values are all strings
         if not all(df[x_col].apply(lambda x: isinstance(x, str))):
-            raise ValueError('All values in column x_col={} must be strings.'
-                             .format(x_col))
+            raise TypeError('All values in column x_col={} must be strings.'
+                            .format(x_col))
         # check labels are string if class_mode is binary or sparse
         if self.class_mode in {'binary', 'sparse'}:
             if not all(df[y_col].apply(lambda x: isinstance(x, str))):
@@ -190,10 +203,14 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                 raise TypeError('If class_mode="{}", y_col="{}" column '
                                 'values must be type string, list or tuple.'
                                 .format(self.class_mode, y_col))
-        # raise warning if classes are given and class_mode other or input
-        if classes and self.class_mode in {"other", "input", None}:
+        # raise warning if classes are given but will be unused
+        if classes and self.class_mode in {"input", "multi_output", "raw", None}:
             warnings.warn('`classes` will be ignored given the class_mode="{}"'
                           .format(self.class_mode))
+        # check that if weight column that the values are numerical
+        if weight_col and not issubclass(df[weight_col].dtype.type, np.number):
+            raise TypeError('Column weight_col={} must be numeric.'
+                            .format(weight_col))
 
     def get_classes(self, df, y_col):
         labels = []
@@ -245,9 +262,15 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         filepaths = df[x_col].map(
             lambda fname: os.path.join(self.directory or '', fname)
         )
-        format_check = filepaths.map(get_extension).isin(self.white_list_formats)
-        existence_check = filepaths.map(os.path.isfile)
-        return df[format_check & existence_check]
+        mask = filepaths.apply(validate_filename, args=(self.white_list_formats,))
+        n_invalid = (~mask).sum()
+        if n_invalid:
+            warnings.warn(
+                'Found {} invalid image filename(s) in x_col="{}". '
+                'These filename(s) will be ignored.'
+                .format(n_invalid, x_col)
+            )
+        return df[mask]
 
     @property
     def filepaths(self):
@@ -255,8 +278,11 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
 
     @property
     def labels(self):
-        return self.classes
+        if self.class_mode in {"multi_output", "raw"}:
+            return self._targets
+        else:
+            return self.classes
 
     @property
-    def data(self):
-        return self._data
+    def sample_weight(self):
+        return self._sample_weight
