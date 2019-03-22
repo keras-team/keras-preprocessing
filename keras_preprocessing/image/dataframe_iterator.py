@@ -154,6 +154,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                 batch_size,
                                                 shuffle,
                                                 seed)
+        root = self.directory or ''
+        self.path_to_files = [os.path.join(root, fname) for fname in self.filenames]
 
     def _check_params(self, df, x_col, y_col, classes):
         # check class mode is one of the currently supported
@@ -249,8 +251,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
 
     @property
     def filepaths(self):
-        root = self.directory or ''
-        return [os.path.join(root, fname) for fname in self.filenames]
+        return self.path_to_files
 
     @property
     def labels(self):
