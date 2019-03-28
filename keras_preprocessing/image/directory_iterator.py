@@ -140,7 +140,9 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                                                 shuffle,
                                                 seed)
 
-        self.path_to_files = [os.path.join(self.directory, fname) for fname in self.filenames]
+        self.path_to_files = [
+            os.path.join(self.directory, fname) for fname in self.filenames
+        ]
 
     @property
     def filepaths(self):
