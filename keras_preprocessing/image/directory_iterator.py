@@ -135,6 +135,9 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
               (self.samples, self.num_classes))
         pool.close()
         pool.join()
+        self._filepaths = [
+            os.path.join(self.directory, fname) for fname in self.filenames
+        ]
         super(DirectoryIterator, self).__init__(self.samples,
                                                 batch_size,
                                                 shuffle,
@@ -142,7 +145,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
 
     @property
     def filepaths(self):
-        return [os.path.join(self.directory, fname) for fname in self.filenames]
+        return self._filepaths
 
     @property
     def labels(self):
