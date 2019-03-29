@@ -90,7 +90,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                                                             save_format,
                                                             subset,
                                                             interpolation)
-        self.directory = directory or ''
+        self.directory = directory
         self.classes = classes
         if class_mode not in self.allowed_class_modes:
             raise ValueError('Invalid class_mode: {}; expected one of: {}'
