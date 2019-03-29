@@ -121,7 +121,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                             subset,
                                                             interpolation)
         df = dataframe.copy()
-        self.directory = directory
+        self.directory = directory or ''
         self.class_mode = class_mode
         self.dtype = dtype
         # check that inputs match the required class_mode
@@ -157,14 +157,13 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         else:
             print('Found {} {} image filenames belonging to {} classes.'
                   .format(self.samples, validated_string, num_classes))
+        self._filepaths = [
+            os.path.join(self.directory, fname) for fname in self.filenames
+        ]
         super(DataFrameIterator, self).__init__(self.samples,
                                                 batch_size,
                                                 shuffle,
                                                 seed)
-        root = self.directory or ''
-        self.path_to_files = [
-            os.path.join(root, fname) for fname in self.filenames
-        ]
 
     def _check_params(self, df, x_col, y_col, weight_col, classes):
         # check class mode is one of the currently supported
@@ -262,7 +261,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             absolute paths to image files
         """
         filepaths = df[x_col].map(
-            lambda fname: os.path.join(self.directory or '', fname)
+            lambda fname: os.path.join(self.directory, fname)
         )
         mask = filepaths.apply(validate_filename, args=(self.white_list_formats,))
         n_invalid = (~mask).sum()
@@ -276,7 +275,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
 
     @property
     def filepaths(self):
-        return self.path_to_files
+        return self._filepaths
 
     @property
     def labels(self):

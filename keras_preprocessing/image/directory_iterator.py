@@ -90,7 +90,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                                                             save_format,
                                                             subset,
                                                             interpolation)
-        self.directory = directory
+        self.directory = directory or ''
         self.classes = classes
         if class_mode not in self.allowed_class_modes:
             raise ValueError('Invalid class_mode: {}; expected one of: {}'
@@ -135,18 +135,17 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
               (self.samples, self.num_classes))
         pool.close()
         pool.join()
+        self._filepaths = [
+            os.path.join(self.directory, fname) for fname in self.filenames
+        ]
         super(DirectoryIterator, self).__init__(self.samples,
                                                 batch_size,
                                                 shuffle,
                                                 seed)
 
-        self.path_to_files = [
-            os.path.join(self.directory, fname) for fname in self.filenames
-        ]
-
     @property
     def filepaths(self):
-        return self.path_to_files
+        return self._filepaths
 
     @property
     def labels(self):
