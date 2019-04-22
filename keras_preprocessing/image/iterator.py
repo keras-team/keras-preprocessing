@@ -34,6 +34,9 @@ class Iterator(IteratorType):
     white_list_formats = ('png', 'jpg', 'jpeg', 'bmp', 'ppm', 'tif', 'tiff')
 
     def __init__(self, n, batch_size, shuffle, seed):
+        if n == 0:
+                raise FileNotFoundError('No files found under provided \
+                    directory to iterate over')
         self.n = n
         self.batch_size = batch_size
         self.seed = seed
@@ -82,7 +85,6 @@ class Iterator(IteratorType):
             if self.batch_index == 0:
                 self._set_index_array()
 
-            assert self.n != 0, "Won't iterate over 0 number of images"
             current_index = (self.batch_index * self.batch_size) % self.n
             if self.n > current_index + self.batch_size:
                 self.batch_index += 1
