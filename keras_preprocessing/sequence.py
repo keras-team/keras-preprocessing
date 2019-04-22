@@ -53,14 +53,16 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
     """
     if not hasattr(sequences, '__len__'):
         raise ValueError('`sequences` must be iterable.')
+    num_samples = len(sequences)
+
     lengths = []
     for x in sequences:
-        if not hasattr(x, '__len__'):
+        try:
+            lengths.append(len(x))
+        except TypeError:
             raise ValueError('`sequences` must be a list of iterables. '
                              'Found non-iterable: ' + str(x))
-        lengths.append(len(x))
 
-    num_samples = len(sequences)
     if maxlen is None:
         maxlen = np.max(lengths)
 
