@@ -1360,7 +1360,8 @@ class TestImage(object):
 
     def test_iterator_empty_directory(self):
         with pytest.raises(FileNotFoundError):
-            image.Iterator(0, 0, False, 0)
+            iterator = image.Iterator(0, 0, False, 0)
+            next(iterator.index_generator)
 
 if __name__ == '__main__':
     pytest.main([__file__])
