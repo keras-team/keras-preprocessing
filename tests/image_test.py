@@ -1358,7 +1358,7 @@ class TestImage(object):
         assert not image.validate_filename(str(filename), valid_extensions)
         assert not image.validate_filename('some_test_file.png', valid_extensions)
 
-    def test_iterator_empty_directory(self, tmpdir):
+    def test_iterator_empty_directory(self):
         with pytest.raises(FileNotFoundError):
             image.Iterator(0, 0, False, 0)
 
