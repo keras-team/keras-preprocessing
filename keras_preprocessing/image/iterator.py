@@ -83,7 +83,7 @@ class Iterator(IteratorType):
                 self._set_index_array()
 
             if self.n == 0:
-                raise FileNotFoundError('No files found under provided \
+                raise Exception('No files found under provided \
                 directory to iterate over')
             current_index = (self.batch_index * self.batch_size) % self.n
             if self.n > current_index + self.batch_size:
