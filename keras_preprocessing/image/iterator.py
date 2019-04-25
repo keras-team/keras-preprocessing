@@ -83,7 +83,7 @@ class Iterator(IteratorType):
                 self._set_index_array()
 
             if self.n == 0:
-                # Avoiding Division by zero error
+                # Avoiding modulo by zero error
                 current_index = 0
             else:
                 current_index = (self.batch_index * self.batch_size) % self.n
