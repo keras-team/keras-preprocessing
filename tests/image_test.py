@@ -1359,8 +1359,8 @@ class TestImage(object):
         assert not image.validate_filename('some_test_file.png', valid_extensions)
 
     def test_iterator_empty_directory(self):
-        # Testing with randomly chosen batch sizes
-        for batch_size in [0, 10, 32, 100, 128, 512]:
+        # Testing with different batch sizes
+        for batch_size in [0, 32]:
             iterator = image.Iterator(0, batch_size, False, 0)
             ret = next(iterator.index_generator)
             assert ret.size == 0
