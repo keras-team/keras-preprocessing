@@ -1363,5 +1363,6 @@ class TestImage(object):
         next(iterator.index_generator)
 
 
+
 if __name__ == '__main__':
     pytest.main([__file__])
