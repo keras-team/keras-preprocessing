@@ -1,6 +1,5 @@
 import pytest
 
-import keras
 import keras_preprocessing
 
 

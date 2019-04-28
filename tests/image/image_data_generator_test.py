@@ -38,8 +38,7 @@ def test_image_data_generator(all_test_images):
         for im in test_images:
             img_list.append(utils.img_to_array(im)[None, ...])
 
-        images = np.vstack(img_list)
-        generator = image_data_generator.ImageDataGenerator(
+        image_data_generator.ImageDataGenerator(
             featurewise_center=True,
             samplewise_center=True,
             featurewise_std_normalization=True,
@@ -328,7 +327,7 @@ def test_image_data_generator_flow(all_test_images, tmpdir):
         rotation_range=90.,
         interpolation_order=0
     )
-    labels_gen = label_generator.flow(
+    label_generator.flow(
         x=labels[np.newaxis, ..., np.newaxis],
         seed=123
     )
