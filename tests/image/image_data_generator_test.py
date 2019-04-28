@@ -32,7 +32,7 @@ def all_test_images():
     return [rgb_images, rgba_images, gray_images]
 
 
-def test_image_data_generator(all_test_images, tmpdir):
+def test_image_data_generator(all_test_images):
     for test_images in all_test_images:
         img_list = []
         for im in test_images:
@@ -56,150 +56,8 @@ def test_image_data_generator(all_test_images, tmpdir):
             cval=0.5,
             horizontal_flip=True,
             vertical_flip=True,
-            interpolation_order=1)
-        generator.fit(images, augment=True)
-
-        for x, y in generator.flow(images, np.arange(images.shape[0]),
-                                   shuffle=False,
-                                   save_to_dir=str(tmpdir),
-                                   batch_size=3):
-            assert x.shape == images[:3].shape
-            assert list(y) == [0, 1, 2]
-            break
-
-        # Test with sample weights
-        for x, y, w in generator.flow(
-                images, np.arange(images.shape[0]),
-                shuffle=False,
-                sample_weight=np.arange(images.shape[0]) + 1,
-                save_to_dir=str(tmpdir),
-                batch_size=3):
-            assert x.shape == images[:3].shape
-            assert list(y) == [0, 1, 2]
-            assert list(w) == [1, 2, 3]
-            break
-
-        # Test with `shuffle=True`
-        for x, y in generator.flow(images, np.arange(images.shape[0]),
-                                   shuffle=True,
-                                   save_to_dir=str(tmpdir),
-                                   batch_size=3,
-                                   seed=42):
-            assert x.shape == images[:3].shape
-            # Check that the sequence is shuffled.
-            assert list(y) != [0, 1, 2]
-            break
-
-        # Test without y
-        for x in generator.flow(images, None,
-                                shuffle=True,
-                                save_to_dir=str(tmpdir),
-                                batch_size=3):
-            assert type(x) is np.ndarray
-            assert x.shape == images[:3].shape
-            # Check that the sequence is shuffled.
-            break
-
-        # Test with a single miscellaneous input data array
-        dsize = images.shape[0]
-        x_misc1 = np.random.random(dsize)
-
-        for i, (x, y) in enumerate(generator.flow(
-                (images, x_misc1),
-                np.arange(dsize),
-                shuffle=False,
-                batch_size=2)):
-            assert x[0].shape == images[:2].shape
-            assert (x[1] == x_misc1[(i * 2):((i + 1) * 2)]).all()
-            if i == 2:
-                break
-
-        # Test with two miscellaneous inputs
-        x_misc2 = np.random.random((dsize, 3, 3))
-
-        for i, (x, y) in enumerate(generator.flow(
-                (images, [x_misc1, x_misc2]),
-                np.arange(dsize),
-                shuffle=False,
-                batch_size=2)):
-            assert x[0].shape == images[:2].shape
-            assert (x[1] == x_misc1[(i * 2):((i + 1) * 2)]).all()
-            assert (x[2] == x_misc2[(i * 2):((i + 1) * 2)]).all()
-            if i == 2:
-                break
-
-        # Test cases with `y = None`
-        x = generator.flow(images, None, batch_size=3).next()
-        assert type(x) is np.ndarray
-        assert x.shape == images[:3].shape
-        x = generator.flow((images, x_misc1), None,
-                           batch_size=3, shuffle=False).next()
-        assert type(x) is list
-        assert x[0].shape == images[:3].shape
-        assert (x[1] == x_misc1[:3]).all()
-        x = generator.flow((images, [x_misc1, x_misc2]), None,
-                           batch_size=3, shuffle=False).next()
-        assert type(x) is list
-        assert x[0].shape == images[:3].shape
-        assert (x[1] == x_misc1[:3]).all()
-        assert (x[2] == x_misc2[:3]).all()
-
-        generator = image_data_generator.ImageDataGenerator(validation_split=0.2)
-        x = generator.flow(images, batch_size=3).next()
-        assert isinstance(x, np.ndarray)
-        assert x.shape == images[:3].shape
-
-        # Test some failure cases:
-        x_misc_err = np.random.random((dsize + 1, 3, 3))
-
-        with pytest.raises(ValueError) as e_info:
-            generator.flow((images, x_misc_err), np.arange(dsize),
-                           batch_size=3)
-        assert str(e_info.value).find(
-            'All of the arrays in') != -1
-
-        with pytest.raises(ValueError) as e_info:
-            generator.flow((images, x_misc1), np.arange(dsize + 1),
-                           batch_size=3)
-        assert str(e_info.value).find(
-            '`x` (images tensor) and `y` (labels) ') != -1
-
-        # Test `flow` behavior as Sequence
-        seq = generator.flow(images, np.arange(images.shape[0]),
-                             shuffle=False, save_to_dir=str(tmpdir),
-                             batch_size=3)
-        assert len(seq) == images.shape[0] // 3 + 1
-        x, y = seq[0]
-        assert x.shape == images[:3].shape
-        assert list(y) == [0, 1, 2]
-
-        # Test with `shuffle=True`
-        seq = generator.flow(images, np.arange(images.shape[0]),
-                             shuffle=True, save_to_dir=str(tmpdir),
-                             batch_size=3, seed=123)
-        x, y = seq[0]
-        # Check that the sequence is shuffled.
-        assert list(y) != [0, 1, 2]
-
-        # `on_epoch_end` should reshuffle the sequence.
-        seq.on_epoch_end()
-        x2, y2 = seq[0]
-        assert list(y) != list(y2)
-
-    # test order_interpolation
-    labels = np.array([[2, 2, 0, 2, 2],
-                       [1, 3, 2, 3, 1],
-                       [2, 1, 0, 1, 2],
-                       [3, 1, 0, 2, 0],
-                       [3, 1, 3, 2, 1]])
-
-    label_generator = image_data_generator.ImageDataGenerator(
-        rotation_range=90.,
-        interpolation_order=0
-    )
-    labels_gen = label_generator.flow(x=labels[np.newaxis, ..., np.newaxis],
-                                      seed=123)
-    assert (np.unique(labels) == np.unique(next(labels_gen))).all()
+            interpolation_order=1
+        )
 
 
 def test_image_data_generator_with_validation_split(all_test_images):
@@ -281,8 +139,22 @@ def test_image_data_generator_fit():
         featurewise_std_normalization=True,
         samplewise_std_normalization=True,
         zca_whitening=True,
+        rotation_range=90.,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        shear_range=0.5,
         zoom_range=(0.2, 0.2),
-        data_format='channels_last')
+        channel_shift_range=0.,
+        brightness_range=(1, 5),
+        fill_mode='nearest',
+        cval=0.5,
+        horizontal_flip=True,
+        vertical_flip=True,
+        interpolation_order=1,
+        data_format='channels_last'
+    )
+    x = np.random.random((32, 10, 10, 3))
+    generator.fit(x, augment=True)
     # Test grayscale
     x = np.random.random((32, 10, 10, 1))
     generator.fit(x)
@@ -298,7 +170,22 @@ def test_image_data_generator_fit():
         featurewise_std_normalization=True,
         samplewise_std_normalization=True,
         zca_whitening=True,
-        data_format='channels_first')
+        rotation_range=90.,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        shear_range=0.5,
+        zoom_range=(0.2, 0.2),
+        channel_shift_range=0.,
+        brightness_range=(1, 5),
+        fill_mode='nearest',
+        cval=0.5,
+        horizontal_flip=True,
+        vertical_flip=True,
+        interpolation_order=1,
+        data_format='channels_first'
+    )
+    x = np.random.random((32, 10, 10, 3))
+    generator.fit(x, augment=True)
     # Test grayscale
     x = np.random.random((32, 1, 10, 10))
     generator.fit(x)
@@ -308,6 +195,143 @@ def test_image_data_generator_fit():
     # Test more samples than dims
     x = np.random.random((32, 1, 4, 4))
     generator.fit(x)
+
+
+def test_image_data_generator_flow(all_test_images, tmpdir):
+    for test_images in all_test_images:
+        img_list = []
+        for im in test_images:
+            img_list.append(utils.img_to_array(im)[None, ...])
+
+        images = np.vstack(img_list)
+        dsize = images.shape[0]
+        generator = image_data_generator.ImageDataGenerator(
+            featurewise_center=True,
+            samplewise_center=True,
+            featurewise_std_normalization=True,
+            samplewise_std_normalization=True,
+            zca_whitening=True,
+            rotation_range=90.,
+            width_shift_range=0.1,
+            height_shift_range=0.1,
+            shear_range=0.5,
+            zoom_range=0.2,
+            channel_shift_range=0.,
+            brightness_range=(1, 5),
+            fill_mode='nearest',
+            cval=0.5,
+            horizontal_flip=True,
+            vertical_flip=True,
+            interpolation_order=1
+        )
+
+        generator.flow(
+            images,
+            np.arange(images.shape[0]),
+            shuffle=False,
+            save_to_dir=str(tmpdir),
+            batch_size=3
+        )
+
+        generator.flow(
+            images,
+            np.arange(images.shape[0]),
+            shuffle=False,
+            sample_weight=np.arange(images.shape[0]) + 1,
+            save_to_dir=str(tmpdir),
+            batch_size=3
+        )
+
+        # Test with `shuffle=True`
+        generator.flow(
+            images, np.arange(images.shape[0]),
+            shuffle=True,
+            save_to_dir=str(tmpdir),
+            batch_size=3,
+            seed=42
+        )
+
+        # Test without y
+        generator.flow(
+            images,
+            None,
+            shuffle=True,
+            save_to_dir=str(tmpdir),
+            batch_size=3
+        )
+
+        # Test with a single miscellaneous input data array
+        x_misc1 = np.random.random(dsize)
+        generator.flow(
+            (images, x_misc1),
+            np.arange(dsize),
+            shuffle=False,
+            batch_size=2
+        )
+
+        # Test with two miscellaneous inputs
+        x_misc2 = np.random.random((dsize, 3, 3))
+        generator.flow(
+            (images, [x_misc1, x_misc2]),
+            np.arange(dsize),
+            shuffle=False,
+            batch_size=2
+        )
+
+        # Test cases with `y = None`
+        generator.flow(images, None, batch_size=3)
+        generator.flow((images, x_misc1), None, batch_size=3, shuffle=False)
+        generator.flow(
+            (images, [x_misc1, x_misc2]),
+            None,
+            batch_size=3,
+            shuffle=False
+        )
+        generator = image_data_generator.ImageDataGenerator(validation_split=0.2)
+        generator.flow(images, batch_size=3)
+
+        # Test some failure cases:
+        x_misc_err = np.random.random((dsize + 1, 3, 3))
+        with pytest.raises(ValueError) as e_info:
+            generator.flow((images, x_misc_err), np.arange(dsize), batch_size=3)
+        assert str(e_info.value).find('All of the arrays in') != -1
+
+        with pytest.raises(ValueError) as e_info:
+            generator.flow((images, x_misc1), np.arange(dsize + 1), batch_size=3)
+        assert str(e_info.value).find('`x` (images tensor) and `y` (labels) ') != -1
+
+        # Test `flow` behavior as Sequence
+        generator.flow(
+            images,
+            np.arange(images.shape[0]),
+            shuffle=False,
+            save_to_dir=str(tmpdir),
+            batch_size=3
+        )
+
+        # Test with `shuffle=True`
+        generator.flow(
+            images,
+            np.arange(images.shape[0]),
+            shuffle=True, save_to_dir=str(tmpdir),
+            batch_size=3, seed=123
+        )
+
+    # test order_interpolation
+    labels = np.array([[2, 2, 0, 2, 2],
+                       [1, 3, 2, 3, 1],
+                       [2, 1, 0, 1, 2],
+                       [3, 1, 0, 2, 0],
+                       [3, 1, 3, 2, 1]])
+
+    label_generator = image_data_generator.ImageDataGenerator(
+        rotation_range=90.,
+        interpolation_order=0
+    )
+    labels_gen = label_generator.flow(
+        x=labels[np.newaxis, ..., np.newaxis],
+        seed=123
+    )
 
 
 def test_valid_args():
