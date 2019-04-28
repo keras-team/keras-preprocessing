@@ -1358,6 +1358,13 @@ class TestImage(object):
         assert not image.validate_filename(str(filename), valid_extensions)
         assert not image.validate_filename('some_test_file.png', valid_extensions)
 
+    def test_iterator_empty_directory(self):
+        # Testing with different batch sizes
+        for batch_size in [0, 32]:
+            iterator = image.Iterator(0, batch_size, False, 0)
+            ret = next(iterator.index_generator)
+            assert ret.size == 0
+
 
 if __name__ == '__main__':
     pytest.main([__file__])
