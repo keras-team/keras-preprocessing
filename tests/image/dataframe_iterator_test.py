@@ -72,9 +72,7 @@ def test_dataframe_iterator(all_test_images, tmpdir):
     df_iterator_dir = generator.flow_from_dataframe(df, str(tmpdir))
     df_sparse_iterator = generator.flow_from_dataframe(df, str(tmpdir),
                                                        class_mode="sparse")
-    if np.isnan(df_sparse_iterator.classes).any():
-        raise ValueError('Invalid values.')
-
+    assert not np.isnan(df_sparse_iterator.classes).any()
     # check number of classes and images
     assert len(df_iterator.class_indices) == num_classes
     assert len(df_iterator.classes) == count
@@ -211,7 +209,7 @@ def test_dataframe_iterator_class_mode_input(all_test_images, tmpdir):
     batch = next(df_autoencoder_iterator)
 
     # check if input and output have the same shape and they're the same
-    assert(batch[0].all() == batch[1].all())
+    assert np.allclose(batch[0], batch[1])
     # check if the input and output images are not the same numpy array
     input_img = batch[0][0]
     output_img = batch[1][0]
