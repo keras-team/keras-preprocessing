@@ -80,6 +80,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
+        dtype: Dtype to use for the generated arrays.
         validate_filenames: Boolean, whether to validate image filenames in
         `x_col`. If `True`, invalid images will be ignored. Disabling this option
         can lead to speed-up in the instantiation of this class. Default: `True`.
@@ -108,6 +109,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  save_format='png',
                  subset=None,
                  interpolation='nearest',
+                 dtype='float32',
                  validate_filenames=True):
 
         super(DataFrameIterator, self).set_processing_attrs(image_data_generator,
@@ -122,6 +124,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         df = dataframe.copy()
         self.directory = directory or ''
         self.class_mode = class_mode
+        self.dtype = dtype
         # check that inputs match the required class_mode
         self._check_params(df, x_col, y_col, weight_col, classes)
         if validate_filenames:  # check which image files are valid and keep them
