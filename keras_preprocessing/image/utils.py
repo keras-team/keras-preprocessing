@@ -34,7 +34,7 @@ if pil_image is not None:
 
 
 def validate_filename(filename, white_list_formats):
-    """Check if a filename refers to a valid file
+    """Check if a filename refers to a valid file.
 
     # Arguments
         filename: String, absolute path to a file
@@ -81,6 +81,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
 
     # Arguments
         path: Path to image file.
+        grayscale: DEPRECATED use `color_mode="grayscale"`.
         color_mode: One of "grayscale", "rgb", "rgba". Default: "rgb".
             The desired image format.
         target_size: Either `None` (default to original size)
@@ -139,6 +140,7 @@ def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif',
     # Arguments
         directory: string, absolute path to the directory
         ext: tuple of strings or single string, extensions of the pictures
+
     # Returns
         a list of paths
     """
@@ -156,7 +158,7 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
             containing files to be counted
         white_list_formats: Set of strings containing allowed extensions for
             the files to be counted.
-        follow_links: Boolean.
+        follow_links: Boolean, follow symbolic links to subdirectories
 
     # Yields
         Tuple of (root, filename) with extension in `white_list_formats`.
@@ -189,7 +191,7 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             E.g.: `segment=(0.6, 1.0)` would only account for last 40 percent
             of images in each directory.
         class_indices: dictionary mapping a class name to its index.
-        follow_links: boolean.
+        follow_links: boolean, follow symbolic links to subdirectories
 
     # Returns
          classes: a list of class indices

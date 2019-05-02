@@ -51,6 +51,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
             images (if `save_to_dir` is set).
         save_format: Format to use for saving sample images
             (if `save_to_dir` is set).
+        follow_links: boolean,follow symbolic links to subdirectories
         subset: Subset of data (`"training"` or `"validation"`) if
             validation_split is set in ImageDataGenerator.
         interpolation: Interpolation method used to resample the image if the

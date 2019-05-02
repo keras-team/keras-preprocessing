@@ -108,7 +108,6 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  save_format='png',
                  subset=None,
                  interpolation='nearest',
-                 dtype='float32',
                  validate_filenames=True):
 
         super(DataFrameIterator, self).set_processing_attrs(image_data_generator,
@@ -123,7 +122,6 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         df = dataframe.copy()
         self.directory = directory or ''
         self.class_mode = class_mode
-        self.dtype = dtype
         # check that inputs match the required class_mode
         self._check_params(df, x_col, y_col, weight_col, classes)
         if validate_filenames:  # check which image files are valid and keep them
@@ -133,6 +131,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             num_classes = len(classes)
             # build an index of all the unique classes
             self.class_indices = dict(zip(classes, range(len(classes))))
+        # retrieve only training or validation set
         # retrieve only training or validation set
         if self.split:
             num_files = len(df)
