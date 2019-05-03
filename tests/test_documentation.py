@@ -159,7 +159,7 @@ def handle_module(mod):
         elif inspect.isfunction(mem):
             handle_function(name, mem)
         elif 'keras_preprocessing' in name and inspect.ismodule(mem):
-            # Only test keras' modules
+            # Only test keras_preprocessing' modules
             handle_module(mem)
 
 

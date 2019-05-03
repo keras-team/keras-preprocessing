@@ -158,7 +158,7 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
             containing files to be counted
         white_list_formats: Set of strings containing allowed extensions for
             the files to be counted.
-        follow_links: Boolean, follow symbolic links to subdirectories
+        follow_links: Boolean, follow symbolic links to subdirectories.
 
     # Yields
         Tuple of (root, filename) with extension in `white_list_formats`.
@@ -191,7 +191,7 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             E.g.: `segment=(0.6, 1.0)` would only account for last 40 percent
             of images in each directory.
         class_indices: dictionary mapping a class name to its index.
-        follow_links: boolean, follow symbolic links to subdirectories
+        follow_links: boolean, follow symbolic links to subdirectories.
 
     # Returns
          classes: a list of class indices
