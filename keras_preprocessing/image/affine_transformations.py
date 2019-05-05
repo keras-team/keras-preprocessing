@@ -46,8 +46,9 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-        interpolation_order int: order of spline interpolation.
+        interpolation_order: int, order of spline interpolation.
             see `ndimage.interpolation.affine_transform`
+
     # Returns
         Rotated Numpy image tensor.
     """
@@ -74,8 +75,9 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-        interpolation_order int: order of spline interpolation.
+        interpolation_order: int, order of spline interpolation.
             see `ndimage.interpolation.affine_transform`
+
     # Returns
         Shifted Numpy image tensor.
     """
@@ -103,8 +105,9 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-        interpolation_order int: order of spline interpolation.
+        interpolation_order: int, order of spline interpolation.
             see `ndimage.interpolation.affine_transform`
+
     # Returns
         Sheared Numpy image tensor.
     """
@@ -130,7 +133,7 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-        interpolation_order int: order of spline interpolation.
+        interpolation_order: int, order of spline interpolation.
             see `ndimage.interpolation.affine_transform`
 
     # Returns
@@ -269,7 +272,7 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-        order int: order of interpolation
+        order: int, order of interpolation
 
     # Returns
         The transformed version of the input.

@@ -37,8 +37,8 @@ class ImageDataGenerator(object):
         featurewise_std_normalization: Boolean.
             Divide inputs by std of the dataset, feature-wise.
         samplewise_std_normalization: Boolean. Divide each input by its std.
-        zca_epsilon: epsilon for ZCA whitening. Default is 1e-6.
         zca_whitening: Boolean. Apply ZCA whitening.
+        zca_epsilon: epsilon for ZCA whitening. Default is 1e-6.
         rotation_range: Int. Degree range for random rotations.
         width_shift_range: Float, 1-D array-like or int
             - float: fraction of total width, if < 1, or pixels if >= 1.
@@ -100,6 +100,8 @@ class ImageDataGenerator(object):
             If you never set it, then it will be "channels_last".
         validation_split: Float. Fraction of images reserved for validation
             (strictly between 0 and 1).
+        interpolation_order: int, order to use for
+            the spline interpolation. Higher is slower.
         dtype: Dtype to use for the generated arrays.
 
     # Examples
