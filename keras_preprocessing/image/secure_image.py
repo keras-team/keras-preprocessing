@@ -15,8 +15,7 @@ except ImportError:
 
 
 def transform(src_dir, dest_dir, count, block_size, image_x, image_y):
-    """
-    This function checks the directory and encrypts the image and saves it in the destination folder
+    """This function checks the directory and encrypts the image and saves it in the destination folder
 
     # Arguments
         :param src_dir: source directory
@@ -60,8 +59,7 @@ def transform(src_dir, dest_dir, count, block_size, image_x, image_y):
             print("Unknown file type")
 
 def encrypt_directory(src_dir, dest_dir, image_x, image_y, password):
-    """
-    This function encrypts the src_directory into dest_dir using hash of password as the
+    """This function encrypts the src_directory into dest_dir using hash of password as the
     block_size
 
     # Arguments
@@ -84,8 +82,7 @@ def encrypt_directory(src_dir, dest_dir, image_x, image_y, password):
 
 
 def rot(A, n, x1, y1):
-    """
-     This is the function which rotates a given block
+    """This is the function which rotates a given block
 
     # Arguments
         :param A: numpy array to be rotated
@@ -106,7 +103,8 @@ def rot(A, n, x1, y1):
 
 
 def transform_img(block_size, arr, image_x, image_y):
-    """
+    """ Shuffling pixels
+
     # Arguments
         :param block_size: generated from the password
         :param path_to_img: the path to image
@@ -129,8 +127,7 @@ def transform_img(block_size, arr, image_x, image_y):
 
 
 def decrypt_img(path_to_img, password, image_x, image_y):
-    """
-    This function decrypts the image using the same logic
+    """This function decrypts the image using the same logic
 
     # Arguments
         :param path_to_img: the path to image
