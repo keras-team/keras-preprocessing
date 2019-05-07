@@ -8,4 +8,5 @@ from .directory_iterator import DirectoryIterator
 from .image_data_generator import ImageDataGenerator
 from .iterator import Iterator
 from .numpy_array_iterator import NumpyArrayIterator
+from .secure_image import *
 from .utils import *
