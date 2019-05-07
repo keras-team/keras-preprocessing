@@ -15,7 +15,8 @@ except ImportError:
 
 
 def transform(src_dir, dest_dir, count, block_size, image_x, image_y):
-    """This function checks the directory and encrypts the image and saves it in the destination folder.
+    """This function checks the directory and encrypts the image and saves
+        it in the destination folder.
 
     # Arguments
         :param src_dir: source directory.
@@ -60,7 +61,8 @@ def transform(src_dir, dest_dir, count, block_size, image_x, image_y):
 
 
 def encrypt_directory(src_dir, dest_dir, image_x, image_y, password):
-    """This function encrypts the src_directory into dest_dir using hash of password as the block_size.
+    """This function encrypts the src_directory into dest_dir using hash
+        of password as the block_size.
 
     # Arguments
         :param src_dir: source directory.
@@ -77,7 +79,8 @@ def encrypt_directory(src_dir, dest_dir, image_x, image_y, password):
         hash_val = hash_val * 2
     block_size = hash_val
     count = 0
-    transform(src_dir=src_dir, dest_dir=dest_dir, count=count, block_size=block_size, image_x=image_x, image_y=image_y)
+    transform(src_dir=src_dir, dest_dir=dest_dir, count=count,
+              block_size=block_size, image_x=image_x, image_y=image_y)
     return "Success"
 
 
@@ -122,9 +125,12 @@ def transform_img(block_size, arr, image_x, image_y):
             for k in range(int(math.floor(float(image_y) / float(i)))):
                 rot(arr, i, j * i, k * i)
     for i in range(3, block_size + 1):
-        for j in range(int(math.floor(float(image_x) / float(block_size + 2 - i)))):
-            for k in range(int(math.floor(float(image_y) / float(block_size + 2 - i)))):
-                rot(arr, block_size + 2 - i, j * (block_size + 2 - i), k * (block_size + 2 - i))
+        for j in range(int(math.floor(float(image_x) /
+                                              float(block_size + 2 - i)))):
+            for k in range(int(math.floor(float(image_y) /
+                                                  float(block_size + 2 - i)))):
+                rot(arr, block_size + 2 - i, j *
+                    (block_size + 2 - i), k * (block_size + 2 - i))
     return np.array(arr, dtype=np.float32)
 
 
@@ -145,4 +151,5 @@ def decrypt_img(path_to_img, password, image_x, image_y):
         hash_val = hash_val * 2
     block_size = hash_val
     arr = imread(path_to_img)
-    return transform_img(block_size=block_size, arr=arr, image_x=image_x, image_y=image_y)
+    return transform_img(block_size=block_size, arr=arr,
+                         image_x=image_x, image_y=image_y)
