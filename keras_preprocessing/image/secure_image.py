@@ -18,15 +18,15 @@ def transform(src_dir, dest_dir, count, block_size, image_x, image_y):
     """This function checks the directory and encrypts the image and saves it in the destination folder.
 
     # Arguments
-        :param src_dir: source directory
-        :param dest_dir: destination directory
-        :param count: keeping count of images processed
-        :param block_size: block size for rotation
-        :param image_x: width of image
-        :param image_y: height of image
+        :param src_dir: source directory.
+        :param dest_dir: destination directory.
+        :param count: keeping count of images processed.
+        :param block_size: block size for rotation.
+        :param image_x: width of image.
+        :param image_y: height of image.
 
     # Returns
-        "Success message"
+        None.
     """
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
@@ -63,14 +63,14 @@ def encrypt_directory(src_dir, dest_dir, image_x, image_y, password):
     """This function encrypts the src_directory into dest_dir using hash of password as the block_size.
 
     # Arguments
-        :param src_dir: source directory
-        :param dest_dir: destination directory
-        :param image_x: width of image
-        :param image_y: height of image
-        :param password: password for encryption
+        :param src_dir: source directory.
+        :param dest_dir: destination directory.
+        :param image_x: width of image.
+        :param image_y: height of image.
+        :param password: password for encryption.
 
     # Returns
-        "Success message"
+        Success message.
     """
     hash_val = int(hashlib.sha1(password.encode('utf-8')).hexdigest(), 16) % 53
     if hash_val < 10:
@@ -85,11 +85,13 @@ def rot(A, n, x1, y1):
     """This is the function which rotates a given block.
 
     # Arguments
-        :param A: numpy array to be rotated
-        :param n: counter
+        :param A: numpy array to be rotated.
+        :param n: counter.
+        :param x1: helper pixel x1 used in shuffling.
+        :param y1: helper pixel y1 used in shuffling.
 
     # Returns
-        Image array
+        Image array.
     """
     temple = []
     for i in range(n):
@@ -106,13 +108,13 @@ def transform_img(block_size, arr, image_x, image_y):
     """ Shuffling pixels.
 
     # Arguments
-        :param block_size: generated from the password
-        :param path_to_img: the path to image
-        :param image_x: width of image
-        :param image_y: height of image
+        :param block_size: generated from the password.
+        :param path_to_img: the path to image.
+        :param image_x: width of image.
+        :param image_y: height of image.
 
      # Returns
-        np array of the image
+        np array of the image.
     """
 
     for i in range(2, block_size + 1):
@@ -130,13 +132,13 @@ def decrypt_img(path_to_img, password, image_x, image_y):
     """This function decrypts the image using the same logic.
 
     # Arguments
-        :param path_to_img: the path to image
-        :param password: password same as encryption
-        :param image_x: width of image
-        :param image_y: height of image
+        :param path_to_img: the path to image.
+        :param password: password same as encryption.
+        :param image_x: width of image.
+        :param image_y: height of image.
 
     # Returns
-        np array which could be yielded to a fit_generator function
+        np array which could be yielded to a fit_generator function.
     """
     hash_val = int(hashlib.sha1(password.encode('utf-8')).hexdigest(), 16) % 53
     if hash_val < 10:
