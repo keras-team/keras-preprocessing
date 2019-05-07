@@ -25,7 +25,9 @@ def transform(src_dir, dest_dir, count, block_size, image_x, image_y):
         :param block_size: block size for rotation
         :param image_x: width of image
         :param image_y: height of image
-    :return: none
+
+    # Return
+        "Success message"
     """
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
@@ -61,6 +63,7 @@ def encrypt_directory(src_dir, dest_dir, image_x, image_y, password):
     """
     This function encrypts the src_directory into dest_dir using hash of password as the
     block_size
+
     # Arguments
         :param src_dir: source directory
         :param dest_dir: destination directory
@@ -83,9 +86,11 @@ def encrypt_directory(src_dir, dest_dir, image_x, image_y, password):
 def rot(A, n, x1, y1):
     """
      This is the function which rotates a given block
+
     # Arguments
         :param A: numpy array to be rotated
         :param n: counter
+
     # Returns
         Image array
     """
@@ -107,6 +112,7 @@ def transform_img(block_size, arr, image_x, image_y):
         :param path_to_img: the path to image
         :param image_x: width of image
         :param image_y: height of image
+
      # Returns
         np array of the image
     """
@@ -131,6 +137,7 @@ def decrypt_img(path_to_img, password, image_x, image_y):
         :param password: password same as encryption
         :param image_x: width of image
         :param image_y: height of image
+
     # Returns
         np array which could be yielded to a fit_generator function
     """
