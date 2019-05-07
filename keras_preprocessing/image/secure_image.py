@@ -109,7 +109,7 @@ def transform_img(block_size, arr, image_x, image_y):
 
     # Arguments
         :param block_size: generated from the password.
-        :param path_to_img: the path to image.
+        :param arr: image array.
         :param image_x: width of image.
         :param image_y: height of image.
 
