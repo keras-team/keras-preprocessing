@@ -125,10 +125,12 @@ def transform_img(block_size, arr, image_x, image_y):
 def decrypt_img(path_to_img, password, image_x, image_y):
     """
     This function decrypts the image using the same logic
-    :param path_to_img: the path to image
-    :param password: password same as encryption
-    :param image_x: width of image
-    :param image_y: height of image
+
+    # Arguments
+        :param path_to_img: the path to image
+        :param password: password same as encryption
+        :param image_x: width of image
+        :param image_y: height of image
     # Returns
         np array which could be yielded to a fit_generator function
     """
