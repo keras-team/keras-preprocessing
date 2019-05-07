@@ -22,12 +22,12 @@ def test_decrypt_img():
 def test_trandorm():
     path = "/path/to/src"
     dest = "path/to/dest"
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(EnvironmentError):
         secure_image.transform(path, dest, count=1, block_size=39, image_x=100, image_y=100)
 
 
 def test_encrypt_directory():
     path = "/path/to/src"
     dest = "path/to/dest"
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(EnvironmentError):
         secure_image.encrypt_directory(path, dest, image_x=100, image_y=100, password="PASS")
