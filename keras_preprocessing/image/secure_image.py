@@ -126,9 +126,9 @@ def transform_img(block_size, arr, image_x, image_y):
                 rot(arr, i, j * i, k * i)
     for i in range(3, block_size + 1):
         for j in range(int(math.floor(float(image_x) /
-                                              float(block_size + 2 - i)))):
+                                      float(block_size + 2 - i)))):
             for k in range(int(math.floor(float(image_y) /
-                                                  float(block_size + 2 - i)))):
+                                          float(block_size + 2 - i)))):
                 rot(arr, block_size + 2 - i, j *
                     (block_size + 2 - i), k * (block_size + 2 - i))
     return np.array(arr, dtype=np.float32)
