@@ -65,9 +65,9 @@ def encrypt_directory(src_dir, dest_dir, image_x, image_y, password):
     # Arguments
         :param src_dir: source directory
         :param dest_dir: destination directory
-        :param password: password for encryption
         :param image_x: width of image
         :param image_y: height of image
+        :param password: password for encryption
 
     # Return
         "Success message"
