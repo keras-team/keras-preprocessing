@@ -82,7 +82,8 @@ def rot(A, n, x1, y1):
      This is the function which rotates a given block
     :param A: numpy array to be rotated
     :param n: counter
-    :return: none
+    # Returns
+        Image array
     """
     temple = []
     for i in range(n):
@@ -101,7 +102,8 @@ def transform_img(block_size, arr, image_x, image_y):
     :param path_to_img: the path to image
     :param image_x: width of image
     :param image_y: height of image
-    :return: np array of the image
+     # Returns
+        np array of the image
     """
 
     for i in range(2, block_size + 1):
@@ -122,7 +124,8 @@ def decrypt_img(path_to_img, password, image_x, image_y):
     :param password: password same as encryption
     :param image_x: width of image
     :param image_y: height of image
-    :return: np array which could be yielded to a fit_generator function
+    # Returns
+        np array which could be yielded to a fit_generator function
     """
     hash_val = int(hashlib.sha1(password.encode('utf-8')).hexdigest(), 16) % 53
     if hash_val < 10:
