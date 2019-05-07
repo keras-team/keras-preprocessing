@@ -25,7 +25,7 @@ def transform(src_dir, dest_dir, count, block_size, image_x, image_y):
         :param image_x: width of image
         :param image_y: height of image
 
-    # Return
+    # Returns
         "Success message"
     """
     if not os.path.exists(dest_dir):
@@ -69,7 +69,7 @@ def encrypt_directory(src_dir, dest_dir, image_x, image_y, password):
         :param image_y: height of image
         :param password: password for encryption
 
-    # Return
+    # Returns
         "Success message"
     """
     hash_val = int(hashlib.sha1(password.encode('utf-8')).hexdigest(), 16) % 53
