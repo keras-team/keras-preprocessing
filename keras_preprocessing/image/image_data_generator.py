@@ -429,7 +429,8 @@ class ImageDataGenerator(object):
             save_to_dir=save_to_dir,
             save_prefix=save_prefix,
             save_format=save_format,
-            subset=subset
+            subset=subset,
+            dtype=self.dtype
         )
 
     def flow_from_directory(self,
@@ -537,7 +538,8 @@ class ImageDataGenerator(object):
             save_format=save_format,
             follow_links=follow_links,
             subset=subset,
-            interpolation=interpolation
+            interpolation=interpolation,
+            dtype=self.dtype
         )
 
     def flow_from_dataframe(self,
@@ -680,7 +682,8 @@ class ImageDataGenerator(object):
             save_format=save_format,
             subset=subset,
             interpolation=interpolation,
-            validate_filenames=validate_filenames
+            validate_filenames=validate_filenames,
+            dtype=self.dtype
         )
 
     def standardize(self, x):
