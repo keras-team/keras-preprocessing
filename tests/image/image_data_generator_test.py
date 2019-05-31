@@ -81,6 +81,12 @@ def test_image_data_generator_with_validation_split(all_test_images):
                            shuffle=False, batch_size=10,
                            subset='validation')
 
+        # test non categorical labels with validation split
+        generator.flow(images, labels,
+                       shuffle=False, batch_size=10,
+                       ignore_class_split=True,
+                       subset='validation')
+
         labels = np.concatenate([
             np.zeros((int(len(images) / 4),)),
             np.ones((int(len(images) / 4),)),
