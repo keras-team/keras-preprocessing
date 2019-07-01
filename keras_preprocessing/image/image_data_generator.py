@@ -845,7 +845,7 @@ class ImageDataGenerator(object):
                 - `'zy'`: Float. Zoom in the y direction.
                 - `'flip_horizontal'`: Boolean. Horizontal flip.
                 - `'flip_vertical'`: Boolean. Vertical flip.
-                - `'channel_shift_intencity'`: Float. Channel shift intensity.
+                - `'channel_shift_intensity'`: Float. Channel shift intensity.
                 - `'brightness'`: Float. Brightness shift intensity.
 
         # Returns
