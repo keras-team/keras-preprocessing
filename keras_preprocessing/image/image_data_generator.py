@@ -692,7 +692,7 @@ class ImageDataGenerator(object):
         If you want to apply this method without changing the input in-place
         you can call the method creating a copy before:
 
-        standarize(np.copy(x))
+        standardize(np.copy(x))
 
         # Arguments
             x: Batch of inputs to be normalized.
