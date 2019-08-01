@@ -383,14 +383,14 @@ def test_deterministic_transform():
                        x[:, ::-1, :])
     x = np.ones((3, 3, 3))
     x_rotated = np.array([[[0., 0., 0.],
-                           [0., 0., 0.],
-                           [1., 1., 1.]],
-                          [[0., 0., 0.],
+                           [1., 1., 1.],
+                           [0., 0., 0.]],
+                          [[1., 1., 1.],
                            [1., 1., 1.],
                            [1., 1., 1.]],
                           [[0., 0., 0.],
-                           [0., 0., 0.],
-                           [1., 1., 1.]]])
+                           [1., 1., 1.],
+                           [0., 0., 0.]]])
     assert np.allclose(generator.apply_transform(x, {'theta': 45}),
                        x_rotated)
 
