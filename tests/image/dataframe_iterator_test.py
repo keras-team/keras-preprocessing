@@ -361,7 +361,7 @@ def test_dataframe_iterator_class_mode_raw(all_test_images, tmpdir):
     df = pd.DataFrame({"filename": filenames}).assign(
         output_0=np.random.uniform(size=len(filenames)),
         output_1=np.random.uniform(size=len(filenames)),
-        output_2d=[np.random.uniform(size=(5, 7) for _ in filenames]
+        output_2d=[np.random.uniform(size=(5, 7)) for _ in filenames]
     )
     df_iterator = image_data_generator.ImageDataGenerator().flow_from_dataframe(
         df, y_col='output_0', directory=str(tmpdir),
@@ -395,8 +395,8 @@ def test_dataframe_iterator_class_mode_raw(all_test_images, tmpdir):
     assert len(batch_x.shape) == 4
     assert isinstance(batch_y, np.ndarray)
     assert batch_y.shape == (3, 5, 7)
-    assert np.array_equal(batch_y,
-                          np.stack(df['output_2d'].values[:3], 0))
+    df_output_2d = np.stack(df['output_2d'].values[:3], 0)
+    assert np.array_equal(batch_y, df_output_2d)
 
 @pytest.mark.parametrize('validation_split,num_training', [
     (0.25, 18),
