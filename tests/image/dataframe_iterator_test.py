@@ -397,6 +397,7 @@ def test_dataframe_iterator_class_mode_raw(all_test_images, tmpdir):
     assert batch_y.shape == (3, 5, 7)
     df_output_2d = np.stack(df['output_2d'].values[:3], 0)
     assert np.array_equal(batch_y, df_output_2d)
+    
 
 @pytest.mark.parametrize('validation_split,num_training', [
     (0.25, 18),
