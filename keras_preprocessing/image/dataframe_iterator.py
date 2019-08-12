@@ -149,7 +149,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         if class_mode == "multi_output":
             self._targets = [np.array(df[col].tolist()) for col in y_col]
         if class_mode == "raw":
-            self._targets = df[y_col].values
+            self._targets = np.stack(df[y_col].values, 0)
         self.samples = len(self.filenames)
         validated_string = 'validated' if validate_filenames else 'non-validated'
         if class_mode in ["input", "multi_output", "raw", None]:
