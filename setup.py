@@ -37,7 +37,7 @@ setup(name='Keras_Preprocessing',
       extras_require={
           'tests': ['pandas',
                     'Pillow' if sys.version_info >= (3, 0) else 'pillow',
-                    'tensorflow==1.7',  # CPU version <dummy>
+                    'tensorflow',  # CPU version
                     'keras',
                     'pytest',
                     'pytest-xdist',
