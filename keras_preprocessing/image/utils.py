@@ -282,14 +282,6 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
         raise ValueError('Unsupported channel number: %s' % (x.shape[2],))
 
 
-def _scale_img(x, lower_bound, upper_bound):
-    x = x + max(-np.min(x), 0)
-    x_max = np.max(x)
-    if x_max != 0:
-        x /= x_max
-    return x * (upper_bound - lower_bound) + lower_bound
-
-
 def img_to_array(img, data_format='channels_last', dtype='float32'):
     """Converts a PIL Image instance to a Numpy array.
 
