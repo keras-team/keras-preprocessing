@@ -82,8 +82,9 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     # Arguments
         path: Path to image file.
         grayscale: DEPRECATED use `color_mode="grayscale"`.
-        color_mode: One of "grayscale", "rgb", "rgba". Default: "rgb".
-            The desired image format.
+        color_mode: The desired image format. One of "grayscale", "rgb", "rgba".
+            "grayscale" supports 8-bit images and 32-bit signed integer images.
+            Default: "rgb".
         target_size: Either `None` (default to original size)
             or tuple of ints `(img_height, img_width)`.
         interpolation: Interpolation method used to resample the image if the
@@ -91,7 +92,8 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
             Supported methods are "nearest", "bilinear", and "bicubic".
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
-            "hamming" are also supported. By default, "nearest" is used.
+            "hamming" are also supported.
+            Default: "nearest".
 
     # Returns
         A PIL Image instance.
@@ -109,7 +111,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
                           'The use of `load_img` requires PIL.')
     img = pil_image.open(path)
     if color_mode == 'grayscale':
-        if img.mode not in ('L', 'I'):
+        if img.mode not in ('L', 'I'):  # 8-bit and 32-bit signed integer pixels
             img = img.convert('L')
     elif color_mode == 'rgba':
         if img.mode != 'RGBA':
@@ -228,11 +230,12 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
 
     # Arguments
         x: Input Numpy array.
-        data_format: Image data format.
-            either "channels_first" or "channels_last".
-        scale: Whether to rescale image values
-            to be within `[0, 255]`.
+        data_format: Image data format, either "channels_first" or "channels_last".
+            Default: "channels_last".
+        scale: Whether to rescale image values to be within `[0, 255]`.
+            Default: True.
         dtype: Dtype to use.
+            Default: "float32".
 
     # Returns
         A PIL Image instance.
@@ -258,11 +261,11 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     if data_format == 'channels_first':
         x = x.transpose(1, 2, 0)
     if scale:
-        if x.shape[2] == 1 and np.max(x) > 255:
-            # 32-bit signed integer grayscale image. PIL mode "I"
-            x = _scale_img(x, -2147483648, 2147483647)
-        else:
-            x = _scale_img(x, 0, 255)
+        x = x + max(-np.min(x), 0)
+        x_max = np.max(x)
+        if x_max != 0:
+            x /= x_max
+        x *= 255
     if x.shape[2] == 4:
         # RGBA
         return pil_image.fromarray(x.astype('uint8'), 'RGBA')
