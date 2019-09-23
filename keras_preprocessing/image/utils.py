@@ -109,7 +109,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
                           'The use of `load_img` requires PIL.')
     img = pil_image.open(path)
     if color_mode == 'grayscale':
-        if img.mode != 'L':
+        if img.mode not in ('L', 'I'):
             img = img.convert('L')
     elif color_mode == 'rgba':
         if img.mode != 'RGBA':
@@ -258,11 +258,11 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     if data_format == 'channels_first':
         x = x.transpose(1, 2, 0)
     if scale:
-        x = x + max(-np.min(x), 0)
-        x_max = np.max(x)
-        if x_max != 0:
-            x /= x_max
-        x *= 255
+        if x.shape[2] == 1 and np.max(x) > 255:
+            # 32-bit signed integer grayscale image. PIL mode "I"
+            x = _scale_img(x, -2147483648, 2147483647)
+        else:
+            x = _scale_img(x, 0, 255)
     if x.shape[2] == 4:
         # RGBA
         return pil_image.fromarray(x.astype('uint8'), 'RGBA')
@@ -271,9 +271,20 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
         return pil_image.fromarray(x.astype('uint8'), 'RGB')
     elif x.shape[2] == 1:
         # grayscale
+        if np.max(x) > 255:
+            # 32-bit signed integer grayscale image. PIL mode "I"
+            return pil_image.fromarray(x[:, :, 0].astype('int32'), 'I')
         return pil_image.fromarray(x[:, :, 0].astype('uint8'), 'L')
     else:
         raise ValueError('Unsupported channel number: %s' % (x.shape[2],))
+
+
+def _scale_img(x, lower_bound, upper_bound):
+    x = x + max(-np.min(x), 0)
+    x_max = np.max(x)
+    if x_max != 0:
+        x /= x_max
+    return x * (upper_bound - lower_bound) + lower_bound
 
 
 def img_to_array(img, data_format='channels_last', dtype='float32'):
