@@ -21,6 +21,7 @@ def test_load_img(tmpdir):
     filename_rgb = str(tmpdir / 'rgb_utils.png')
     filename_rgba = str(tmpdir / 'rgba_utils.png')
     filename_grayscale_8bit = str(tmpdir / 'grayscale_8bit_utils.png')
+    filename_grayscale_16bit = str(tmpdir / 'grayscale_16bit_utils.tiff')
     filename_grayscale_32bit = str(tmpdir / 'grayscale_32bit_utils.tiff')
 
     original_rgb_array = np.array(255 * np.random.rand(100, 100, 3),
@@ -38,6 +39,13 @@ def test_load_img(tmpdir):
     original_grayscale_8bit = utils.array_to_img(original_grayscale_8bit_array,
                                                  scale=False)
     original_grayscale_8bit.save(filename_grayscale_8bit)
+
+    original_grayscale_16bit_array = np.array(
+        np.random.randint(-2147483648, 2147483647, (100, 100, 1)), dtype=np.int16
+    )
+    original_grayscale_16bit = utils.array_to_img(original_grayscale_16bit_array,
+                                                  scale=False, dtype='int16')
+    original_grayscale_16bit.save(filename_grayscale_16bit)
 
     original_grayscale_32bit_array = np.array(
         np.random.randint(-2147483648, 2147483647, (100, 100, 1)), dtype=np.int32
@@ -67,6 +75,14 @@ def test_load_img(tmpdir):
     loaded_im_array = utils.img_to_array(loaded_im)
     assert loaded_im_array.shape == original_grayscale_8bit_array.shape
     assert np.all(loaded_im_array == original_grayscale_8bit_array)
+
+    loaded_im = utils.load_img(filename_grayscale_16bit, color_mode='grayscale')
+    loaded_im_array = utils.img_to_array(loaded_im, dtype='int16')
+    assert loaded_im_array.shape == original_grayscale_16bit_array.shape
+    assert np.all(loaded_im_array == original_grayscale_16bit_array)
+    # test casting int16 image to float32
+    loaded_im_array = utils.img_to_array(loaded_im)
+    assert np.allclose(loaded_im_array, original_grayscale_16bit_array)
 
     loaded_im = utils.load_img(filename_grayscale_32bit, color_mode='grayscale')
     loaded_im_array = utils.img_to_array(loaded_im, dtype='int32')
@@ -101,6 +117,12 @@ def test_load_img(tmpdir):
     assert loaded_im_array.shape == original_grayscale_8bit_array.shape
     assert np.all(loaded_im_array == original_grayscale_8bit_array)
 
+    loaded_im = utils.load_img(filename_grayscale_16bit, color_mode='grayscale',
+                               target_size=(100, 100))
+    loaded_im_array = utils.img_to_array(loaded_im, dtype='int16')
+    assert loaded_im_array.shape == original_grayscale_16bit_array.shape
+    assert np.all(loaded_im_array == original_grayscale_16bit_array)
+
     loaded_im = utils.load_img(filename_grayscale_32bit, color_mode='grayscale',
                                target_size=(100, 100))
     loaded_im_array = utils.img_to_array(loaded_im, dtype='int32')
@@ -128,6 +150,11 @@ def test_load_img(tmpdir):
     loaded_im_array = utils.img_to_array(loaded_im)
     assert loaded_im_array.shape == (25, 25, 1)
 
+    loaded_im = utils.load_img(filename_grayscale_16bit, color_mode='grayscale',
+                               target_size=(25, 25))
+    loaded_im_array = utils.img_to_array(loaded_im, dtype='int16')
+    assert loaded_im_array.shape == (25, 25, 1)
+
     loaded_im = utils.load_img(filename_grayscale_32bit, color_mode='grayscale',
                                target_size=(25, 25))
     loaded_im_array = utils.img_to_array(loaded_im, dtype='int32')
@@ -151,6 +178,11 @@ def test_load_img(tmpdir):
     loaded_im = utils.load_img(filename_grayscale_8bit, color_mode='grayscale',
                                target_size=(25, 25), interpolation="nearest")
     loaded_im_array = utils.img_to_array(loaded_im)
+    assert loaded_im_array.shape == (25, 25, 1)
+
+    loaded_im = utils.load_img(filename_grayscale_16bit, color_mode='grayscale',
+                               target_size=(25, 25), interpolation="nearest")
+    loaded_im_array = utils.img_to_array(loaded_im, dtype='int16')
     assert loaded_im_array.shape == (25, 25, 1)
 
     loaded_im = utils.load_img(filename_grayscale_32bit, color_mode='grayscale',
@@ -240,6 +272,17 @@ def test_array_to_img_and_img_to_array():
 
     # Test 2D
     x = np.random.random((height, width, 1))
+    img = utils.array_to_img(x, data_format='channels_last')
+    assert img.size == (width, height)
+
+    x = utils.img_to_array(img, data_format='channels_last')
+    assert x.shape == (height, width, 1)
+
+    # grayscale 16-bit signed integer
+    x = np.array(
+        np.random.randint(-2147483648, 2147483647, (height, width, 1)),
+        dtype=np.int16
+    )
     img = utils.array_to_img(x, data_format='channels_last')
     assert img.size == (width, height)
 
