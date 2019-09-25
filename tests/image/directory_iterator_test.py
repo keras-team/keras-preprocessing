@@ -34,14 +34,17 @@ def all_test_images():
         im = Image.fromarray(imarray.astype('uint8').squeeze()).convert('L')
         gray_images.append(im)
         # 16-bit grayscale
-        imarray = np.array(np.random.randint(-2147483648, 2147483647, (img_w, img_h)))
+        imarray = np.array(
+            np.random.randint(-2147483648, 2147483647, (img_w, img_h))
+        )
         im = Image.fromarray(imarray.astype('uint16'))
         gray_images_16bit.append(im)
         # 32-bit grayscale
         im = Image.fromarray(imarray.astype('uint32'))
         gray_images_32bit.append(im)
 
-    return [rgb_images, rgba_images, gray_images, gray_images_16bit, gray_images_32bit]
+    return [rgb_images, rgba_images,
+            gray_images, gray_images_16bit, gray_images_32bit]
 
 
 def test_directory_iterator(all_test_images, tmpdir):
