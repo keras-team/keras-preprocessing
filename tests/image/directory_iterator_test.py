@@ -113,7 +113,7 @@ def test_directory_iterator(all_test_images, tmpdir):
                                             color_mode='rgb',
                                             batch_size=3,
                                             class_mode='categorical')
-    assert len(dir_seq) == np.ceil(count / 3)
+    assert len(dir_seq) == np.ceil(count / 3.)
     x1, y1 = dir_seq[1]
     assert x1.shape == (3, 26, 26, 3)
     assert y1.shape == (3, num_classes)
