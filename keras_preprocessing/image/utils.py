@@ -111,7 +111,9 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
                           'The use of `load_img` requires PIL.')
     img = pil_image.open(path)
     if color_mode == 'grayscale':
-        if img.mode not in ('L', 'I'):  # 8-bit and 32-bit signed integer pixels
+        # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
+        # convert it to an 8-bit grayscale image.
+        if img.mode not in ('L', 'I;16', 'I'):
             img = img.convert('L')
     elif color_mode == 'rgba':
         if img.mode != 'RGBA':
