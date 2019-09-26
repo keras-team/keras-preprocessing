@@ -16,23 +16,35 @@ def all_test_images():
     rgb_images = []
     rgba_images = []
     gray_images = []
+    gray_images_16bit = []
+    gray_images_32bit = []
     for n in range(8):
         bias = np.random.rand(img_w, img_h, 1) * 64
         variance = np.random.rand(img_w, img_h, 1) * (255 - 64)
+        # RGB
         imarray = np.random.rand(img_w, img_h, 3) * variance + bias
         im = Image.fromarray(imarray.astype('uint8')).convert('RGB')
         rgb_images.append(im)
-
+        # RGBA
         imarray = np.random.rand(img_w, img_h, 4) * variance + bias
         im = Image.fromarray(imarray.astype('uint8')).convert('RGBA')
         rgba_images.append(im)
-
+        # 8-bit grayscale
         imarray = np.random.rand(img_w, img_h, 1) * variance + bias
-        im = Image.fromarray(
-            imarray.astype('uint8').squeeze()).convert('L')
+        im = Image.fromarray(imarray.astype('uint8').squeeze()).convert('L')
         gray_images.append(im)
+        # 16-bit grayscale
+        imarray = np.array(
+            np.random.randint(-2147483648, 2147483647, (img_w, img_h))
+        )
+        im = Image.fromarray(imarray.astype('uint16'))
+        gray_images_16bit.append(im)
+        # 32-bit grayscale
+        im = Image.fromarray(imarray.astype('uint32'))
+        gray_images_32bit.append(im)
 
-    return [rgb_images, rgba_images, gray_images]
+    return [rgb_images, rgba_images,
+            gray_images, gray_images_16bit, gray_images_32bit]
 
 
 def test_directory_iterator(all_test_images, tmpdir):
@@ -101,7 +113,7 @@ def test_directory_iterator(all_test_images, tmpdir):
                                             color_mode='rgb',
                                             batch_size=3,
                                             class_mode='categorical')
-    assert len(dir_seq) == np.ceil(count / 3)
+    assert len(dir_seq) == np.ceil(count / 3.)
     x1, y1 = dir_seq[1]
     assert x1.shape == (3, 26, 26, 3)
     assert y1.shape == (3, num_classes)
@@ -109,7 +121,7 @@ def test_directory_iterator(all_test_images, tmpdir):
     assert (x1 == 0).all()
 
     with pytest.raises(ValueError):
-        x1, y1 = dir_seq[9]
+        x1, y1 = dir_seq[14]  # there are 40 images and batch size is 3
 
 
 def test_directory_iterator_class_mode_input(all_test_images, tmpdir):
@@ -140,9 +152,9 @@ def test_directory_iterator_class_mode_input(all_test_images, tmpdir):
 
 
 @pytest.mark.parametrize('validation_split,num_training', [
-    (0.25, 18),
-    (0.50, 12),
-    (0.75, 6),
+    (0.25, 30),
+    (0.50, 20),
+    (0.75, 10),
 ])
 def test_directory_iterator_with_validation_split(all_test_images,
                                                   validation_split,
