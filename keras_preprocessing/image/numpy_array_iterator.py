@@ -156,7 +156,7 @@ class NumpyArrayIterator(Iterator):
 
         if self.save_to_dir:
             for i, j in enumerate(index_array):
-                img = array_to_img(batch_x[i], self.data_format, scale=True)
+                img = array_to_img(batch_x[i], self.data_format, scale=False)
                 fname = '{prefix}_{index}_{hash}.{format}'.format(
                     prefix=self.save_prefix,
                     index=j,
