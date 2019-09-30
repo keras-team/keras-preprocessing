@@ -234,7 +234,8 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
         x: Input Numpy array.
         data_format: Image data format, either "channels_first" or "channels_last".
             Default: "channels_last".
-        scale: Whether to rescale image values to be within `[0, 255]`.
+        scale: Whether to rescale the image such that minimum and maximum values
+            are 0 and 255 respectively.
             Default: True.
         dtype: Dtype to use.
             Default: "float32".
@@ -263,7 +264,7 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     if data_format == 'channels_first':
         x = x.transpose(1, 2, 0)
     if scale:
-        x = x + max(-np.min(x), 0)
+        x = x - np.min(x)
         x_max = np.max(x)
         if x_max != 0:
             x /= x_max
