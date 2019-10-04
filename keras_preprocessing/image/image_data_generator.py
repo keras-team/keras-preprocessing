@@ -429,7 +429,8 @@ class ImageDataGenerator(object):
             save_to_dir=save_to_dir,
             save_prefix=save_prefix,
             save_format=save_format,
-            subset=subset
+            subset=subset,
+            dtype=x.dtype
         )
 
     def flow_from_directory(self,

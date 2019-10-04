@@ -109,7 +109,7 @@ class NumpyArrayIterator(Iterator):
                 if y is not None:
                     y = y[split_idx:]
 
-        self.x = np.asarray(x, dtype=self.dtype)
+        self.x = np.asanyarray(x, dtype=self.dtype)
         self.x_misc = x_misc
         if self.x.ndim != 4:
             raise ValueError('Input data in `NumpyArrayIterator` '
