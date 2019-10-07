@@ -226,9 +226,12 @@ class BatchFromFilesMixin():
         for i, j in enumerate(index_array):
             img = load_img(filepaths[j],
                            color_mode=self.color_mode,
+                           # TODO: here use None when resizing function is not None
                            target_size=self.target_size,
                            interpolation=self.interpolation)
             x = img_to_array(img, data_format=self.data_format)
+            # TODO: here use the custom provided resizing function if not None
+            # and check that the size corresponds to the target size.
             # Pillow images should be closed after `load_img`,
             # but not PIL images.
             if hasattr(img, 'close'):
