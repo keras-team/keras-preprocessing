@@ -239,6 +239,8 @@ class BatchFromFilesMixin():
                            target_size=load_target_size,
                            interpolation=self.interpolation)
             x = img_to_array(img, data_format=self.data_format)
+            # NOTE: we could potentially have keyword arguments for the
+            # resizing function
             x = self.resizing_function(x)
             if x.shape[:-1] != self.target_size:
                 raise ValueError(
