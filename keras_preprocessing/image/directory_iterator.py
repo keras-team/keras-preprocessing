@@ -60,6 +60,11 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
+        resizing_function: function, used to resize the loaded images to the
+            target size. this will overrule interpolation. If None, then
+            interpolation will happen. The input is an image in the specified
+            data format, and the output has to be an image in the specified
+            data format with the target size.
         dtype: Dtype to use for generated arrays.
     """
     allowed_class_modes = {'categorical', 'binary', 'sparse', 'input', None}
@@ -81,6 +86,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                  follow_links=False,
                  subset=None,
                  interpolation='nearest',
+                 resizing_function=None,
                  dtype='float32'):
         super(DirectoryIterator, self).set_processing_attrs(image_data_generator,
                                                             target_size,
@@ -90,7 +96,8 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                                                             save_prefix,
                                                             save_format,
                                                             subset,
-                                                            interpolation)
+                                                            interpolation,
+                                                            resizing_function)
         self.directory = directory
         self.classes = classes
         if class_mode not in self.allowed_class_modes:
