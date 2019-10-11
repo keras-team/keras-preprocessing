@@ -242,11 +242,11 @@ class BatchFromFilesMixin():
             # NOTE: we could potentially have keyword arguments for the
             # resizing function
             x = self.resizing_function(x)
-            if x.shape[:-1] != self.target_size:
+            if x.shape != self.image_shape:
                 raise ValueError(
-                    'The loaded image size %s (at %s) does not correspond to'
-                    'the target size %s' %
-                    (str(x.shape[:-1]), filepaths[j], str(self.target_size)))
+                    'The loaded image shape %s (at %s) does not correspond to'
+                    'the specified image shape %s' %
+                    (str(x.shape), filepaths[j], str(self.image_shape)))
             # Pillow images should be closed after `load_img`,
             # but not PIL images.
             if hasattr(img, 'close'):
