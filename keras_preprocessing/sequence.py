@@ -393,8 +393,8 @@ class TimeseriesGenerator(object):
                  end_index=None,
                  shuffle=False,
                  reverse=False,
-                 inter_batch_stride=None,
-                 batch_size=128):
+                 batch_size=128,
+                 inter_batch_stride=None):
 
         if len(data) != len(targets):
             raise ValueError('Data and targets have to be' +
@@ -478,12 +478,12 @@ class TimeseriesGenerator(object):
             'length': self.length,
             'sampling_rate': self.sampling_rate,
             'stride': self.stride,
-            'inter_batch_stride': self.inter_batch_stride,
             'start_index': self.start_index,
             'end_index': self.end_index,
             'shuffle': self.shuffle,
             'reverse': self.reverse,
-            'batch_size': self.batch_size
+            'batch_size': self.batch_size,
+            'inter_batch_stride': self.inter_batch_stride
         }
 
     def to_json(self, **kwargs):
