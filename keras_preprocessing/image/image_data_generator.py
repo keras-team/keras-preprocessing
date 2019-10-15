@@ -87,8 +87,8 @@ class ImageDataGenerator(object):
         preprocessing_function: function that will be applied on each input.
             The function will run after the image is resized and augmented.
             The function should take one argument:
-            one image (Numpy tensor with rank 3),
-            and should output a Numpy tensor with the same shape.
+            one image (NumPy tensor with rank 3),
+            and should output a NumPy tensor with the same shape.
         data_format: Image data format,
             either "channels_first" or "channels_last".
             "channels_last" mode means that the images should have shape
@@ -378,10 +378,10 @@ class ImageDataGenerator(object):
         """Takes data & label arrays, generates batches of augmented data.
 
         # Arguments
-            x: Input data. Numpy array of rank 4 or a tuple.
+            x: Input data. NumPy array of rank 4 or a tuple.
                 If tuple, the first element
                 should contain the images and the second element
-                another numpy array or a list of numpy arrays
+                another NumPy array or a list of NumPy arrays
                 that gets passed to the output
                 without any modifications.
                 Can be used to feed the model miscellaneous data
@@ -409,13 +409,13 @@ class ImageDataGenerator(object):
 
         # Returns
             An `Iterator` yielding tuples of `(x, y)`
-                where `x` is a numpy array of image data
+                where `x` is a NumPy array of image data
                 (in the case of a single image input) or a list
-                of numpy arrays (in the case with
-                additional inputs) and `y` is a numpy array
+                of NumPy arrays (in the case with
+                additional inputs) and `y` is a NumPy array
                 of corresponding labels. If 'sample_weight' is not None,
                 the yielded tuples are of the form `(x, y, sample_weight)`.
-                If `y` is None, only the numpy array `x` is returned.
+                If `y` is None, only the NumPy array `x` is returned.
         """
         return NumpyArrayIterator(
             x,
@@ -517,9 +517,9 @@ class ImageDataGenerator(object):
 
         # Returns
             A `DirectoryIterator` yielding tuples of `(x, y)`
-                where `x` is a numpy array containing a batch
+                where `x` is a NumPy array containing a batch
                 of images with shape `(batch_size, *target_size, channels)`
-                and `y` is a numpy array of corresponding labels.
+                and `y` is a NumPy array of corresponding labels.
         """
         return DirectoryIterator(
             directory,
@@ -600,14 +600,14 @@ class ImageDataGenerator(object):
             class_mode: one of "binary", "categorical", "input", "multi_output",
                 "raw", sparse" or None. Default: "categorical".
                 Mode for yielding the targets:
-                - `"binary"`: 1D numpy array of binary labels,
-                - `"categorical"`: 2D numpy array of one-hot encoded labels.
+                - `"binary"`: 1D NumPy array of binary labels,
+                - `"categorical"`: 2D NumPy array of one-hot encoded labels.
                     Supports multi-label output.
                 - `"input"`: images identical to input images (mainly used to
                     work with autoencoders),
                 - `"multi_output"`: list with the values of the different columns,
-                - `"raw"`: numpy array of values in `y_col` column(s),
-                - `"sparse"`: 1D numpy array of integer labels,
+                - `"raw"`: NumPy array of values in `y_col` column(s),
+                - `"sparse"`: 1D NumPy array of integer labels,
                 - `None`, no targets are returned (the generator will only yield
                     batches of image data, which is useful to use in
                     `model.predict_generator()`).
@@ -639,9 +639,9 @@ class ImageDataGenerator(object):
 
         # Returns
             A `DataFrameIterator` yielding tuples of `(x, y)`
-            where `x` is a numpy array containing a batch
+            where `x` is a NumPy array containing a batch
             of images with shape `(batch_size, *target_size, channels)`
-            and `y` is a numpy array of corresponding labels.
+            and `y` is a NumPy array of corresponding labels.
         """
         if 'has_ext' in kwargs:
             warnings.warn('has_ext is deprecated, filenames in the dataframe have '
