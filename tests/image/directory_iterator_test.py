@@ -131,7 +131,7 @@ def test_directory_iterator(all_test_images, tmpdir):
     batch_size = 4
     # augmentation not disabled
     seq = generator.flow_from_directory(
-        tmpdir,
+        str(tmpdir),
         target_size=(26, 26),
         color_mode='rgb',
         class_mode='categorical',
@@ -144,7 +144,7 @@ def test_directory_iterator(all_test_images, tmpdir):
     assert not np.array_equal(x1, x2)
     # augmentation not disabled
     seq = generator.flow_from_directory(
-        tmpdir,
+        str(tmpdir),
         target_size=(26, 26),
         color_mode='rgb',
         class_mode='categorical',
@@ -156,7 +156,7 @@ def test_directory_iterator(all_test_images, tmpdir):
     assert not np.array_equal(x1, x2)
     # augmentation disabled
     seq = generator.flow_from_directory(
-        tmpdir,
+        str(tmpdir),
         target_size=(26, 26),
         color_mode='rgb',
         class_mode='categorical',
