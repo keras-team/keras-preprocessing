@@ -74,6 +74,9 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             (if `save_to_dir` is set).
         subset: Subset of data (`"training"` or `"validation"`) if
             validation_split is set in ImageDataGenerator.
+        apply_augmentation: Boolean, can be set to False to disable
+            data augmentation, e.g. for the validation subset.
+            Standardization is still applied.
         interpolation: Interpolation method used to resample the image if the
             target size is different from that of the loaded image.
             Supported methods are "nearest", "bilinear", and "bicubic".
@@ -108,6 +111,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  save_prefix='',
                  save_format='png',
                  subset=None,
+                 apply_augmentation=True,
                  interpolation='nearest',
                  dtype='float32',
                  validate_filenames=True):
@@ -120,6 +124,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                             save_prefix,
                                                             save_format,
                                                             subset,
+                                                            apply_augmentation,
                                                             interpolation)
         df = dataframe.copy()
         self.directory = directory or ''

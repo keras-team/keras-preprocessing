@@ -374,7 +374,8 @@ class ImageDataGenerator(object):
              save_to_dir=None,
              save_prefix='',
              save_format='png',
-             subset=None):
+             subset=None,
+             apply_augmentation=True):
         """Takes data & label arrays, generates batches of augmented data.
 
         # Arguments
@@ -429,7 +430,8 @@ class ImageDataGenerator(object):
             save_to_dir=save_to_dir,
             save_prefix=save_prefix,
             save_format=save_format,
-            subset=subset
+            subset=subset,
+            apply_augmentation=apply_augmentation
         )
 
     def flow_from_directory(self,
@@ -446,6 +448,7 @@ class ImageDataGenerator(object):
                             save_format='png',
                             follow_links=False,
                             subset=None,
+                            apply_augmentation=True,
                             interpolation='nearest'):
         """Takes the path to a directory & generates batches of augmented data.
 
@@ -537,6 +540,7 @@ class ImageDataGenerator(object):
             save_format=save_format,
             follow_links=follow_links,
             subset=subset,
+            apply_augmentation=apply_augmentation,
             interpolation=interpolation
         )
 
@@ -557,6 +561,7 @@ class ImageDataGenerator(object):
                             save_prefix='',
                             save_format='png',
                             subset=None,
+                            apply_augmentation=True,
                             interpolation='nearest',
                             validate_filenames=True,
                             **kwargs):
@@ -679,6 +684,7 @@ class ImageDataGenerator(object):
             save_prefix=save_prefix,
             save_format=save_format,
             subset=subset,
+            apply_augmentation=apply_augmentation,
             interpolation=interpolation,
             validate_filenames=validate_filenames
         )

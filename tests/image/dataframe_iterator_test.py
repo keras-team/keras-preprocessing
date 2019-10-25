@@ -123,6 +123,22 @@ def test_dataframe_iterator(all_test_images, tmpdir):
     with pytest.raises(ValueError):
         x1, y1 = dir_seq[9]
 
+    # Test that augmentation can be disabled.
+    # other tests for possible values of apply_augmentation
+    # in directory_iterator_test.
+    generator = image_data_generator.ImageDataGenerator(
+        rotation_range=0.2,
+    )
+    dir_seq = generator.flow_from_dataframe(df, str(tmpdir),
+                                            target_size=(26, 26),
+                                            color_mode='rgb',
+                                            batch_size=3,
+                                            apply_augmentation=False,
+                                            class_mode='categorical')
+    x1, _ = dir_seq[0]
+    x2, _ = dir_seq[0]
+    assert np.array_equal(x1, x2)
+
 
 def test_dataframe_iterator_validate_filenames(all_test_images, tmpdir):
     # save the images in the paths

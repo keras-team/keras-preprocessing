@@ -39,6 +39,9 @@ class NumpyArrayIterator(Iterator):
             (if `save_to_dir` is set).
         subset: Subset of data (`"training"` or `"validation"`) if
             validation_split is set in ImageDataGenerator.
+        apply_augmentation: Boolean, can be set to False to disable
+            data augmentation, e.g. for the validation subset.
+            Standardization is still applied.
         dtype: Dtype to use for the generated arrays.
     """
 
@@ -55,6 +58,7 @@ class NumpyArrayIterator(Iterator):
                  save_prefix='',
                  save_format='png',
                  subset=None,
+                 apply_augmentation=True,
                  dtype='float32'):
         self.dtype = dtype
         if (type(x) is tuple) or (type(x) is list):
@@ -108,7 +112,7 @@ class NumpyArrayIterator(Iterator):
                 x_misc = [np.asarray(xx[split_idx:]) for xx in x_misc]
                 if y is not None:
                     y = y[split_idx:]
-
+        self.apply_augmentation = apply_augmentation
         self.x = np.asarray(x, dtype=self.dtype)
         self.x_misc = x_misc
         if self.x.ndim != 4:
@@ -148,9 +152,9 @@ class NumpyArrayIterator(Iterator):
                            dtype=self.dtype)
         for i, j in enumerate(index_array):
             x = self.x[j]
-            params = self.image_data_generator.get_random_transform(x.shape)
-            x = self.image_data_generator.apply_transform(
-                x.astype(self.dtype), params)
+            if self.apply_augmentation:
+                params = self.image_data_generator.get_random_transform(x.shape)
+                x = self.image_data_generator.apply_transform(x.astype(self.dtype), params)
             x = self.image_data_generator.standardize(x)
             batch_x[i] = x
 

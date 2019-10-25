@@ -107,7 +107,8 @@ def test_directory_iterator(all_test_images, tmpdir):
 
     # Test usage as Sequence
     generator = image_data_generator.ImageDataGenerator(
-        preprocessing_function=preprocessing_function)
+        preprocessing_function=preprocessing_function
+    )
     dir_seq = generator.flow_from_directory(str(tmpdir),
                                             target_size=(26, 26),
                                             color_mode='rgb',
@@ -122,6 +123,50 @@ def test_directory_iterator(all_test_images, tmpdir):
 
     with pytest.raises(ValueError):
         x1, y1 = dir_seq[14]  # there are 40 images and batch size is 3
+
+    # Test that augmentation can be disabled
+    generator = image_data_generator.ImageDataGenerator(
+        rotation_range=0.2,
+    )
+    batch_size = 4
+    # augmentation not disabled
+    seq = generator.flow_from_directory(
+        tmpdir,
+        target_size=(26, 26),
+        color_mode='rgb',
+        class_mode='categorical',
+        apply_augmentation=True,
+        shuffle=False,
+        batch_size=batch_size, seed=123
+    )
+    x1, _ = seq[0]
+    x2, _ = seq[0]
+    assert not np.array_equal(x1, x2)
+    # augmentation not disabled
+    seq = generator.flow_from_directory(
+        tmpdir,
+        target_size=(26, 26),
+        color_mode='rgb',
+        class_mode='categorical',
+        shuffle=False,
+        batch_size=batch_size, seed=123
+    )
+    x1, _ = seq[0]
+    x2, _ = seq[0]
+    assert not np.array_equal(x1, x2)
+    # augmentation disabled
+    seq = generator.flow_from_directory(
+        tmpdir,
+        target_size=(26, 26),
+        color_mode='rgb',
+        class_mode='categorical',
+        apply_augmentation=False,
+        shuffle=False,
+        batch_size=batch_size, seed=123
+    )
+    x1, _ = seq[0]
+    x2, _ = seq[0]
+    assert np.array_equal(x1, x2)
 
 
 def test_directory_iterator_class_mode_input(all_test_images, tmpdir):

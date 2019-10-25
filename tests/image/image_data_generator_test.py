@@ -286,6 +286,8 @@ def test_image_data_generator_flow(all_test_images, tmpdir):
             batch_size=3,
             shuffle=False
         )
+
+        # now using a generator without data augmentation
         generator = image_data_generator.ImageDataGenerator(validation_split=0.2)
         generator.flow(images, batch_size=3)
 
@@ -315,6 +317,41 @@ def test_image_data_generator_flow(all_test_images, tmpdir):
             shuffle=True, save_to_dir=str(tmpdir),
             batch_size=3, seed=123
         )
+
+        # Test that augmentation can be disabled
+        generator = image_data_generator.ImageDataGenerator(
+            rotation_range=0.2,
+        )
+        batch_size = 4
+        # augmentation not disabled
+        seq = generator.flow(
+            images,
+            np.arange(images.shape[0]),
+            apply_augmentation=True,
+            shuffle=False,
+            batch_size=batch_size, seed=123
+        )
+        x, _ = seq[0]
+        assert not np.array_equal(x, images[:batch_size])
+        # augmentation not disabled
+        seq = generator.flow(
+            images,
+            np.arange(images.shape[0]),
+            shuffle=False,
+            batch_size=batch_size, seed=123
+        )
+        x, _ = seq[0]
+        assert not np.array_equal(x, images[:batch_size])
+        # augmentation disabled
+        seq = generator.flow(
+            images,
+            np.arange(images.shape[0]),
+            apply_augmentation=False,
+            shuffle=False,
+            batch_size=batch_size, seed=123
+        )
+        x, _ = seq[0]
+        assert np.array_equal(x, images[:batch_size])
 
     # test order_interpolation
     labels = np.array([[2, 2, 0, 2, 2],

@@ -142,6 +142,7 @@ class BatchFromFilesMixin():
                              save_prefix,
                              save_format,
                              subset,
+                             apply_augmentation,
                              interpolation):
         """Sets attributes to use later for processing files into a batch.
 
@@ -162,6 +163,9 @@ class BatchFromFilesMixin():
                 (if `save_to_dir` is set).
             subset: Subset of data (`"training"` or `"validation"`) if
                 validation_split is set in ImageDataGenerator.
+            apply_augmentation: Boolean, can be set to False to disable
+                data augmentation, e.g. for the validation subset.
+                Standardization is still applied.
             interpolation: Interpolation method used to resample the image if the
                 target size is different from that of the loaded image.
                 Supported methods are "nearest", "bilinear", and "bicubic".
@@ -209,6 +213,7 @@ class BatchFromFilesMixin():
             split = None
         self.split = split
         self.subset = subset
+        self.apply_augmentation = apply_augmentation
 
     def _get_batches_of_transformed_samples(self, index_array):
         """Gets a batch of transformed samples.
@@ -234,8 +239,9 @@ class BatchFromFilesMixin():
             if hasattr(img, 'close'):
                 img.close()
             if self.image_data_generator:
-                params = self.image_data_generator.get_random_transform(x.shape)
-                x = self.image_data_generator.apply_transform(x, params)
+                if self.apply_augmentation:
+                    params = self.image_data_generator.get_random_transform(x.shape)
+                    x = self.image_data_generator.apply_transform(x, params)
                 x = self.image_data_generator.standardize(x)
             batch_x[i] = x
         # optionally save augmented images to disk for debugging purposes

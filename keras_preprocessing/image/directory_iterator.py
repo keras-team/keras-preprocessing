@@ -54,6 +54,9 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
         follow_links: boolean,follow symbolic links to subdirectories
         subset: Subset of data (`"training"` or `"validation"`) if
             validation_split is set in ImageDataGenerator.
+        apply_augmentation: Boolean, can be set to False to disable
+            data augmentation, e.g. for the validation subset.
+            Standardization is still applied.
         interpolation: Interpolation method used to resample the image if the
             target size is different from that of the loaded image.
             Supported methods are "nearest", "bilinear", and "bicubic".
@@ -80,6 +83,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                  save_format='png',
                  follow_links=False,
                  subset=None,
+                 apply_augmentation=True,
                  interpolation='nearest',
                  dtype='float32'):
         super(DirectoryIterator, self).set_processing_attrs(image_data_generator,
@@ -90,6 +94,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                                                             save_prefix,
                                                             save_format,
                                                             subset,
+                                                            apply_augmentation,
                                                             interpolation)
         self.directory = directory
         self.classes = classes
