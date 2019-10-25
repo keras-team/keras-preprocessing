@@ -154,7 +154,8 @@ class NumpyArrayIterator(Iterator):
             x = self.x[j]
             if self.apply_augmentation:
                 params = self.image_data_generator.get_random_transform(x.shape)
-                x = self.image_data_generator.apply_transform(x.astype(self.dtype), params)
+                x = self.image_data_generator.apply_transform(x.astype(self.dtype),
+                                                              params)
             x = self.image_data_generator.standardize(x)
             batch_x[i] = x
 
