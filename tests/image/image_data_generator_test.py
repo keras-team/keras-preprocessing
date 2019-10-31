@@ -452,18 +452,20 @@ def test_fit_rescale(all_test_images):
         images = np.vstack(img_list)
 
         # featurewise_center and featurewise_std_normalization test
-        generator = image_data_generator.ImageDataGenerator(rescale=rescale,
-                                                            featurewise_center=True,
-                                                            featurewise_std_normalization=True)
+        generator = image_data_generator.ImageDataGenerator(
+            rescale=rescale,
+            featurewise_center=True,
+            featurewise_std_normalization=True)
         generator.fit(images)
         batch = generator.flow(images, batch_size=8).next()
         assert abs(np.mean(batch)) < 1e-3
         assert abs(1 - np.std(batch)) < 1e-3
 
         # zca_whitening test
-        generator = image_data_generator.ImageDataGenerator(rescale=rescale,
-                                                            featurewise_center=True,
-                                                            zca_whitening=True)
+        generator = image_data_generator.ImageDataGenerator(
+            rescale=rescale,
+            featurewise_center=True,
+            zca_whitening=True)
         generator.fit(images)
         batch = generator.flow(images, batch_size=8).next()
         assert np.max(np.abs(batch)) <= 1
