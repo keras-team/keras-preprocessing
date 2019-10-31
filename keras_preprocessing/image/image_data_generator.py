@@ -943,6 +943,9 @@ class ImageDataGenerator(object):
             np.random.seed(seed)
 
         x = np.copy(x)
+        if self.rescale:
+            x *= self.rescale
+
         if augment:
             ax = np.zeros(
                 tuple([rounds * x.shape[0]] + list(x.shape)[1:]),

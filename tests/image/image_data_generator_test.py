@@ -442,5 +442,32 @@ def test_random_transforms():
     assert transform_dict['brightness'] is None
 
 
+def test_fit_rescale(all_test_images):
+    rescale = 1. / 255
+
+    for test_images in all_test_images:
+        img_list = []
+        for im in test_images:
+            img_list.append(utils.img_to_array(im)[None, ...])
+        images = np.vstack(img_list)
+
+        # featurewise_center and featurewise_std_normalization test
+        generator = image_data_generator.ImageDataGenerator(rescale=rescale,
+                                                            featurewise_center=True,
+                                                            featurewise_std_normalization=True)
+        generator.fit(images)
+        batch = generator.flow(images, batch_size=8).next()
+        assert abs(np.mean(batch)) < 1e-3
+        assert abs(1 - np.std(batch)) < 1e-3
+
+        # zca_whitening test
+        generator = image_data_generator.ImageDataGenerator(rescale=rescale,
+                                                            featurewise_center=True,
+                                                            zca_whitening=True)
+        generator.fit(images)
+        batch = generator.flow(images, batch_size=8).next()
+        assert np.max(np.abs(batch)) <= 1
+
+
 if __name__ == '__main__':
     pytest.main([__file__])
