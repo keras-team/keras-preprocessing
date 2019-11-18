@@ -109,31 +109,31 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
                           'The use of `load_img` requires PIL.')
-    img = pil_image.open(path)
-    if color_mode == 'grayscale':
-        # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
-        # convert it to an 8-bit grayscale image.
-        if img.mode not in ('L', 'I;16', 'I'):
-            img = img.convert('L')
-    elif color_mode == 'rgba':
-        if img.mode != 'RGBA':
-            img = img.convert('RGBA')
-    elif color_mode == 'rgb':
-        if img.mode != 'RGB':
-            img = img.convert('RGB')
-    else:
-        raise ValueError('color_mode must be "grayscale", "rgb", or "rgba"')
-    if target_size is not None:
-        width_height_tuple = (target_size[1], target_size[0])
-        if img.size != width_height_tuple:
-            if interpolation not in _PIL_INTERPOLATION_METHODS:
-                raise ValueError(
-                    'Invalid interpolation method {} specified. Supported '
-                    'methods are {}'.format(
-                        interpolation,
-                        ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
-            resample = _PIL_INTERPOLATION_METHODS[interpolation]
-            img = img.resize(width_height_tuple, resample)
+    with pil_image.open(path) as img:
+        if color_mode == 'grayscale':
+            # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
+            # convert it to an 8-bit grayscale image.
+            if img.mode not in ('L', 'I;16', 'I'):
+                img = img.convert('L')
+        elif color_mode == 'rgba':
+            if img.mode != 'RGBA':
+                img = img.convert('RGBA')
+        elif color_mode == 'rgb':
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+        else:
+            raise ValueError('color_mode must be "grayscale", "rgb", or "rgba"')
+        if target_size is not None:
+            width_height_tuple = (target_size[1], target_size[0])
+            if img.size != width_height_tuple:
+                if interpolation not in _PIL_INTERPOLATION_METHODS:
+                    raise ValueError(
+                        'Invalid interpolation method {} specified. Supported '
+                        'methods are {}'.format(
+                            interpolation,
+                            ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
+                resample = _PIL_INTERPOLATION_METHODS[interpolation]
+                img = img.resize(width_height_tuple, resample)
     return img
 
 
