@@ -241,7 +241,8 @@ class BatchFromFilesMixin():
             x = img_to_array(img, data_format=self.data_format)
             # NOTE: we could potentially have keyword arguments for the
             # resizing function
-            x = self.resizing_function(x)
+            if self.resizing_function is not None:
+                x = self.resizing_function(x)
             if x.shape != self.image_shape:
                 raise ValueError(
                     'The loaded image shape %s (at %s) does not correspond to'

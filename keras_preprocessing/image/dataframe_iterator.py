@@ -109,6 +109,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  save_format='png',
                  subset=None,
                  interpolation='nearest',
+                 resizing_function=None,
                  dtype='float32',
                  validate_filenames=True):
 
@@ -120,7 +121,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                             save_prefix,
                                                             save_format,
                                                             subset,
-                                                            interpolation)
+                                                            interpolation,
+                                                            resizing_function)
         df = dataframe.copy()
         self.directory = directory or ''
         self.class_mode = class_mode
