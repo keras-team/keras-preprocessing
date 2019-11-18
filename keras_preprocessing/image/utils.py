@@ -134,7 +134,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
                             ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
                 resample = _PIL_INTERPOLATION_METHODS[interpolation]
                 img = img.resize(width_height_tuple, resample)
-    return img
+        return img
 
 
 def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif',
