@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import io
 import os
 import warnings
 
@@ -109,7 +110,8 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
                           'The use of `load_img` requires PIL.')
-    with pil_image.open(path) as img:
+    with open(path, 'rb') as f:
+        img = pil_image.open(io.BytesIO(f.read()))
         if color_mode == 'grayscale':
             # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
             # convert it to an 8-bit grayscale image.
