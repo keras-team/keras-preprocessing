@@ -80,6 +80,11 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
+        resizing_function: function, used to resize the loaded images to the
+            target size. this will overrule interpolation. If None, then
+            interpolation will happen. The input is an image in the specified
+            data format, and the output has to be an image in the specified
+            data format with the target size.
         dtype: Dtype to use for the generated arrays.
         validate_filenames: Boolean, whether to validate image filenames in
         `x_col`. If `True`, invalid images will be ignored. Disabling this option
