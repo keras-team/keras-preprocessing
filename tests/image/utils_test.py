@@ -328,11 +328,13 @@ def test_array_to_img_and_img_to_array():
 
 
 def test_image_file_handlers_close(tmpdir):
-    im = utils.array_to_img(np.random.rand(1,1,3))
+    im = utils.array_to_img(np.random.rand(1, 1, 3))
     path = str(tmpdir / 'sample_image.png')
     utils.save_img(path, im)
     max_open_files, _ = soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-    images = [utils.load_img(path) for i in range(max_open_files+1)]
+    for i in range(max_open_files+1):
+        utils.load_img(path)
+
 
 if __name__ == '__main__':
     pytest.main([__file__])
