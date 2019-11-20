@@ -451,24 +451,41 @@ def test_fit_rescale(all_test_images):
             img_list.append(utils.img_to_array(im)[None, ...])
         images = np.vstack(img_list)
 
-        # featurewise_center and featurewise_std_normalization test
+        # featurewise_center test
         generator = image_data_generator.ImageDataGenerator(
             rescale=rescale,
             featurewise_center=True,
-            featurewise_std_normalization=True)
+            dtype='float64')
         generator.fit(images)
         batch = generator.flow(images, batch_size=8).next()
-        assert abs(np.mean(batch)) < 1e-3
-        assert abs(1 - np.std(batch)) < 1e-3
+        assert abs(np.mean(batch)) < 1e-6
+
+        # featurewise_std_normalization test
+        generator = image_data_generator.ImageDataGenerator(
+            rescale=rescale,
+            featurewise_center=True,
+            featurewise_std_normalization=True,
+            dtype='float64')
+        generator.fit(images)
+        batch = generator.flow(images, batch_size=8).next()
+        assert abs(np.mean(batch)) < 1e-6
+        assert abs(1 - np.std(batch)) < 1e-5
 
         # zca_whitening test
         generator = image_data_generator.ImageDataGenerator(
             rescale=rescale,
             featurewise_center=True,
-            zca_whitening=True)
+            zca_whitening=True,
+            dtype='float64')
         generator.fit(images)
         batch = generator.flow(images, batch_size=8).next()
-        assert np.max(np.abs(batch)) <= 1
+        batch = np.reshape(batch,
+                           (batch.shape[0],
+                            batch.shape[1] * batch.shape[2] * batch.shape[3]))
+        # Y * Y_T = n * I, where Y = W * X
+        identity = np.dot(batch, batch.T) / batch.shape[0]
+        assert ((np.abs(identity) - np.identity(identity.shape[0]))
+                < 1e-6).all()
 
 
 if __name__ == '__main__':
