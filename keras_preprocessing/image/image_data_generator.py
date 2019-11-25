@@ -913,7 +913,7 @@ class ImageDataGenerator(object):
         Only required if `featurewise_center` or
         `featurewise_std_normalization` or `zca_whitening` are set to True.
 
-        In case when `rescale` is set to a value, rescaling is applied to
+        When `rescale` is set to a value, rescaling is applied to
         sample data before computing the internal data stats.
 
         # Arguments
