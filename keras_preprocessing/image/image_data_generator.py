@@ -429,7 +429,8 @@ class ImageDataGenerator(object):
             save_to_dir=save_to_dir,
             save_prefix=save_prefix,
             save_format=save_format,
-            subset=subset
+            subset=subset,
+            dtype=self.dtype
         )
 
     def flow_from_directory(self,
@@ -537,7 +538,8 @@ class ImageDataGenerator(object):
             save_format=save_format,
             follow_links=follow_links,
             subset=subset,
-            interpolation=interpolation
+            interpolation=interpolation,
+            dtype=self.dtype
         )
 
     def flow_from_dataframe(self,
@@ -680,14 +682,15 @@ class ImageDataGenerator(object):
             save_format=save_format,
             subset=subset,
             interpolation=interpolation,
-            validate_filenames=validate_filenames
+            validate_filenames=validate_filenames,
+            dtype=self.dtype
         )
 
     def standardize(self, x):
         """Applies the normalization configuration in-place to a batch of inputs.
 
         `x` is changed in-place since the function is mainly used internally
-        to standarize images and feed them to your network. If a copy of `x`
+        to standardize images and feed them to your network. If a copy of `x`
         would be created instead it would have a significant performance cost.
         If you want to apply this method without changing the input in-place
         you can call the method creating a copy before:
@@ -910,6 +913,9 @@ class ImageDataGenerator(object):
         Only required if `featurewise_center` or
         `featurewise_std_normalization` or `zca_whitening` are set to True.
 
+        When `rescale` is set to a value, rescaling is applied to
+        sample data before computing the internal data stats.
+
         # Arguments
             x: Sample data. Should have rank 4.
              In case of grayscale data,
@@ -943,6 +949,9 @@ class ImageDataGenerator(object):
             np.random.seed(seed)
 
         x = np.copy(x)
+        if self.rescale:
+            x *= self.rescale
+
         if augment:
             ax = np.zeros(
                 tuple([rounds * x.shape[0]] + list(x.shape)[1:]),
