@@ -327,13 +327,25 @@ def test_array_to_img_and_img_to_array():
         img = utils.img_to_array(x, data_format='channels_last')
 
 
-def test_image_file_handlers_close(tmpdir):
+def write_sample_image(tmpdir):
     im = utils.array_to_img(np.random.rand(1, 1, 3))
     path = str(tmpdir / 'sample_image.png')
     utils.save_img(path, im)
+    return path
+
+
+def test_image_file_handlers_close(tmpdir):
+    path = write_sample_image(tmpdir)
     max_open_files, _ = soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
     for i in range(max_open_files+1):
         utils.load_img(path)
+
+
+def test_load_img_returns_image(tmpdir):
+    path = write_sample_image(tmpdir)
+    im = utils.load_img(path)
+    assert hasattr(im, 'height')
+    assert hasattr(im, 'width')
 
 
 if __name__ == '__main__':
