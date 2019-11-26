@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import resource
+import PIL
 
 from keras_preprocessing.image import utils
 
@@ -344,8 +345,7 @@ def test_image_file_handlers_close(tmpdir):
 def test_load_img_returns_image(tmpdir):
     path = write_sample_image(tmpdir)
     im = utils.load_img(path)
-    assert hasattr(im, 'height')
-    assert hasattr(im, 'width')
+    assert isinstance(im, PIL.Image.Image)
 
 
 if __name__ == '__main__':
