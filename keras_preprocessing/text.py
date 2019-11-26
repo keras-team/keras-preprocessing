@@ -7,7 +7,6 @@ from __future__ import print_function
 
 import string
 import sys
-import six
 import warnings
 from collections import OrderedDict
 from collections import defaultdict
@@ -44,10 +43,8 @@ def text_to_word_sequence(text,
         text = text.lower()
 
     if sys.version_info < (3,):
-        # in Python 2.x six.string_types == basestring
-        # and basestring is a superclass for unicode and str
-        if isinstance(text, six.string_types) and not isinstance(text, str):
-            translate_map = dict((ord(c), six.u(split)) for c in filters)
+        if isinstance(text, unicode):
+            translate_map = dict((ord(c), unicode(split)) for c in filters)
             text = text.translate(translate_map)
         elif len(split) == 1:
             translate_map = maketrans(filters, split * len(filters))
