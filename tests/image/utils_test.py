@@ -337,7 +337,7 @@ def write_sample_image(tmpdir):
 
 def test_image_file_handlers_close(tmpdir):
     path = write_sample_image(tmpdir)
-    max_open_files, _ = soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    max_open_files, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
     for i in range(max_open_files+1):
         utils.load_img(path)
 
