@@ -43,8 +43,10 @@ def text_to_word_sequence(text,
         text = text.lower()
 
     if sys.version_info < (3,):
-        if isinstance(text, unicode):
-            translate_map = dict((ord(c), unicode(split)) for c in filters)
+        if isinstance(text, unicode):  # noqa: F821
+            translate_map = dict(
+                (ord(c), unicode(split)) for c in filters  # noqa: F821
+            )
             text = text.translate(translate_map)
         elif len(split) == 1:
             translate_map = maketrans(filters, split * len(filters))
