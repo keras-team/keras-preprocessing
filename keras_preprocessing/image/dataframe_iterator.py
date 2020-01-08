@@ -241,7 +241,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                 )
 
         if classes:
-            classes = list(OrderedDict.fromkeys(classes).keys()) # prepare for membership lookup
+            # prepare for membership lookup
+            classes = list(OrderedDict.fromkeys(classes).keys())
             df[y_col] = df[y_col].apply(lambda x: remove_classes(x, classes))
         else:
             classes = set()
