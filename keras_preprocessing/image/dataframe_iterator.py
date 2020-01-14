@@ -8,6 +8,7 @@ import os
 import warnings
 
 import numpy as np
+from collections import OrderedDict
 
 from .iterator import BatchFromFilesMixin, Iterator
 from .utils import validate_filename
@@ -240,7 +241,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                 )
 
         if classes:
-            classes = set(classes)  # sort and prepare for membership lookup
+            # prepare for membership lookup
+            classes = list(OrderedDict.fromkeys(classes).keys())
             df[y_col] = df[y_col].apply(lambda x: remove_classes(x, classes))
         else:
             classes = set()
