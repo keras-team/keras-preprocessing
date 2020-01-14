@@ -647,5 +647,39 @@ def test_dataframe_iterator_with_subdirs(all_test_images, tmpdir):
     assert set(df_iterator.filenames) == set(filenames)
 
 
+def test_dataframe_iterator_classes_indices_order(all_test_images, tmpdir):
+    # save the images in the paths
+    count = 0
+    filenames = []
+    for test_images in all_test_images:
+        for im in test_images:
+            filename = 'image-{}.png'.format(count)
+            im.save(str(tmpdir / filename))
+            filenames.append(filename)
+            count += 1
+
+    # Test the class_indices without classes input
+    generator = image_data_generator.ImageDataGenerator()
+    label_opt = ['a', 'b', ['a'], ['b'], ['a', 'b'], ['b', 'a']]
+    df_f = pd.DataFrame({
+      "filename": filenames,
+      "class": ['a', 'b'] + [random.choice(label_opt) for _ in filenames[:-2]]
+    })
+    flow_forward_iter = generator.flow_from_dataframe(df_f, str(tmpdir))
+    label_rev = ['b', 'a', ['b'], ['a'], ['b', 'a'], ['a', 'b']]
+    df_r = pd.DataFrame({
+      "filename": filenames,
+      "class": ['b', 'a'] + [random.choice(label_rev) for _ in filenames[:-2]]
+    })
+    flow_backward_iter = generator.flow_from_dataframe(df_r, str(tmpdir))
+    assert flow_forward_iter.class_indices == flow_backward_iter.class_indices
+
+    # Test the class_indices with classes input 
+    df = pd.DataFrame([['data/A.jpg', 'A'],['data/B.jpg', 'B']], columns=['filename', 'class'])
+    flow_forward = generator.flow_from_dataframe(df, classes=['A', 'B'])
+    flow_backward = generator.flow_from_dataframe(df, classes=['B', 'A'])
+    assert flow_forward.class_indices != flow_backward.class_indices
+
+
 if __name__ == '__main__':
     pytest.main([__file__])
