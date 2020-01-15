@@ -647,7 +647,7 @@ def test_dataframe_iterator_with_subdirs(all_test_images, tmpdir):
     assert set(df_iterator.filenames) == set(filenames)
 
 
-def test_dataframe_iterator_classes_indices_order():
+def test_dataframe_iterator_classes_indices_order(all_test_images, tmpdir):
     # save the images in the paths
     count = 0
     filenames = []
