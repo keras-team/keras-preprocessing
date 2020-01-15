@@ -659,7 +659,7 @@ def test_dataframe_iterator_classes_indices_order():
     #         count += 1
 
     # Test the class_indices without classes input
-    # generator = image_data_generator.ImageDataGenerator()
+    generator = image_data_generator.ImageDataGenerator()
     # label_opt = ['a', 'b', ['a'], ['b'], ['a', 'b'], ['b', 'a']]
     # df_f = pd.DataFrame({
     #   "filename": filenames,
