@@ -649,29 +649,29 @@ def test_dataframe_iterator_with_subdirs(all_test_images, tmpdir):
 
 def test_dataframe_iterator_classes_indices_order(all_test_images, tmpdir):
     # save the images in the paths
-    count = 0
-    filenames = []
-    for test_images in all_test_images:
-        for im in test_images:
-            filename = 'image-{}.png'.format(count)
-            im.save(str(tmpdir / filename))
-            filenames.append(filename)
-            count += 1
+#     count = 0
+#     filenames = []
+#     for test_images in all_test_images:
+#         for im in test_images:
+#             filename = 'image-{}.png'.format(count)
+#             im.save(str(tmpdir / filename))
+#             filenames.append(filename)
+#             count += 1
 
-    # Test the class_indices without classes input
-    generator = image_data_generator.ImageDataGenerator()
-    label_opt = ['a', 'b', ['a'], ['b'], ['a', 'b'], ['b', 'a']]
-    df_f = pd.DataFrame({
-      "filename": filenames,
-      "class": ['a', 'b'] + [random.choice(label_opt) for _ in filenames[:-2]]
-    })
-    flow_forward_iter = generator.flow_from_dataframe(df_f, str(tmpdir))
-    label_rev = ['b', 'a', ['b'], ['a'], ['b', 'a'], ['a', 'b']]
-    df_r = pd.DataFrame({
-      "filename": filenames,
-      "class": ['b', 'a'] + [random.choice(label_rev) for _ in filenames[:-2]]
-    })
-    flow_backward_iter = generator.flow_from_dataframe(df_r, str(tmpdir))
+#     # Test the class_indices without classes input
+#     generator = image_data_generator.ImageDataGenerator()
+#     label_opt = ['a', 'b', ['a'], ['b'], ['a', 'b'], ['b', 'a']]
+#     df_f = pd.DataFrame({
+#       "filename": filenames,
+#       "class": ['a', 'b'] + [random.choice(label_opt) for _ in filenames[:-2]]
+#     })
+#     flow_forward_iter = generator.flow_from_dataframe(df_f, str(tmpdir))
+#     label_rev = ['b', 'a', ['b'], ['a'], ['b', 'a'], ['a', 'b']]
+#     df_r = pd.DataFrame({
+#       "filename": filenames,
+#       "class": ['b', 'a'] + [random.choice(label_rev) for _ in filenames[:-2]]
+#     })
+#     flow_backward_iter = generator.flow_from_dataframe(df_r, str(tmpdir))
 
     # check class_indices
     assert flow_forward_iter.class_indices == flow_backward_iter.class_indices
