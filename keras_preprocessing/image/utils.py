@@ -208,12 +208,10 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     """
     dirname = os.path.basename(directory)
     if split:
-        num_files = len(list(
-            _iter_valid_files(directory, white_list_formats, follow_links)))
+        all_files = list(_iter_valid_files(directory, white_list_formats, follow_links))
+        num_files = len(all_files)
         start, stop = int(split[0] * num_files), int(split[1] * num_files)
-        valid_files = list(
-            _iter_valid_files(
-                directory, white_list_formats, follow_links))[start: stop]
+        valid_files = all_files[start: stop]
     else:
         valid_files = _iter_valid_files(
             directory, white_list_formats, follow_links)
