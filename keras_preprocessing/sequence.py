@@ -23,7 +23,7 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
     or the length of the longest sequence otherwise.
 
     Sequences that are shorter than `num_timesteps`
-    are padded with `value` at the end.
+    are padded with `value` at the beginning.
 
     Sequences longer than `num_timesteps` are truncated
     so that they fit the desired length.
