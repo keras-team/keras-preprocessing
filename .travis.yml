@@ -32,7 +32,6 @@ matrix:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install google-perftools
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -63,7 +62,6 @@ install:
     fi
 
 script:
-  - export LD_PRELOAD="/usr/lib/libtcmalloc.so.4"
   - if [[ "$TEST_MODE" == "PEP8" ]]; then
       flake8 -v --count;
     elif [[ "$TEST_MODE" == "TESTS" ]]; then
