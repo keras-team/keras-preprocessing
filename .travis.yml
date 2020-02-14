@@ -43,7 +43,6 @@ before_install:
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
-  - export LD_PRELOAD="/usr/lib/libtcmalloc.so.4"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
@@ -65,6 +64,7 @@ install:
     fi
 
 script:
+  - export LD_PRELOAD="/usr/lib/libtcmalloc.so.4"
   - if [[ "$TEST_MODE" == "PEP8" ]]; then
       flake8 -v --count;
     elif [[ "$TEST_MODE" == "TESTS" ]]; then
