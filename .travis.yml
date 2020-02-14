@@ -33,6 +33,7 @@ matrix:
 
 before_install:
   - sudo apt-get update
+  - sudo apt-get install google-perftools
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -42,6 +43,7 @@ before_install:
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
+  - export LD_PRELOAD="/usr/lib/libtcmalloc.so.4"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
