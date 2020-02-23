@@ -322,9 +322,9 @@ class ImageDataGenerator(object):
         self.std = None
         self.principal_components = None
 
-        if np.isscalar(zoom_range):
+        if isinstance(zoom_range, float):
             self.zoom_range = [1 - zoom_range, 1 + zoom_range]
-        elif len(zoom_range) == 2:
+        elif len(zoom_range) == 2 and all(isinstance(zoom_val, float) for zoom_val in zoom_range):
             self.zoom_range = [zoom_range[0], zoom_range[1]]
         else:
             raise ValueError('`zoom_range` should be a float or '
