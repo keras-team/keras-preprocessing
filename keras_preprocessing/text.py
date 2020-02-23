@@ -44,9 +44,9 @@ def text_to_word_sequence(text,
 
     if sys.version_info < (3,):
         if isinstance(text, unicode):  # noqa: F821
-            translate_map = dict(
-                (ord(c), unicode(split)) for c in filters  # noqa: F821
-            )
+            translate_map = {
+                ord(c): unicode(split) for c in filters  # noqa: F821
+            }
             text = text.translate(translate_map)
         elif len(split) == 1:
             translate_map = maketrans(filters, split * len(filters))
@@ -55,7 +55,7 @@ def text_to_word_sequence(text,
             for c in filters:
                 text = text.replace(c, split)
     else:
-        translate_dict = dict((c, split) for c in filters)
+        translate_dict = {c: split for c in filters}
         translate_map = maketrans(translate_dict)
         text = text.translate(translate_map)
 
@@ -193,8 +193,8 @@ class Tokenizer(object):
         self.char_level = char_level
         self.oov_token = oov_token
         self.index_docs = defaultdict(int)
-        self.word_index = dict()
-        self.index_word = dict()
+        self.word_index = {}
+        self.index_word = {}
 
     def fit_on_texts(self, texts):
         """Updates internal vocabulary based on a list of texts.
@@ -245,7 +245,7 @@ class Tokenizer(object):
         self.word_index = dict(
             list(zip(sorted_voc, list(range(1, len(sorted_voc) + 1)))))
 
-        self.index_word = dict((c, w) for w, c in self.word_index.items())
+        self.index_word = {c: w for w, c in self.word_index.items()}
 
         for w, c in list(self.word_docs.items()):
             self.index_docs[self.word_index[w]] = c
