@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+import pkg_resources
 
 _KERAS_BACKEND = None
 _KERAS_UTILS = None
@@ -40,4 +41,4 @@ def get_keras_submodule(name):
         return _KERAS_UTILS
 
 
-__version__ = '1.1.0'
+__version__ = pkg_resources.get_distribution('keras_preprocessing').version
