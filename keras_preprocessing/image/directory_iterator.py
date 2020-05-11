@@ -64,6 +64,15 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
     """
     allowed_class_modes = {'categorical', 'binary', 'sparse', 'input', None}
 
+    def __new__(cls, *args, **kwargs):
+        try:
+            from tensorflow.keras.utils import Sequence as TFSequence
+            if TFSequence not in cls.__bases__:
+                cls.__bases__ = cls.__bases__ + (TFSequence,)
+        except ImportError:
+            pass
+        return super(DirectoryIterator, cls).__new__(cls)
+
     def __init__(self,
                  directory,
                  image_data_generator,
