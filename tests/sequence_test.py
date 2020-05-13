@@ -101,8 +101,8 @@ def test_skipgrams():
                                          categorical=True)
     for couple in couples:
         assert couple[0] - couple[1] <= 3
-    for l in labels:
-        assert len(l) == 2
+    for lbl in labels:
+        assert len(lbl) == 2
 
 
 def test_remove_long_seq():

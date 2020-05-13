@@ -1,3 +1,5 @@
+import io
+
 import numpy as np
 import pytest
 import resource
@@ -188,6 +190,14 @@ def test_load_img(tmpdir):
     assert loaded_im_array.shape == (25, 25, 1)
 
     loaded_im = utils.load_img(filename_grayscale_32bit, color_mode='grayscale',
+                               target_size=(25, 25), interpolation="nearest")
+    loaded_im_array = utils.img_to_array(loaded_im, dtype='int32')
+    assert loaded_im_array.shape == (25, 25, 1)
+
+    with open(filename_grayscale_32bit, 'rb') as f:
+        buf = io.BytesIO(f.read())
+    loaded_im = utils.load_img(buf,
+                               color_mode='grayscale',
                                target_size=(25, 25), interpolation="nearest")
     loaded_im_array = utils.img_to_array(loaded_im, dtype='int32')
     assert loaded_im_array.shape == (25, 25, 1)

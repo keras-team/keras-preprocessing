@@ -256,7 +256,7 @@ def test_dataframe_iterator_class_mode_categorical_multi_label(all_test_images,
     assert isinstance(batch_y, np.ndarray)
     assert batch_y.shape == (len(batch_x), 2)
     for labels in batch_y:
-        assert all(l in {0, 1} for l in labels)
+        assert all(lbl in {0, 1} for lbl in labels)
 
     # on first 3 batches
     df = pd.DataFrame({
@@ -272,7 +272,7 @@ def test_dataframe_iterator_class_mode_categorical_multi_label(all_test_images,
     assert isinstance(batch_y, np.ndarray)
     assert batch_y.shape == (len(batch_x), 3)
     for labels in batch_y:
-        assert all(l in {0, 1} for l in labels)
+        assert all(lbl in {0, 1} for lbl in labels)
     assert (batch_y[0] == np.array([1, 1, 0])).all()
     assert (batch_y[1] == np.array([0, 1, 0])).all()
     assert (batch_y[2] == np.array([0, 0, 1])).all()
