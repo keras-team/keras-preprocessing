@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-import keras
+from tensorflow import keras
 from keras_preprocessing import text
 from collections import OrderedDict
 
