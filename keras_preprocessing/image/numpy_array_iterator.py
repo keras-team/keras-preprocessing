@@ -39,6 +39,9 @@ class NumpyArrayIterator(Iterator):
             (if `save_to_dir` is set).
         subset: Subset of data (`"training"` or `"validation"`) if
             validation_split is set in ImageDataGenerator.
+        ignore_class_split: Boolean (default: False), ignore difference
+                in number of classes in labels across train and validation
+                split (useful for non-classification tasks)
         dtype: Dtype to use for the generated arrays.
     """
 
@@ -64,6 +67,7 @@ class NumpyArrayIterator(Iterator):
                  save_prefix='',
                  save_format='png',
                  subset=None,
+                 ignore_class_split=False,
                  dtype='float32'):
         self.dtype = dtype
         if (type(x) is tuple) or (type(x) is list):
@@ -98,7 +102,7 @@ class NumpyArrayIterator(Iterator):
                                  '; expected "training" or "validation".')
             split_idx = int(len(x) * image_data_generator._validation_split)
 
-            if (y is not None and not
+            if (y is not None and not ignore_class_split and not
                 np.array_equal(np.unique(y[:split_idx]),
                                np.unique(y[split_idx:]))):
                 raise ValueError('Training and validation subsets '

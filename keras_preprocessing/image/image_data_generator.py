@@ -375,6 +375,7 @@ class ImageDataGenerator(object):
              save_to_dir=None,
              save_prefix='',
              save_format='png',
+             ignore_class_split=False,
              subset=None):
         """Takes data & label arrays, generates batches of augmented data.
 
@@ -405,6 +406,9 @@ class ImageDataGenerator(object):
                 (only relevant if `save_to_dir` is set).
             save_format: one of "png", "jpeg"
                 (only relevant if `save_to_dir` is set). Default: "png".
+            ignore_class_split: Boolean (default: False), ignore difference
+                in number of classes in labels across train and validation
+                split (useful for non-classification tasks)
             subset: Subset of data (`"training"` or `"validation"`) if
                 `validation_split` is set in `ImageDataGenerator`.
 
@@ -430,6 +434,7 @@ class ImageDataGenerator(object):
             save_to_dir=save_to_dir,
             save_prefix=save_prefix,
             save_format=save_format,
+            ignore_class_split=ignore_class_split,
             subset=subset,
             dtype=self.dtype
         )
