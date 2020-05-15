@@ -49,7 +49,7 @@ class ImageDataGenerator(object):
                 are integers `[-1, 0, +1]`,
                 same as with `width_shift_range=[-1, 0, +1]`,
                 while with `width_shift_range=1.0` possible values are floats
-                in the interval [-1.0, +1.0).
+                in the interval `[-1.0, +1.0)`.
         height_shift_range: Float, 1-D array-like or int
             - float: fraction of total height, if < 1, or pixels if >= 1.
             - 1-D array-like: random elements from the array.
@@ -59,7 +59,7 @@ class ImageDataGenerator(object):
                 are integers `[-1, 0, +1]`,
                 same as with `height_shift_range=[-1, 0, +1]`,
                 while with `height_shift_range=1.0` possible values are floats
-                in the interval [-1.0, +1.0).
+                in the interval `[-1.0, +1.0)`.
         brightness_range: Tuple or list of two floats. Range for picking
             a brightness shift value from.
         shear_range: Float. Shear Intensity
@@ -87,8 +87,8 @@ class ImageDataGenerator(object):
         preprocessing_function: function that will be applied on each input.
             The function will run after the image is resized and augmented.
             The function should take one argument:
-            one image (Numpy tensor with rank 3),
-            and should output a Numpy tensor with the same shape.
+            one image (NumPy tensor with rank 3),
+            and should output a NumPy tensor with the same shape.
         data_format: Image data format,
             either "channels_first" or "channels_last".
             "channels_last" mode means that the images should have shape
@@ -322,9 +322,10 @@ class ImageDataGenerator(object):
         self.std = None
         self.principal_components = None
 
-        if np.isscalar(zoom_range):
+        if isinstance(zoom_range, (float, int)):
             self.zoom_range = [1 - zoom_range, 1 + zoom_range]
-        elif len(zoom_range) == 2:
+        elif (len(zoom_range) == 2 and
+              all(isinstance(val, (float, int)) for val in zoom_range)):
             self.zoom_range = [zoom_range[0], zoom_range[1]]
         else:
             raise ValueError('`zoom_range` should be a float or '
@@ -379,10 +380,10 @@ class ImageDataGenerator(object):
         """Takes data & label arrays, generates batches of augmented data.
 
         # Arguments
-            x: Input data. Numpy array of rank 4 or a tuple.
+            x: Input data. NumPy array of rank 4 or a tuple.
                 If tuple, the first element
                 should contain the images and the second element
-                another numpy array or a list of numpy arrays
+                another NumPy array or a list of NumPy arrays
                 that gets passed to the output
                 without any modifications.
                 Can be used to feed the model miscellaneous data
@@ -413,13 +414,13 @@ class ImageDataGenerator(object):
 
         # Returns
             An `Iterator` yielding tuples of `(x, y)`
-                where `x` is a numpy array of image data
+                where `x` is a NumPy array of image data
                 (in the case of a single image input) or a list
-                of numpy arrays (in the case with
-                additional inputs) and `y` is a numpy array
+                of NumPy arrays (in the case with
+                additional inputs) and `y` is a NumPy array
                 of corresponding labels. If 'sample_weight' is not None,
                 the yielded tuples are of the form `(x, y, sample_weight)`.
-                If `y` is None, only the numpy array `x` is returned.
+                If `y` is None, only the NumPy array `x` is returned.
         """
         return NumpyArrayIterator(
             x,
@@ -434,7 +435,8 @@ class ImageDataGenerator(object):
             save_prefix=save_prefix,
             save_format=save_format,
             ignore_class_split=ignore_class_split,
-            subset=subset
+            subset=subset,
+            dtype=self.dtype
         )
 
     def flow_from_directory(self,
@@ -522,9 +524,9 @@ class ImageDataGenerator(object):
 
         # Returns
             A `DirectoryIterator` yielding tuples of `(x, y)`
-                where `x` is a numpy array containing a batch
+                where `x` is a NumPy array containing a batch
                 of images with shape `(batch_size, *target_size, channels)`
-                and `y` is a numpy array of corresponding labels.
+                and `y` is a NumPy array of corresponding labels.
         """
         return DirectoryIterator(
             directory,
@@ -542,7 +544,8 @@ class ImageDataGenerator(object):
             save_format=save_format,
             follow_links=follow_links,
             subset=subset,
-            interpolation=interpolation
+            interpolation=interpolation,
+            dtype=self.dtype
         )
 
     def flow_from_dataframe(self,
@@ -605,14 +608,14 @@ class ImageDataGenerator(object):
             class_mode: one of "binary", "categorical", "input", "multi_output",
                 "raw", sparse" or None. Default: "categorical".
                 Mode for yielding the targets:
-                - `"binary"`: 1D numpy array of binary labels,
-                - `"categorical"`: 2D numpy array of one-hot encoded labels.
+                - `"binary"`: 1D NumPy array of binary labels,
+                - `"categorical"`: 2D NumPy array of one-hot encoded labels.
                     Supports multi-label output.
                 - `"input"`: images identical to input images (mainly used to
                     work with autoencoders),
                 - `"multi_output"`: list with the values of the different columns,
-                - `"raw"`: numpy array of values in `y_col` column(s),
-                - `"sparse"`: 1D numpy array of integer labels,
+                - `"raw"`: NumPy array of values in `y_col` column(s),
+                - `"sparse"`: 1D NumPy array of integer labels,
                 - `None`, no targets are returned (the generator will only yield
                     batches of image data, which is useful to use in
                     `model.predict_generator()`).
@@ -644,9 +647,9 @@ class ImageDataGenerator(object):
 
         # Returns
             A `DataFrameIterator` yielding tuples of `(x, y)`
-            where `x` is a numpy array containing a batch
+            where `x` is a NumPy array containing a batch
             of images with shape `(batch_size, *target_size, channels)`
-            and `y` is a numpy array of corresponding labels.
+            and `y` is a NumPy array of corresponding labels.
         """
         if 'has_ext' in kwargs:
             warnings.warn('has_ext is deprecated, filenames in the dataframe have '
@@ -685,19 +688,20 @@ class ImageDataGenerator(object):
             save_format=save_format,
             subset=subset,
             interpolation=interpolation,
-            validate_filenames=validate_filenames
+            validate_filenames=validate_filenames,
+            dtype=self.dtype
         )
 
     def standardize(self, x):
         """Applies the normalization configuration in-place to a batch of inputs.
 
         `x` is changed in-place since the function is mainly used internally
-        to standarize images and feed them to your network. If a copy of `x`
+        to standardize images and feed them to your network. If a copy of `x`
         would be created instead it would have a significant performance cost.
         If you want to apply this method without changing the input in-place
         you can call the method creating a copy before:
 
-        standarize(np.copy(x))
+        standardize(np.copy(x))
 
         # Arguments
             x: Batch of inputs to be normalized.
@@ -850,7 +854,7 @@ class ImageDataGenerator(object):
                 - `'zy'`: Float. Zoom in the y direction.
                 - `'flip_horizontal'`: Boolean. Horizontal flip.
                 - `'flip_vertical'`: Boolean. Vertical flip.
-                - `'channel_shift_intencity'`: Float. Channel shift intensity.
+                - `'channel_shift_intensity'`: Float. Channel shift intensity.
                 - `'brightness'`: Float. Brightness shift intensity.
 
         # Returns
@@ -915,6 +919,9 @@ class ImageDataGenerator(object):
         Only required if `featurewise_center` or
         `featurewise_std_normalization` or `zca_whitening` are set to True.
 
+        When `rescale` is set to a value, rescaling is applied to
+        sample data before computing the internal data stats.
+
         # Arguments
             x: Sample data. Should have rank 4.
              In case of grayscale data,
@@ -948,6 +955,9 @@ class ImageDataGenerator(object):
             np.random.seed(seed)
 
         x = np.copy(x)
+        if self.rescale:
+            x *= self.rescale
+
         if augment:
             ax = np.zeros(
                 tuple([rounds * x.shape[0]] + list(x.shape)[1:]),

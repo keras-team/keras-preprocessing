@@ -40,4 +40,4 @@ def get_keras_submodule(name):
         return _KERAS_UTILS
 
 
-__version__ = '1.1.0'
+__version__ = '1.1.2'

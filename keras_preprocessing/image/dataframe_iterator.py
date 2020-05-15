@@ -89,6 +89,15 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
         'binary', 'categorical', 'input', 'multi_output', 'raw', 'sparse', None
     }
 
+    def __new__(cls, *args, **kwargs):
+        try:
+            from tensorflow.keras.utils import Sequence as TFSequence
+            if TFSequence not in cls.__bases__:
+                cls.__bases__ = cls.__bases__ + (TFSequence,)
+        except ImportError:
+            pass
+        return super(DataFrameIterator, cls).__new__(cls)
+
     def __init__(self,
                  dataframe,
                  directory=None,

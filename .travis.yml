@@ -1,10 +1,12 @@
 sudo: required
-dist: trusty
 language: python
 matrix:
     include:
         # check code style and Python 2.7
         - python: 2.7
+          env: TEST_MODE=PEP8
+        # check code style and Python 3.6
+        - python: 3.6
           env: TEST_MODE=PEP8
         # run tests with keras from source and Python 2.7
         - python: 2.7

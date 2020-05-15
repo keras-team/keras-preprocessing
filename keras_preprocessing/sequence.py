@@ -23,7 +23,8 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
     or the length of the longest sequence otherwise.
 
     Sequences that are shorter than `num_timesteps`
-    are padded with `value` at the end.
+    are padded with `value` at the beginning or the end
+    if padding='post.
 
     Sequences longer than `num_timesteps` are truncated
     so that they fit the desired length.
@@ -56,23 +57,24 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
     num_samples = len(sequences)
 
     lengths = []
+    sample_shape = ()
+    flag = True
+
+    # take the sample shape from the first non empty sequence
+    # checking for consistency in the main loop below.
+
     for x in sequences:
         try:
             lengths.append(len(x))
+            if flag and len(x):
+                sample_shape = np.asarray(x).shape[1:]
+                flag = False
         except TypeError:
             raise ValueError('`sequences` must be a list of iterables. '
                              'Found non-iterable: ' + str(x))
 
     if maxlen is None:
         maxlen = np.max(lengths)
-
-    # take the sample shape from the first non empty sequence
-    # checking for consistency in the main loop below.
-    sample_shape = tuple()
-    for s in sequences:
-        if len(s) > 0:
-            sample_shape = np.asarray(s).shape[1:]
-            break
 
     is_dtype_str = np.issubdtype(dtype, np.str_) or np.issubdtype(dtype, np.unicode_)
     if isinstance(value, six.string_types) and dtype != object and not is_dtype_str:

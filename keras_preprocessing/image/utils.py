@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import io
 import os
 import warnings
 
@@ -82,8 +83,9 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     # Arguments
         path: Path to image file.
         grayscale: DEPRECATED use `color_mode="grayscale"`.
-        color_mode: One of "grayscale", "rgb", "rgba". Default: "rgb".
-            The desired image format.
+        color_mode: The desired image format. One of "grayscale", "rgb", "rgba".
+            "grayscale" supports 8-bit images and 32-bit signed integer images.
+            Default: "rgb".
         target_size: Either `None` (default to original size)
             or tuple of ints `(img_height, img_width)`.
         interpolation: Interpolation method used to resample the image if the
@@ -91,7 +93,8 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
             Supported methods are "nearest", "bilinear", and "bicubic".
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
-            "hamming" are also supported. By default, "nearest" is used.
+            "hamming" are also supported.
+            Default: "nearest".
 
     # Returns
         A PIL Image instance.
@@ -107,30 +110,33 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
                           'The use of `load_img` requires PIL.')
-    img = pil_image.open(path)
-    if color_mode == 'grayscale':
-        if img.mode != 'L':
-            img = img.convert('L')
-    elif color_mode == 'rgba':
-        if img.mode != 'RGBA':
-            img = img.convert('RGBA')
-    elif color_mode == 'rgb':
-        if img.mode != 'RGB':
-            img = img.convert('RGB')
-    else:
-        raise ValueError('color_mode must be "grayscale", "rgb", or "rgba"')
-    if target_size is not None:
-        width_height_tuple = (target_size[1], target_size[0])
-        if img.size != width_height_tuple:
-            if interpolation not in _PIL_INTERPOLATION_METHODS:
-                raise ValueError(
-                    'Invalid interpolation method {} specified. Supported '
-                    'methods are {}'.format(
-                        interpolation,
-                        ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
-            resample = _PIL_INTERPOLATION_METHODS[interpolation]
-            img = img.resize(width_height_tuple, resample)
-    return img
+    with open(path, 'rb') as f:
+        img = pil_image.open(io.BytesIO(f.read()))
+        if color_mode == 'grayscale':
+            # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
+            # convert it to an 8-bit grayscale image.
+            if img.mode not in ('L', 'I;16', 'I'):
+                img = img.convert('L')
+        elif color_mode == 'rgba':
+            if img.mode != 'RGBA':
+                img = img.convert('RGBA')
+        elif color_mode == 'rgb':
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+        else:
+            raise ValueError('color_mode must be "grayscale", "rgb", or "rgba"')
+        if target_size is not None:
+            width_height_tuple = (target_size[1], target_size[0])
+            if img.size != width_height_tuple:
+                if interpolation not in _PIL_INTERPOLATION_METHODS:
+                    raise ValueError(
+                        'Invalid interpolation method {} specified. Supported '
+                        'methods are {}'.format(
+                            interpolation,
+                            ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
+                resample = _PIL_INTERPOLATION_METHODS[interpolation]
+                img = img.resize(width_height_tuple, resample)
+        return img
 
 
 def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif',
@@ -202,12 +208,11 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     """
     dirname = os.path.basename(directory)
     if split:
-        num_files = len(list(
-            _iter_valid_files(directory, white_list_formats, follow_links)))
+        all_files = list(_iter_valid_files(directory, white_list_formats,
+                                           follow_links))
+        num_files = len(all_files)
         start, stop = int(split[0] * num_files), int(split[1] * num_files)
-        valid_files = list(
-            _iter_valid_files(
-                directory, white_list_formats, follow_links))[start: stop]
+        valid_files = all_files[start: stop]
     else:
         valid_files = _iter_valid_files(
             directory, white_list_formats, follow_links)
@@ -228,11 +233,13 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
 
     # Arguments
         x: Input Numpy array.
-        data_format: Image data format.
-            either "channels_first" or "channels_last".
-        scale: Whether to rescale image values
-            to be within `[0, 255]`.
+        data_format: Image data format, either "channels_first" or "channels_last".
+            Default: "channels_last".
+        scale: Whether to rescale the image such that minimum and maximum values
+            are 0 and 255 respectively.
+            Default: True.
         dtype: Dtype to use.
+            Default: "float32".
 
     # Returns
         A PIL Image instance.
@@ -258,7 +265,7 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     if data_format == 'channels_first':
         x = x.transpose(1, 2, 0)
     if scale:
-        x = x + max(-np.min(x), 0)
+        x = x - np.min(x)
         x_max = np.max(x)
         if x_max != 0:
             x /= x_max
@@ -271,6 +278,9 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
         return pil_image.fromarray(x.astype('uint8'), 'RGB')
     elif x.shape[2] == 1:
         # grayscale
+        if np.max(x) > 255:
+            # 32-bit signed integer grayscale image. PIL mode "I"
+            return pil_image.fromarray(x[:, :, 0].astype('int32'), 'I')
         return pil_image.fromarray(x[:, :, 0].astype('uint8'), 'L')
     else:
         raise ValueError('Unsupported channel number: %s' % (x.shape[2],))
