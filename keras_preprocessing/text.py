@@ -167,7 +167,8 @@ class Tokenizer(object):
         char_level: if True, every character will be treated as a token.
         oov_token: if given, it will be added to word_index and used to
             replace out-of-vocabulary words during text_to_sequence calls
-        analyzer: function. Custom analyzer to split the text. The default analyzer is text_to_word_sequence
+        analyzer: function. Custom analyzer to split the text.
+            The default analyzer is text_to_word_sequence
 
     By default, all punctuation is removed, turning the texts into
     space-separated sequences of words
