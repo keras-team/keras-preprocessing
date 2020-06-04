@@ -66,7 +66,8 @@ def text_to_word_sequence(text,
 def one_hot(text, n,
             filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n',
             lower=True,
-            split=' '):
+            split=' ',
+            analyzer=None):
     """One-hot encodes a text into a list of word indexes of size n.
 
     This is a wrapper to the `hashing_trick` function using `hash` as the
@@ -80,6 +81,7 @@ def one_hot(text, n,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to set the text to lowercase.
         split: str. Separator for word splitting.
+        analyzer: function. Custom analyzer to split the text
 
     # Returns
         List of integers in [1, n]. Each integer encodes a word
@@ -89,14 +91,16 @@ def one_hot(text, n,
                          hash_function=hash,
                          filters=filters,
                          lower=lower,
-                         split=split)
+                         split=split,
+                         analyzer=analyzer)
 
 
 def hashing_trick(text, n,
                   hash_function=None,
                   filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n',
                   lower=True,
-                  split=' '):
+                  split=' ',
+                  analyzer=None):
     """Converts a text to a sequence of indexes in a fixed-size hashing space.
 
     # Arguments
@@ -112,6 +116,7 @@ def hashing_trick(text, n,
             includes basic punctuation, tabs, and newlines.
         lower: boolean. Whether to set the text to lowercase.
         split: str. Separator for word splitting.
+        analyzer: function. Custom analyzer to split the text
 
     # Returns
         A list of integer word indices (unicity non-guaranteed).
@@ -131,10 +136,14 @@ def hashing_trick(text, n,
         def hash_function(w):
             return int(md5(w.encode()).hexdigest(), 16)
 
-    seq = text_to_word_sequence(text,
-                                filters=filters,
-                                lower=lower,
-                                split=split)
+    if analyzer is None:
+        seq = text_to_word_sequence(text,
+                                    filters=filters,
+                                    lower=lower,
+                                    split=split)
+    else:
+        seq = analyzer(text)
+
     return [(hash_function(w) % (n - 1) + 1) for w in seq]
 
 
@@ -158,6 +167,8 @@ class Tokenizer(object):
         char_level: if True, every character will be treated as a token.
         oov_token: if given, it will be added to word_index and used to
             replace out-of-vocabulary words during text_to_sequence calls
+        analyzer: function. Custom analyzer to split the text.
+            The default analyzer is text_to_word_sequence
 
     By default, all punctuation is removed, turning the texts into
     space-separated sequences of words
@@ -174,6 +185,7 @@ class Tokenizer(object):
                  char_level=False,
                  oov_token=None,
                  document_count=0,
+                 analyzer=None,
                  **kwargs):
         # Legacy support
         if 'nb_words' in kwargs:
@@ -195,6 +207,7 @@ class Tokenizer(object):
         self.index_docs = defaultdict(int)
         self.word_index = {}
         self.index_word = {}
+        self.analyzer = analyzer
 
     def fit_on_texts(self, texts):
         """Updates internal vocabulary based on a list of texts.
@@ -219,10 +232,13 @@ class Tokenizer(object):
                         text = text.lower()
                 seq = text
             else:
-                seq = text_to_word_sequence(text,
-                                            self.filters,
-                                            self.lower,
-                                            self.split)
+                if self.analyzer is None:
+                    seq = text_to_word_sequence(text,
+                                                filters=self.filters,
+                                                lower=self.lower,
+                                                split=self.split)
+                else:
+                    seq = self.analyzer(text)
             for w in seq:
                 if w in self.word_counts:
                     self.word_counts[w] += 1
@@ -306,10 +322,13 @@ class Tokenizer(object):
                         text = text.lower()
                 seq = text
             else:
-                seq = text_to_word_sequence(text,
-                                            self.filters,
-                                            self.lower,
-                                            self.split)
+                if self.analyzer is None:
+                    seq = text_to_word_sequence(text,
+                                                filters=self.filters,
+                                                lower=self.lower,
+                                                split=self.split)
+                else:
+                    seq = self.analyzer(text)
             vect = []
             for w in seq:
                 i = self.word_index.get(w)
