@@ -43,8 +43,10 @@ def text_to_word_sequence(text,
         text = text.lower()
 
     if sys.version_info < (3,):
-        if isinstance(text, unicode):
-            translate_map = dict((ord(c), unicode(split)) for c in filters)
+        if isinstance(text, unicode):  # noqa: F821
+            translate_map = {
+                ord(c): unicode(split) for c in filters  # noqa: F821
+            }
             text = text.translate(translate_map)
         elif len(split) == 1:
             translate_map = maketrans(filters, split * len(filters))
@@ -53,7 +55,7 @@ def text_to_word_sequence(text,
             for c in filters:
                 text = text.replace(c, split)
     else:
-        translate_dict = dict((c, split) for c in filters)
+        translate_dict = {c: split for c in filters}
         translate_map = maketrans(translate_dict)
         text = text.translate(translate_map)
 
@@ -131,7 +133,8 @@ def hashing_trick(text, n,
     if hash_function is None:
         hash_function = hash
     elif hash_function == 'md5':
-        hash_function = lambda w: int(md5(w.encode()).hexdigest(), 16)
+        def hash_function(w):
+            return int(md5(w.encode()).hexdigest(), 16)
 
     if analyzer is None:
         seq = text_to_word_sequence(text,
@@ -154,7 +157,7 @@ class Tokenizer(object):
 
     # Arguments
         num_words: the maximum number of words to keep, based
-            on word frequency. Only the most common `num_words` words will
+            on word frequency. Only the most common `num_words-1` words will
             be kept.
         filters: a string where each element is a character that will be
             filtered from the texts. The default is all punctuation, plus
@@ -255,9 +258,9 @@ class Tokenizer(object):
 
         # note that index 0 is reserved, never assigned to an existing word
         self.word_index = dict(
-            list(zip(sorted_voc, list(range(1, len(sorted_voc) + 1)))))
+            zip(sorted_voc, list(range(1, len(sorted_voc) + 1))))
 
-        self.index_word = dict((c, w) for w, c in self.word_index.items())
+        self.index_word = {c: w for w, c in self.word_index.items()}
 
         for w, c in list(self.word_docs.items()):
             self.index_docs[self.word_index[w]] = c
@@ -281,7 +284,7 @@ class Tokenizer(object):
     def texts_to_sequences(self, texts):
         """Transforms each text in texts to a sequence of integers.
 
-        Only top "num_words" most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
@@ -298,7 +301,7 @@ class Tokenizer(object):
         Each item in texts can also be a list,
         in which case we assume each item of that list to be a token.
 
-        Only top "num_words" most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
@@ -341,11 +344,11 @@ class Tokenizer(object):
     def sequences_to_texts(self, sequences):
         """Transforms each sequence into a list of text.
 
-        Only top "num_words" most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
-            texts: A list of sequences (list of integers).
+            sequences: A list of sequences (list of integers).
 
         # Returns
             A list of texts (strings)
@@ -358,11 +361,11 @@ class Tokenizer(object):
         Each sequence has to a list of integers.
         In other words, sequences should be a list of sequences
 
-        Only top "num_words" most frequent words will be taken into account.
+        Only top `num_words-1` most frequent words will be taken into account.
         Only words known by the tokenizer will be taken into account.
 
         # Arguments
-            texts: A list of sequences.
+            sequences: A list of sequences.
 
         # Yields
             Yields individual texts.
@@ -416,7 +419,7 @@ class Tokenizer(object):
             if self.word_index:
                 num_words = len(self.word_index) + 1
             else:
-                raise ValueError('Specify a dimension (num_words argument), '
+                raise ValueError('Specify a dimension (`num_words` argument), '
                                  'or fit on some text data first.')
         else:
             num_words = self.num_words
