@@ -164,7 +164,7 @@ class Tokenizer(object):
         char_level: if True, every character will be treated as a token.
         oov_token: if given, it will be added to word_index and used to
             replace out-of-vocabulary words during text_to_sequence calls
-        analyzer: function. Custom analyzer to split the text
+        analyzer: function. Custom analyzer to split the text. The default analyzer is text_to_word_sequence
 
     By default, all punctuation is removed, turning the texts into
     space-separated sequences of words
@@ -201,8 +201,8 @@ class Tokenizer(object):
         self.char_level = char_level
         self.oov_token = oov_token
         self.index_docs = defaultdict(int)
-        self.word_index = dict()
-        self.index_word = dict()
+        self.word_index = {}
+        self.index_word = {}
         self.analyzer = analyzer
 
     def fit_on_texts(self, texts):
