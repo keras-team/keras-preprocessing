@@ -294,9 +294,8 @@ def test_tokenizer_lower_flag():
     char_tokenizer.fit_on_texts(texts)
     expected_word_counts = OrderedDict([('t', 11), ('h', 5), ('e', 6), (' ', 14),
                                         ('c', 2), ('a', 6), ('s', 2), ('o', 6),
-                                        ('n', 4), ('m', 1), ('.', 3), ('d', 3),
-                                        ('g', 5), ('l', 2), ('i', 2), ('v', 1),
-                                        ('r', 1)])
+                                        ('n', 4), ('m', 1), ('d', 3), ('g', 5),
+                                        ('l', 2), ('i', 2), ('v', 1), ('r', 1)])
     assert char_tokenizer.word_counts == expected_word_counts
 
 
