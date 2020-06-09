@@ -189,8 +189,7 @@ def test_tokenizer_filter_char_level():
     """
     x_train = ['This text has only known words this text']
 
-    tokenizer = keras.preprocessing.text.Tokenizer(char_level=True,
-                                                   filters="e")
+    tokenizer = text.Tokenizer(filters="e", char_level=True)
     tokenizer.fit_on_texts(x_train)
     assert "e" not in tokenizer.word_index
 
