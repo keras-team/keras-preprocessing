@@ -184,10 +184,7 @@ def test_tokenizer_oov_flag_and_num_words():
     assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
 
 
-@pytest.mark.parametrize(
-    "x_train",
-    ("ae", ["ae", "er"], [["ae", "er"], ["ee", "a"]])
-)
+@pytest.mark.parametrize("x_train", ("ae", ["ae", "er"]))
 def test_tokenizer_filter_char_level(x_train):
     """It does not tokenize filtered characters at the character level.
     """
