@@ -185,7 +185,7 @@ def test_tokenizer_oov_flag_and_num_words():
 
 
 def test_tokenizer_filter_char_level():
-    """It does not tokenize the characters in ``filters`` when ``char_level=True``
+    """It does not tokenize filtered characters at the character level.
     """
     x_train = ['This text has only known words this text']
 
