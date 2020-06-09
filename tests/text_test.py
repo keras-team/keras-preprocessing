@@ -184,11 +184,13 @@ def test_tokenizer_oov_flag_and_num_words():
     assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
 
 
-def test_tokenizer_filter_char_level():
+@pytest.mark.parametrize(
+    "x_train",
+    ("ae", ["ae", "er"], [["ae", "er"], ["ee", "a"]])
+)
+def test_tokenizer_filter_char_level(x_train):
     """It does not tokenize filtered characters at the character level.
     """
-    x_train = ['This text has only known words this text']
-
     tokenizer = text.Tokenizer(filters="e", char_level=True)
     tokenizer.fit_on_texts(x_train)
     assert "e" not in tokenizer.word_index
