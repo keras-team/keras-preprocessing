@@ -184,6 +184,17 @@ def test_tokenizer_oov_flag_and_num_words():
     assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
 
 
+def test_tokenizer_filter_char_level():
+    """It does not tokenize the characters in ``filters`` when ``char_level=True``
+    """
+    x_train = ['This text has only known words this text']
+
+    tokenizer = keras.preprocessing.text.Tokenizer(char_level=True,
+                                                   filters="e")
+    tokenizer.fit_on_texts(x_train)
+    assert "e" not in tokenizer.word_index
+
+
 def test_sequences_to_texts_with_num_words_and_oov_token():
     x_train = ['This text has only known words this text']
     x_test = ['This text has some unknown words']
