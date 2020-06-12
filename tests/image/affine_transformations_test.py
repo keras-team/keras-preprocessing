@@ -46,13 +46,22 @@ def test_apply_brightness_shift_error(monkeypatch):
 
 def test_random_brightness(monkeypatch):
     monkeypatch.setattr(affine_transformations,
-                        'apply_brightness_shift', lambda x, y: (x, y))
+                        'apply_brightness_shift', lambda x, y, z: (x, y))
     assert (0, 3.) == affine_transformations.random_brightness(0, (3, 3))
 
 
 def test_random_brightness_error():
     with pytest.raises(ValueError):
         affine_transformations.random_brightness(0, [0])
+
+
+def test_random_brightness_scale():
+    img = np.ones((1, 1, 3)) * 128
+    zeros = np.zeros((1, 1, 3))
+    must_be_128 = affine_transformations.random_brightness(img, [1, 1], False)
+    assert np.array_equal(img, must_be_128)
+    must_be_0 = affine_transformations.random_brightness(img, [1, 1], True)
+    assert np.array_equal(zeros, must_be_0)
 
 
 def test_apply_affine_transform_error(monkeypatch):

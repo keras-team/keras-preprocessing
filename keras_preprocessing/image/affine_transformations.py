@@ -195,37 +195,41 @@ def random_channel_shift(x, intensity_range, channel_axis=0):
     return apply_channel_shift(x, intensity, channel_axis=channel_axis)
 
 
-def apply_brightness_shift(x, brightness):
+def apply_brightness_shift(x, brightness, scale=True):
     """Performs a brightness shift.
 
     # Arguments
         x: Input tensor. Must be 3D.
         brightness: Float. The new brightness value.
-        channel_axis: Index of axis for channels in the input tensor.
+        scale: Whether to rescale the image such that minimum and maximum values
+            are 0 and 255 respectively.
+            Default: True.
 
     # Returns
         Numpy image tensor.
 
     # Raises
-        ValueError if `brightness_range` isn't a tuple.
+        ImportError: if PIL is not available.
     """
     if ImageEnhance is None:
         raise ImportError('Using brightness shifts requires PIL. '
                           'Install PIL or Pillow.')
-    x = array_to_img(x)
+    x = array_to_img(x, scale=scale)
     x = imgenhancer_Brightness = ImageEnhance.Brightness(x)
     x = imgenhancer_Brightness.enhance(brightness)
     x = img_to_array(x)
     return x
 
 
-def random_brightness(x, brightness_range):
+def random_brightness(x, brightness_range, scale=True):
     """Performs a random brightness shift.
 
     # Arguments
         x: Input tensor. Must be 3D.
         brightness_range: Tuple of floats; brightness range.
-        channel_axis: Index of axis for channels in the input tensor.
+        scale: Whether to rescale the image such that minimum and maximum values
+            are 0 and 255 respectively.
+            Default: True.
 
     # Returns
         Numpy image tensor.
@@ -239,7 +243,7 @@ def random_brightness(x, brightness_range):
             'Received: %s' % (brightness_range,))
 
     u = np.random.uniform(brightness_range[0], brightness_range[1])
-    return apply_brightness_shift(x, u)
+    return apply_brightness_shift(x, u, scale)
 
 
 def transform_matrix_offset_center(matrix, x, y):
