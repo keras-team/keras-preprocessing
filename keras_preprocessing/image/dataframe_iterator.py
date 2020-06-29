@@ -8,6 +8,7 @@ import os
 import warnings
 
 import numpy as np
+from collections import OrderedDict
 
 from .iterator import BatchFromFilesMixin, Iterator
 from .utils import validate_filename
@@ -249,7 +250,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                 )
 
         if classes:
-            classes = set(classes)  # sort and prepare for membership lookup
+            # prepare for membership lookup
+            classes = list(OrderedDict.fromkeys(classes).keys())
             df[y_col] = df[y_col].apply(lambda x: remove_classes(x, classes))
         else:
             classes = set()
@@ -258,7 +260,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                     classes.update(v)
                 else:
                     classes.add(v)
-        return df.dropna(subset=[y_col]), sorted(classes)
+            classes = sorted(classes)
+        return df.dropna(subset=[y_col]), classes
 
     def _filter_valid_filepaths(self, df, x_col):
         """Keep only dataframe rows with valid filenames
