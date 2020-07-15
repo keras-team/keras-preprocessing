@@ -110,33 +110,32 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
                           'The use of `load_img` requires PIL.')
-    with open(path, 'rb') as f:
-        img = pil_image.open(io.BytesIO(f.read()))
-        if color_mode == 'grayscale':
-            # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
-            # convert it to an 8-bit grayscale image.
-            if img.mode not in ('L', 'I;16', 'I'):
-                img = img.convert('L')
-        elif color_mode == 'rgba':
-            if img.mode != 'RGBA':
-                img = img.convert('RGBA')
-        elif color_mode == 'rgb':
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-        else:
-            raise ValueError('color_mode must be "grayscale", "rgb", or "rgba"')
-        if target_size is not None:
-            width_height_tuple = (target_size[1], target_size[0])
-            if img.size != width_height_tuple:
-                if interpolation not in _PIL_INTERPOLATION_METHODS:
-                    raise ValueError(
-                        'Invalid interpolation method {} specified. Supported '
-                        'methods are {}'.format(
-                            interpolation,
-                            ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
-                resample = _PIL_INTERPOLATION_METHODS[interpolation]
-                img = img.resize(width_height_tuple, resample)
-        return img
+    img = pil_image.open(path) #read from path as well as bytes object
+    if color_mode == 'grayscale':
+        # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
+        # convert it to an 8-bit grayscale image.
+        if img.mode not in ('L', 'I;16', 'I'):
+            img = img.convert('L')
+    elif color_mode == 'rgba':
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+    elif color_mode == 'rgb':
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+    else:
+        raise ValueError('color_mode must be "grayscale", "rgb", or "rgba"')
+    if target_size is not None:
+        width_height_tuple = (target_size[1], target_size[0])
+        if img.size != width_height_tuple:
+            if interpolation not in _PIL_INTERPOLATION_METHODS:
+                raise ValueError(
+                    'Invalid interpolation method {} specified. Supported '
+                    'methods are {}'.format(
+                        interpolation,
+                        ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
+            resample = _PIL_INTERPOLATION_METHODS[interpolation]
+            img = img.resize(width_height_tuple, resample)
+    return img
 
 
 def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif',
@@ -228,7 +227,7 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     return classes, filenames
 
 
-def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
+def array_to_img(x, data_format='channels_last', scale=True, is_grayscale=False, dtype='float32'):
     """Converts a 3D Numpy array to a PIL Image instance.
 
     # Arguments
@@ -240,6 +239,8 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
             Default: True.
         dtype: Dtype to use.
             Default: "float32".
+        is_grayscale: Whether image is grayscale.
+            Default: False
 
     # Returns
         A PIL Image instance.
@@ -253,7 +254,11 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
                           'The use of `array_to_img` requires PIL.')
     x = np.asarray(x, dtype=dtype)
     if x.ndim != 3:
-        raise ValueError('Expected image array to have rank 3 (single image). '
+        # Grayscale image can be of ndim = 2, manually adding channel 1 for such cases
+        if is_grayscale:
+            x = np.expand_dims(x,axis=2)
+        else:
+            raise ValueError('Expected image array to have rank 3 (single image). '
                          'Got array with shape: %s' % (x.shape,))
 
     if data_format not in {'channels_first', 'channels_last'}:
@@ -306,7 +311,7 @@ def img_to_array(img, data_format='channels_last', dtype='float32'):
     # Numpy array x has format (height, width, channel)
     # or (channel, height, width)
     # but original PIL image has format (width, height, channel)
-    x = np.asarray(img, dtype=dtype)
+    x = np.array(img, dtype=dtype) #retrieve a copy of image array (for better processing with cv2 functions)
     if len(x.shape) == 3:
         if data_format == 'channels_first':
             x = x.transpose(2, 0, 1)
