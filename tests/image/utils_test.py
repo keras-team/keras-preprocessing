@@ -302,6 +302,14 @@ def test_array_to_img_and_img_to_array():
     x = utils.img_to_array(img, data_format='channels_last')
     assert x.shape == (height, width, 1)
 
+    # 2D Grayscale array to image
+    x = np.array(
+        np.random.randint(-2147483648, 2147483647, (height, width)),
+        dtype=np.int32
+    )
+    img = utils.array_to_img(x, is_grayscale=True)
+    assert img.size == (width,height)
+
     # Test invalid use case
     with pytest.raises(ValueError):
         x = np.random.random((height, width))  # not 3D

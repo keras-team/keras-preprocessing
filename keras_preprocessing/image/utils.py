@@ -237,10 +237,10 @@ def array_to_img(x, data_format='channels_last', scale=True, is_grayscale=False,
         scale: Whether to rescale the image such that minimum and maximum values
             are 0 and 255 respectively.
             Default: True.
-        dtype: Dtype to use.
-            Default: "float32".
         is_grayscale: Whether image is grayscale.
             Default: False
+        dtype: Dtype to use.
+            Default: "float32".
 
     # Returns
         A PIL Image instance.
@@ -256,7 +256,10 @@ def array_to_img(x, data_format='channels_last', scale=True, is_grayscale=False,
     if x.ndim != 3:
         # Grayscale image can be of ndim = 2, manually adding channel 1 for such cases
         if is_grayscale:
-            x = np.expand_dims(x,axis=2)
+            if data_format == 'channels_last':
+                x = np.expand_dims(x,axis=2)
+            else:
+                x = np.expand_dims(x,axis=0)
         else:
             raise ValueError('Expected image array to have rank 3 (single image). '
                          'Got array with shape: %s' % (x.shape,))
