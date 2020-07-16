@@ -308,7 +308,7 @@ def test_array_to_img_and_img_to_array():
         dtype=np.int32
     )
     img = utils.array_to_img(x, is_grayscale=True)
-    assert img.size == (width,height)
+    assert img.size == (width, height)
 
     # Test invalid use case
     with pytest.raises(ValueError):
