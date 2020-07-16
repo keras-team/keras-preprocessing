@@ -4,7 +4,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import io
 import os
 import warnings
 
@@ -110,7 +109,8 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
                           'The use of `load_img` requires PIL.')
-    img = pil_image.open(path) #read from path as well as bytes object
+    # read from path as well as bytes object
+    img = pil_image.open(path)
     if color_mode == 'grayscale':
         # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
         # convert it to an 8-bit grayscale image.
@@ -227,7 +227,7 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     return classes, filenames
 
 
-def array_to_img(x, data_format='channels_last', scale=True, is_grayscale=False, dtype='float32'):
+def array_to_img(x, data_format='channels_last', scale=True, is_gray=False, dtype='float32'):
     """Converts a 3D Numpy array to a PIL Image instance.
 
     # Arguments
@@ -237,7 +237,7 @@ def array_to_img(x, data_format='channels_last', scale=True, is_grayscale=False,
         scale: Whether to rescale the image such that minimum and maximum values
             are 0 and 255 respectively.
             Default: True.
-        is_grayscale: Whether image is grayscale.
+        is_gray: Whether image is grayscale.
             Default: False
         dtype: Dtype to use.
             Default: "float32".
@@ -254,15 +254,15 @@ def array_to_img(x, data_format='channels_last', scale=True, is_grayscale=False,
                           'The use of `array_to_img` requires PIL.')
     x = np.asarray(x, dtype=dtype)
     if x.ndim != 3:
-        # Grayscale image can be of ndim = 2, manually adding channel 1 for such cases
-        if is_grayscale:
+        # Grayscale image can be of ndim=2, manually adding channel 1 for such cases
+        if is_gray:
             if data_format == 'channels_last':
-                x = np.expand_dims(x,axis=2)
+                x = np.expand_dims(x, axis=2)
             else:
-                x = np.expand_dims(x,axis=0)
+                x = np.expand_dims(x, axis=0)
         else:
             raise ValueError('Expected image array to have rank 3 (single image). '
-                         'Got array with shape: %s' % (x.shape,))
+                             'Got array with shape: %s' % (x.shape,))
 
     if data_format not in {'channels_first', 'channels_last'}:
         raise ValueError('Invalid data_format: %s' % data_format)
@@ -314,7 +314,8 @@ def img_to_array(img, data_format='channels_last', dtype='float32'):
     # Numpy array x has format (height, width, channel)
     # or (channel, height, width)
     # but original PIL image has format (width, height, channel)
-    x = np.array(img, dtype=dtype) #retrieve a copy of image array (for better processing with cv2 functions)
+    # retrieve a copy of image array (for better processing with cv2 functions)
+    x = np.array(img, dtype=dtype)
     if len(x.shape) == 3:
         if data_format == 'channels_first':
             x = x.transpose(2, 0, 1)
