@@ -25,6 +25,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
             via the `classes` argument.
         image_data_generator: Instance of `ImageDataGenerator`
             to use for random transformations and normalization.
+        balance: Boolean, will handle data imbalance if set to True.
         target_size: tuple of integers, dimensions to resize input images to.
         color_mode: One of `"rgb"`, `"rgba"`, `"grayscale"`.
             Color mode to read images.
@@ -76,6 +77,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
     def __init__(self,
                  directory,
                  image_data_generator,
+                 balance = False,
                  target_size=(256, 256),
                  color_mode='rgb',
                  classes=None,
