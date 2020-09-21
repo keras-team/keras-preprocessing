@@ -227,9 +227,28 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
 
     return classes, filenames
 
+def _generate_class_count(directory):
+    """Maintain sample count of each class in the directory.
+    
+    # Arguments
+        directory: string, absolute path to the directory
+    # Returns
+        class_count: dictionary, sample count for each class
+    """
+    
+    class_count = {}
+
+    if directory[-1] != '/':
+        directory += '/'
+
+    for category in os.listdir(directory):
+      class_count[category] = len(os.listdir(directory + category))
+
+    return class_count
 
 def _make_balance_config(directory, validation_split):
     """Scans the directory to make a config dictionary to handle data imbalance.
+    
     # Arguments
         directory: string, absolute path to the directory
         validation_split: float, validation split
