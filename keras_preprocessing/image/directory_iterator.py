@@ -11,7 +11,8 @@ from six.moves import range
 import numpy as np
 
 from .iterator import BatchFromFilesMixin, Iterator
-from .utils import _list_valid_filenames_in_directory
+from .utils import (_list_valid_filenames_in_directory,
+                    _make_balance_config)
 
 
 class DirectoryIterator(BatchFromFilesMixin, Iterator):
@@ -103,6 +104,13 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                                                             subset,
                                                             interpolation)
         self.directory = directory
+
+        if balance and subset != 'validation':
+            self._balance_config = _make_balance_config(directory, 
+                image_data_generator._validation_split)
+        else:
+            self._balance_config = None
+
         self.classes = classes
         if class_mode not in self.allowed_class_modes:
             raise ValueError('Invalid class_mode: {}; expected one of: {}'
