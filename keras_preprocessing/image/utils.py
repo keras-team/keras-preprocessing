@@ -228,6 +228,29 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     return classes, filenames
 
 
+def _make_balance_config(directory, validation_split):
+    """Scans the directory to make a config dictionary to handle data imbalance.
+    # Arguments
+        directory: string, absolute path to the directory
+        validation_split: float, validation split
+            Default: None
+    # Returns
+        balance_config: dictionary, specs needed to handle data imbalance
+            'majority': integer, number of samples in the majority class
+    """
+    class_count = _generate_class_count(directory)
+
+    # Get the sample count of the majority class
+    majority_class_count = class_count[max(class_count, key = class_count.get)]
+    if validation_split:
+        majority_class_count = int(majority_class_count*(1 - validation_split)) + 1        
+
+    balance_config = {
+        'majority': majority_class_count
+    }
+
+    return balance_config
+
 def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     """Converts a 3D Numpy array to a PIL Image instance.
 
