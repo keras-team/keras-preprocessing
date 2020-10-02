@@ -7,6 +7,7 @@ from __future__ import print_function
 import io
 import os
 import warnings
+import random
 
 import numpy as np
 
@@ -181,6 +182,19 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
             if fname.lower().endswith(white_list_formats):
                 yield root, fname
 
+def _settle_debt(list_valid_files, debt):
+    """Iterates over list_valid_files and resamples to settle debt.
+
+    # Arguments:
+        list_valid_files: List of strings, list that contains valid filenames
+        debt: Integer, required number of samples to be resampled from
+            valid_file_names
+
+    # Yields:
+        randomly chosen filename from list_valid_files 
+    """
+    for i in range(debt):
+        yield random.choice(list_valid_files)
 
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,
                                        class_indices, follow_links, 
