@@ -533,6 +533,7 @@ class ImageDataGenerator(object):
         return DirectoryIterator(
             directory,
             self,
+            balance=balance,
             target_size=target_size,
             color_mode=color_mode,
             classes=classes,
