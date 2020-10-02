@@ -238,11 +238,9 @@ def _generate_class_count(directory):
     
     class_count = {}
 
-    if directory[-1] != '/':
-        directory += '/'
-
     for category in os.listdir(directory):
-      class_count[category] = len(os.listdir(directory + category))
+      category_directory = os.path.join(directory, category)
+      class_count[category] = len(os.listdir(category_directory))
 
     return class_count
 
