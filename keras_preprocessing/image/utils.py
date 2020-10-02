@@ -183,7 +183,8 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
 
 
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,
-                                       class_indices, follow_links):
+                                       class_indices, follow_links, 
+                                       balance_config = None):
     """Lists paths of files in `subdir` with extensions in `white_list_formats`.
 
     # Arguments
@@ -198,6 +199,7 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             of images in each directory.
         class_indices: dictionary mapping a class name to its index.
         follow_links: boolean, follow symbolic links to subdirectories.
+        balance_config: dict, stores configurations for handling data imbalance.
 
     # Returns
          classes: a list of class indices
@@ -224,6 +226,15 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
         relative_path = os.path.join(
             dirname, os.path.relpath(absolute_path, directory))
         filenames.append(relative_path)
+
+    if balance_config:
+        filenames_copy = filenames.copy()
+
+        debt = balance_config['majority'] - len(filenames_copy)
+
+        for filename in _settle_debt(filenames_copy, debt):
+            classes.append(class_indices[dirname])
+            filenames.append(filename)
 
     return classes, filenames
 

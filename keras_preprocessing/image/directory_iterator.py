@@ -139,7 +139,8 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
             results.append(
                 pool.apply_async(_list_valid_filenames_in_directory,
                                  (dirpath, self.white_list_formats, self.split,
-                                  self.class_indices, follow_links)))
+                                  self.class_indices, follow_links,
+                                  self._balance_config)))
         classes_list = []
         for res in results:
             classes, filenames = res.get()
