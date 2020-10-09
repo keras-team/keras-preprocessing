@@ -106,8 +106,9 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
         self.directory = directory
 
         if balance and subset != 'validation':
+            validation_split = image_data_generator._validation_split
             self._balance_config = _make_balance_config(directory,
-                                                        image_data_generator._validation_split)
+                                                        validation_split)
         else:
             self._balance_config = None
 

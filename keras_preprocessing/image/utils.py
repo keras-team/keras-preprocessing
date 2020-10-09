@@ -192,7 +192,7 @@ def _settle_debt(list_valid_files, debt):
             valid_file_names
 
     # Yields:
-        randomly chosen filename from list_valid_files 
+        randomly chosen filename from list_valid_files
     """
     for i in range(debt):
         yield random.choice(list_valid_files)
