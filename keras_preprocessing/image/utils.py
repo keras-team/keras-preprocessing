@@ -182,6 +182,7 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
             if fname.lower().endswith(white_list_formats):
                 yield root, fname
 
+
 def _settle_debt(list_valid_files, debt):
     """Iterates over list_valid_files and resamples to settle debt.
 
@@ -196,9 +197,10 @@ def _settle_debt(list_valid_files, debt):
     for i in range(debt):
         yield random.choice(list_valid_files)
 
+
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,
-                                       class_indices, follow_links, 
-                                       balance_config = None):
+                                       class_indices, follow_links,
+                                       balance_config=None):
     """Lists paths of files in `subdir` with extensions in `white_list_formats`.
 
     # Arguments
@@ -252,26 +254,28 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
 
     return classes, filenames
 
+
 def _generate_class_count(directory):
     """Maintain sample count of each class in the directory.
-    
+
     # Arguments
         directory: string, absolute path to the directory
     # Returns
         class_count: dictionary, sample count for each class
     """
-    
+
     class_count = {}
 
     for category in os.listdir(directory):
-      category_directory = os.path.join(directory, category)
-      class_count[category] = len(os.listdir(category_directory))
+        category_directory = os.path.join(directory, category)
+        class_count[category] = len(os.listdir(category_directory))
 
     return class_count
 
+
 def _make_balance_config(directory, validation_split):
     """Scans the directory to make a config dictionary to handle data imbalance.
-    
+
     # Arguments
         directory: string, absolute path to the directory
         validation_split: float, validation split
@@ -283,15 +287,16 @@ def _make_balance_config(directory, validation_split):
     class_count = _generate_class_count(directory)
 
     # Get the sample count of the majority class
-    majority_class_count = class_count[max(class_count, key = class_count.get)]
+    majority_class_count = class_count[max(class_count, key=class_count.get)]
     if validation_split:
-        majority_class_count = int(majority_class_count*(1 - validation_split)) + 1        
+        majority_class_count = int(majority_class_count*(1 - validation_split)) + 1
 
     balance_config = {
         'majority': majority_class_count
     }
 
     return balance_config
+
 
 def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     """Converts a 3D Numpy array to a PIL Image instance.

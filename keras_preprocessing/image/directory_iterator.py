@@ -78,7 +78,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
     def __init__(self,
                  directory,
                  image_data_generator,
-                 balance = False,
+                 balance=False,
                  target_size=(256, 256),
                  color_mode='rgb',
                  classes=None,
@@ -106,8 +106,8 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
         self.directory = directory
 
         if balance and subset != 'validation':
-            self._balance_config = _make_balance_config(directory, 
-                image_data_generator._validation_split)
+            self._balance_config = _make_balance_config(directory,
+                                                        image_data_generator._validation_split)
         else:
             self._balance_config = None
 

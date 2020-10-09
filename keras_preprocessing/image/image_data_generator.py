@@ -441,7 +441,7 @@ class ImageDataGenerator(object):
 
     def flow_from_directory(self,
                             directory,
-                            balance = False,
+                            balance=False,
                             target_size=(256, 256),
                             color_mode='rgb',
                             classes=None,
