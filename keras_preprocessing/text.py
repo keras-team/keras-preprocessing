@@ -191,6 +191,10 @@ class Tokenizer(object):
             warnings.warn('The `nb_words` argument in `Tokenizer` '
                           'has been renamed `num_words`.')
             num_words = kwargs.pop('nb_words')
+        if 'document_count' in kwargs:
+            warnings.warn('The `document_count` argument in `Tokenizer` '
+                          'has been removed.')
+            del kwargs['document_count']
         if kwargs:
             raise TypeError('Unrecognized keyword arguments: ' + str(kwargs))
 
