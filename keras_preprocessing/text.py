@@ -184,7 +184,6 @@ class Tokenizer(object):
                  split=' ',
                  char_level=False,
                  oov_token=None,
-                 document_count=0,
                  analyzer=None,
                  **kwargs):
         # Legacy support
@@ -192,6 +191,7 @@ class Tokenizer(object):
             warnings.warn('The `nb_words` argument in `Tokenizer` '
                           'has been renamed `num_words`.')
             num_words = kwargs.pop('nb_words')
+        document_count = kwargs.pop('document_count', 0)
         if kwargs:
             raise TypeError('Unrecognized keyword arguments: ' + str(kwargs))
 
