@@ -27,6 +27,21 @@ def test_deterministic_transform():
         x, theta=45, channel_axis=2, fill_mode='constant'), x_rotated)
 
 
+def test_matrix_center():
+    x = np.expand_dims(np.array([
+        [0, 1],
+        [0, 0],
+    ]), -1)
+    x_rotated90 = np.expand_dims(np.array([
+        [0, 0],
+        [0, 1],
+    ]), -1)
+
+    assert np.allclose(
+        affine_transformations.apply_affine_transform(x, theta=90),
+        x_rotated90)
+
+
 def test_random_zoom():
     x = np.random.random((2, 28, 28))
     assert affine_transformations.random_zoom(x, (5, 5)).shape == (2, 28, 28)
