@@ -15,16 +15,31 @@ def test_random_transforms():
 def test_deterministic_transform():
     x = np.ones((3, 3, 3))
     x_rotated = np.array([[[0., 0., 0.],
-                           [0., 0., 0.],
-                           [1., 1., 1.]],
-                          [[0., 0., 0.],
+                           [1., 1., 1.],
+                           [0., 0., 0.]],
+                          [[1., 1., 1.],
                            [1., 1., 1.],
                            [1., 1., 1.]],
                           [[0., 0., 0.],
-                           [0., 0., 0.],
-                           [1., 1., 1.]]])
+                           [1., 1., 1.],
+                           [0., 0., 0.]]])
     assert np.allclose(affine_transformations.apply_affine_transform(
         x, theta=45, channel_axis=2, fill_mode='constant'), x_rotated)
+
+
+def test_matrix_center():
+    x = np.expand_dims(np.array([
+        [0, 1],
+        [0, 0],
+    ]), -1)
+    x_rotated90 = np.expand_dims(np.array([
+        [0, 0],
+        [0, 1],
+    ]), -1)
+
+    assert np.allclose(
+        affine_transformations.apply_affine_transform(x, theta=90),
+        x_rotated90)
 
 
 def test_random_zoom():
