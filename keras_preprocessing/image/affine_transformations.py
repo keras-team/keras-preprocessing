@@ -256,7 +256,7 @@ def transform_matrix_offset_center(matrix, x, y):
 
 
 def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
-                           row_axis=0, col_axis=1, channel_axis=2,
+                           row_axis=1, col_axis=2, channel_axis=0,
                            fill_mode='nearest', cval=0., order=1):
     """Applies an affine transformation specified by the parameters given.
 
