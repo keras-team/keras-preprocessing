@@ -268,8 +268,10 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
         shear: Shear angle in degrees.
         zx: Zoom in x direction.
         zy: Zoom in y direction
-        row_axis: Index of axis for rows (aka Y axis) in the input image. Direction: left to right.
-        col_axis: Index of axis for columns (aka X axis) in the input image. Direction: top to bottom.
+        row_axis: Index of axis for rows (aka Y axis) in the input image.
+                  Direction: left to right.
+        col_axis: Index of axis for columns (aka X axis) in the input image.
+                  Direction: top to bottom.
         channel_axis: Index of axis for channels in the input image.
         fill_mode: Points outside the boundaries of the input
             are filled according to the given mode
@@ -302,7 +304,7 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
     if x.ndim != 3:
         raise ValueError("Input arrays must be multi-channel 2D images.")
     if channel_axis not in [0, 2]:
-        raise ValueError("Only channels-last and channels-first images are supported")
+        raise ValueError("Channels are allowed and the first and last dimensions.")
 
     transform_matrix = None
     if theta != 0:
