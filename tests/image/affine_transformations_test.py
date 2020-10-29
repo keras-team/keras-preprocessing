@@ -52,6 +52,100 @@ def test_matrix_center():
         x_rotated90)
 
 
+def test_translation():
+    x = np.array([
+        [0, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 0, 0],
+    ])
+    x_up = np.array([
+        [0, 1, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+    ])
+    x_dn = np.array([
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 1, 0, 0],
+    ])
+    x_left = np.array([
+        [0, 0, 0, 0],
+        [1, 0, 0, 0],
+        [0, 0, 0, 0],
+    ])
+    x_right = np.array([
+        [0, 0, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 0],
+    ])
+
+    # Channels first
+    x_test = np.expand_dims(x, 0)
+
+    # Horizontal translation
+    assert np.alltrue(x_left == np.squeeze(
+        affine_transformations.apply_affine_transform(x_test, tx=1)))
+    assert np.alltrue(x_right == np.squeeze(
+        affine_transformations.apply_affine_transform(x_test, tx=-1)))
+
+    # change axes: x<->y
+    assert np.alltrue(x_left == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, ty=1, row_axis=2, col_axis=1)))
+    assert np.alltrue(x_right == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, ty=-1, row_axis=2, col_axis=1)))
+
+    # Vertical translation
+    assert np.alltrue(x_up == np.squeeze(
+        affine_transformations.apply_affine_transform(x_test, ty=1)))
+    assert np.alltrue(x_dn == np.squeeze(
+        affine_transformations.apply_affine_transform(x_test, ty=-1)))
+
+    # change axes: x<->y
+    assert np.alltrue(x_up == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, tx=1, row_axis=2, col_axis=1)))
+    assert np.alltrue(x_dn == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, tx=-1, row_axis=2, col_axis=1)))
+
+    # Channels last
+    x_test = np.expand_dims(x, -1)
+
+    # Horizontal translation
+    assert np.alltrue(x_left == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, tx=1, row_axis=0, col_axis=1, channel_axis=2)))
+    assert np.alltrue(x_right == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, tx=-1, row_axis=0, col_axis=1, channel_axis=2)))
+
+    # change axes: x<->y
+    assert np.alltrue(x_left == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, ty=1, row_axis=1, col_axis=0, channel_axis=2)))
+    assert np.alltrue(x_right == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, ty=-1, row_axis=1, col_axis=0, channel_axis=2)))
+
+    # Vertical translation
+    assert np.alltrue(x_up == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, ty=1, row_axis=0, col_axis=1, channel_axis=2)))
+    assert np.alltrue(x_dn == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, ty=-1, row_axis=0, col_axis=1, channel_axis=2)))
+
+    # change axes: x<->y
+    assert np.alltrue(x_up == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, tx=1, row_axis=1, col_axis=0, channel_axis=2)))
+    assert np.alltrue(x_dn == np.squeeze(
+        affine_transformations.apply_affine_transform(
+            x_test, tx=-1, row_axis=1, col_axis=0, channel_axis=2)))
+
+
 def test_random_zoom():
     x = np.random.random((2, 28, 28))
     assert affine_transformations.random_zoom(x, (5, 5)).shape == (2, 28, 28)
