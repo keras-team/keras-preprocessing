@@ -12,7 +12,6 @@ matrix:
         # run tests with keras from PyPI and Python 3.6
         - python: 3.6
           env: TEST_MODE=TESTS
-        # run import test and Python 2.7
         # run import test and Python 3.6
         - python: 3.6
           env: TEST_MODE=IMPORTS
