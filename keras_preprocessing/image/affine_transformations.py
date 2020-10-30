@@ -278,20 +278,22 @@ def transform_matrix_offset_center(matrix, x, y):
 
 
 def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
-                           row_axis=0, col_axis=1, channel_axis=2,
+                           row_axis=1, col_axis=2, channel_axis=0,
                            fill_mode='nearest', cval=0., order=1):
     """Applies an affine transformation specified by the parameters given.
 
     # Arguments
-        x: 2D numpy array, single image.
+        x: 3D numpy array - a 2D image with one or more channels.
         theta: Rotation angle in degrees.
         tx: Width shift.
         ty: Heigh shift.
         shear: Shear angle in degrees.
         zx: Zoom in x direction.
         zy: Zoom in y direction
-        row_axis: Index of axis for rows in the input image.
-        col_axis: Index of axis for columns in the input image.
+        row_axis: Index of axis for rows (aka Y axis) in the input image.
+                  Direction: left to right.
+        col_axis: Index of axis for columns (aka X axis) in the input image.
+                  Direction: top to bottom.
         channel_axis: Index of axis for channels in the input image.
         fill_mode: Points outside the boundaries of the input
             are filled according to the given mode
@@ -306,6 +308,26 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
     if scipy is None:
         raise ImportError('Image transformations require SciPy. '
                           'Install SciPy.')
+
+    # Input sanity checks:
+    # 1. x must 2D image with one or more channels (i.e., a 3D tensor)
+    # 2. channels must be either first or last dimension
+    if np.unique([row_axis, col_axis, channel_axis]).size != 3:
+        raise ValueError("'row_axis', 'col_axis', and 'channel_axis'"
+                         " must be distinct")
+
+    # TODO: shall we support negative indices?
+    valid_indices = set([0, 1, 2])
+    actual_indices = set([row_axis, col_axis, channel_axis])
+    if actual_indices != valid_indices:
+        raise ValueError(
+            f"Invalid axis' indices: {actual_indices - valid_indices}")
+
+    if x.ndim != 3:
+        raise ValueError("Input arrays must be multi-channel 2D images.")
+    if channel_axis not in [0, 2]:
+        raise ValueError("Channels are allowed and the first and last dimensions.")
+
     transform_matrix = None
     if theta != 0:
         theta = np.deg2rad(theta)
@@ -347,6 +369,12 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
         transform_matrix = transform_matrix_offset_center(
             transform_matrix, h, w)
         x = np.rollaxis(x, channel_axis, 0)
+
+        # Matrix construction assumes that coordinates are x, y (in that order).
+        # However, regular numpy arrays use y,x (aka i,j) indexing.
+        # Swap the first two columns of the matrix to simulate the x, y indexing.
+        if col_axis > row_axis:
+            transform_matrix[:, [0, 1]] = transform_matrix[:, [1, 0]]
         final_affine_matrix = transform_matrix[:2, :2]
         final_offset = transform_matrix[:2, 2]
 
