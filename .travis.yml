@@ -2,29 +2,16 @@ sudo: required
 language: python
 matrix:
     include:
-        # check code style and Python 2.7
-        - python: 2.7
-          env: TEST_MODE=PEP8
         # check code style and Python 3.6
         - python: 3.6
           env: TEST_MODE=PEP8
-        # run tests with keras from source and Python 2.7
-        - python: 2.7
-          env: KERAS_HEAD=true
-          env: TEST_MODE=TESTS
         # run tests with keras from source and Python 3.6
         - python: 3.6
           env: KERAS_HEAD=true
           env: TEST_MODE=TESTS
-        # run tests with keras from PyPI and Python 2.7
-        - python: 2.7
-          env: TEST_MODE=TESTS
         # run tests with keras from PyPI and Python 3.6
         - python: 3.6
           env: TEST_MODE=TESTS
-        # run import test and Python 2.7
-        - python: 2.7
-          env: TEST_MODE=IMPORTS
         # run import test and Python 3.6
         - python: 3.6
           env: TEST_MODE=IMPORTS
@@ -32,13 +19,7 @@ matrix:
 
 before_install:
   - sudo apt-get update
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r

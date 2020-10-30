@@ -53,8 +53,13 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
         Rotated Numpy image tensor.
     """
     theta = np.random.uniform(-rg, rg)
-    x = apply_affine_transform(x, theta=theta, channel_axis=channel_axis,
-                               fill_mode=fill_mode, cval=cval,
+    x = apply_affine_transform(x,
+                               theta=theta,
+                               row_axis=row_axis,
+                               col_axis=col_axis,
+                               channel_axis=channel_axis,
+                               fill_mode=fill_mode,
+                               cval=cval,
                                order=interpolation_order)
     return x
 
@@ -84,8 +89,14 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
     h, w = x.shape[row_axis], x.shape[col_axis]
     tx = np.random.uniform(-hrg, hrg) * h
     ty = np.random.uniform(-wrg, wrg) * w
-    x = apply_affine_transform(x, tx=tx, ty=ty, channel_axis=channel_axis,
-                               fill_mode=fill_mode, cval=cval,
+    x = apply_affine_transform(x,
+                               tx=tx,
+                               ty=ty,
+                               row_axis=row_axis,
+                               col_axis=col_axis,
+                               channel_axis=channel_axis,
+                               fill_mode=fill_mode,
+                               cval=cval,
                                order=interpolation_order)
     return x
 
@@ -112,8 +123,13 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
         Sheared Numpy image tensor.
     """
     shear = np.random.uniform(-intensity, intensity)
-    x = apply_affine_transform(x, shear=shear, channel_axis=channel_axis,
-                               fill_mode=fill_mode, cval=cval,
+    x = apply_affine_transform(x,
+                               shear=shear,
+                               row_axis=row_axis,
+                               col_axis=col_axis,
+                               channel_axis=channel_axis,
+                               fill_mode=fill_mode,
+                               cval=cval,
                                order=interpolation_order)
     return x
 
@@ -150,8 +166,14 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
         zx, zy = 1, 1
     else:
         zx, zy = np.random.uniform(zoom_range[0], zoom_range[1], 2)
-    x = apply_affine_transform(x, zx=zx, zy=zy, channel_axis=channel_axis,
-                               fill_mode=fill_mode, cval=cval,
+    x = apply_affine_transform(x,
+                               zx=zx,
+                               zy=zy,
+                               row_axis=row_axis,
+                               col_axis=col_axis,
+                               channel_axis=channel_axis,
+                               fill_mode=fill_mode,
+                               cval=cval,
                                order=interpolation_order)
     return x
 
