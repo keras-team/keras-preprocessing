@@ -16,5 +16,5 @@ from an up-to-date installation of Keras:
 from keras import preprocessing
 ```
 
-Keras Preprocessing is compatible with Python 2.7-3.6
+Keras Preprocessing is compatible with Python 3.6
 and is distributed under the MIT license.
