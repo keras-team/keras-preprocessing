@@ -372,9 +372,16 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
 
         # Matrix construction assumes that coordinates are x, y (in that order).
         # However, regular numpy arrays use y,x (aka i,j) indexing.
-        # Swap the first two columns of the matrix to simulate the x, y indexing.
+        # Possible solution is:
+        #   1. Swap the x and y axes.
+        #   2. Apply transform.
+        #   3. Swap the x and y axes again to restore image-like data ordering.
+        # Mathematically, it is equivalent to the following transformation:
+        # M' = PMP, where P is the permutation matrix, M is the original
+        # transformation matrix.
         if col_axis > row_axis:
             transform_matrix[:, [0, 1]] = transform_matrix[:, [1, 0]]
+            transform_matrix[[0, 1]] = transform_matrix[[1, 0]]
         final_affine_matrix = transform_matrix[:2, :2]
         final_offset = transform_matrix[:2, 2]
 

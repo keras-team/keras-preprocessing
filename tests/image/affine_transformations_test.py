@@ -39,8 +39,8 @@ def test_matrix_center():
         [0, 0],
     ]), -1)
     x_rotated90 = np.expand_dims(np.array([
+        [1, 0],
         [0, 0],
-        [0, 1],
     ]), -1)
 
     assert np.allclose(
