@@ -5,11 +5,9 @@ import shutil
 import numpy as np
 import pandas as pd
 import pytest
-
 from PIL import Image
 
-from keras_preprocessing.image import dataframe_iterator
-from keras_preprocessing.image import image_data_generator
+from keras_preprocessing.image import dataframe_iterator, image_data_generator
 
 
 @pytest.fixture(scope='module')

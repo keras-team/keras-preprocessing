@@ -1,11 +1,6 @@
 """Utilities for real-time data augmentation on image data.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import warnings
-from six.moves import range
 
 import numpy as np
 
@@ -13,17 +8,17 @@ try:
     import scipy
     # scipy.linalg cannot be accessed until explicitly imported
     from scipy import linalg
+
     # scipy.ndimage cannot be accessed until explicitly imported
 except ImportError:
     scipy = None
 
+from .affine_transformations import (apply_affine_transform,
+                                     apply_brightness_shift,
+                                     apply_channel_shift, flip_axis)
 from .dataframe_iterator import DataFrameIterator
 from .directory_iterator import DirectoryIterator
 from .numpy_array_iterator import NumpyArrayIterator
-from .affine_transformations import (apply_affine_transform,
-                                     apply_brightness_shift,
-                                     apply_channel_shift,
-                                     flip_axis)
 
 
 class ImageDataGenerator(object):

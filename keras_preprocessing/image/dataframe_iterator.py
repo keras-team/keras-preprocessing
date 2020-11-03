@@ -1,14 +1,10 @@
 """Utilities for real-time data augmentation on image data.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 import warnings
+from collections import OrderedDict
 
 import numpy as np
-from collections import OrderedDict
 
 from .iterator import BatchFromFilesMixin, Iterator
 from .utils import validate_filename

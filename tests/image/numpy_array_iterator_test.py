@@ -1,10 +1,8 @@
 import numpy as np
 import pytest
-
 from PIL import Image
 
-from keras_preprocessing.image import numpy_array_iterator
-from keras_preprocessing.image import utils
+from keras_preprocessing.image import numpy_array_iterator, utils
 from keras_preprocessing.image.image_data_generator import ImageDataGenerator
 
 

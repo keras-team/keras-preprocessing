@@ -1,8 +1,5 @@
 """Enables dynamic setting of underlying Keras module.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 _KERAS_BACKEND = None
 _KERAS_UTILS = None

@@ -1,9 +1,8 @@
 from math import ceil
-import pytest
+
 import numpy as np
-from numpy.testing import assert_allclose
-from numpy.testing import assert_equal
-from numpy.testing import assert_raises
+import pytest
+from numpy.testing import assert_allclose, assert_equal, assert_raises
 
 from keras_preprocessing import sequence
 

@@ -1,13 +1,8 @@
 """Utilities for performing affine transformations on image data.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import numpy as np
 
-from .utils import (array_to_img,
-                    img_to_array)
+from .utils import array_to_img, img_to_array
 
 try:
     import scipy
@@ -17,8 +12,8 @@ except ImportError:
     scipy = None
 
 try:
-    from PIL import ImageEnhance
     from PIL import Image as pil_image
+    from PIL import ImageEnhance
 except ImportError:
     pil_image = None
     ImageEnhance = None

@@ -4,7 +4,6 @@ import tempfile
 
 import numpy as np
 import pytest
-
 from PIL import Image
 
 from keras_preprocessing.image import image_data_generator

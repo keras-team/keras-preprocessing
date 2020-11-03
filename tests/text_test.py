@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
+
 import numpy as np
 import pytest
-
 from tensorflow import keras
+
 from keras_preprocessing import text
-from collections import OrderedDict
 
 
 def test_one_hot():

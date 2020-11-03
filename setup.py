@@ -1,7 +1,4 @@
-import sys
-
-from setuptools import setup
-from setuptools import find_packages
+from setuptools import find_packages, setup
 
 long_description = '''
 Keras Preprocessing is the data preprocessing
@@ -18,7 +15,7 @@ from an up-to-date installation of Keras:
 from keras import preprocessing
 ```
 
-Keras Preprocessing is compatible with Python 2.7-3.6
+Keras Preprocessing is compatible with Python 3.6
 and is distributed under the MIT license.
 '''
 
@@ -32,11 +29,10 @@ setup(name='Keras_Preprocessing',
       download_url='https://github.com/keras-team/'
                    'keras-preprocessing/tarball/1.1.2',
       license='MIT',
-      install_requires=['numpy>=1.9.1',
-                        'six>=1.9.0'],
+      install_requires=['numpy>=1.9.1'],
       extras_require={
           'tests': ['pandas',
-                    'Pillow' if sys.version_info >= (3, 0) else 'pillow',
+                    'Pillow',
                     'tensorflow',  # CPU version
                     'keras',
                     'pytest',
@@ -52,8 +48,6 @@ setup(name='Keras_Preprocessing',
           'Intended Audience :: Education',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: MIT License',
-          'Programming Language :: Python :: 2',
-          'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
           'Programming Language :: Python :: 3.6',
           'Topic :: Software Development :: Libraries',
