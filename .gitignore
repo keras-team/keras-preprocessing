@@ -9,3 +9,7 @@ Keras_Preprocessing.egg-info
 .coverage
 .cache
 .pytest_cache
+
+# dev related
+.ipynb_checkpoints/
+.vscode/
