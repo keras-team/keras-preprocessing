@@ -1,12 +1,10 @@
 """Utilities for real-time data augmentation on image data.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 import threading
+
 import numpy as np
+
 from keras_preprocessing import get_keras_submodule
 
 try:
@@ -14,9 +12,7 @@ try:
 except ImportError:
     IteratorType = object
 
-from .utils import (array_to_img,
-                    img_to_array,
-                    load_img)
+from .utils import array_to_img, img_to_array, load_img
 
 
 class Iterator(IteratorType):

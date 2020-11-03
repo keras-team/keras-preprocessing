@@ -1,26 +1,14 @@
 # -*- coding: utf-8 -*-
 """Utilities for text input preprocessing.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import string
-import sys
-import warnings
-from collections import OrderedDict
-from collections import defaultdict
-from hashlib import md5
 import json
+import warnings
+from collections import OrderedDict, defaultdict
+from hashlib import md5
 
 import numpy as np
-from six.moves import range
-from six.moves import zip
 
-if sys.version_info < (3,):
-    maketrans = string.maketrans
-else:
-    maketrans = str.maketrans
+maketrans = str.maketrans
 
 
 def text_to_word_sequence(text,
@@ -42,22 +30,9 @@ def text_to_word_sequence(text,
     if lower:
         text = text.lower()
 
-    if sys.version_info < (3,):
-        if isinstance(text, unicode):  # noqa: F821
-            translate_map = {
-                ord(c): unicode(split) for c in filters  # noqa: F821
-            }
-            text = text.translate(translate_map)
-        elif len(split) == 1:
-            translate_map = maketrans(filters, split * len(filters))
-            text = text.translate(translate_map)
-        else:
-            for c in filters:
-                text = text.replace(c, split)
-    else:
-        translate_dict = {c: split for c in filters}
-        translate_map = maketrans(translate_dict)
-        text = text.translate(translate_map)
+    translate_dict = {c: split for c in filters}
+    translate_map = maketrans(translate_dict)
+    text = text.translate(translate_map)
 
     seq = text.split(split)
     return [i for i in seq if i]

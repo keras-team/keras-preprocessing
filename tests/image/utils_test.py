@@ -1,7 +1,8 @@
-import numpy as np
-import pytest
 import resource
+
+import numpy as np
 import PIL
+import pytest
 
 from keras_preprocessing.image import utils
 

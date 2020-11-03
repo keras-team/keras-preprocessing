@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
 """Utilities for preprocessing sequence data.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+import json
+import random
 
 import numpy as np
-import random
-import json
-from six.moves import range
-import six
 
 
 def pad_sequences(sequences, maxlen=None, dtype='int32',
@@ -77,7 +72,7 @@ def pad_sequences(sequences, maxlen=None, dtype='int32',
         maxlen = np.max(lengths)
 
     is_dtype_str = np.issubdtype(dtype, np.str_) or np.issubdtype(dtype, np.unicode_)
-    if isinstance(value, six.string_types) and dtype != object and not is_dtype_str:
+    if isinstance(value, str) and dtype != object and not is_dtype_str:
         raise ValueError("`dtype` {} is not compatible with `value`'s type: {}\n"
                          "You should set `dtype=object` for variable length strings."
                          .format(dtype, type(value)))
