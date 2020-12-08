@@ -179,7 +179,7 @@ def test_random_brightness_scale():
     zeros = np.zeros((1, 1, 3))
     must_be_128 = affine_transformations.random_brightness(img, [1, 1], False)
     assert np.array_equal(img, must_be_128)
-    must_be_0 = affine_transformations.random_brightness(img, [1, 1], True)
+    must_be_0 = affine_transformations.random_brightness(zeros, [1, 1], True)
     assert np.array_equal(zeros, must_be_0)
 
 
