@@ -231,10 +231,13 @@ def apply_brightness_shift(x, brightness, scale=True):
     if ImageEnhance is None:
         raise ImportError('Using brightness shifts requires PIL. '
                           'Install PIL or Pillow.')
+    x_min, x_max = np.min(x), np.max(x)
     x = array_to_img(x, scale=scale)
     x = imgenhancer_Brightness = ImageEnhance.Brightness(x)
     x = imgenhancer_Brightness.enhance(brightness)
     x = img_to_array(x)
+    if scale:
+        x = x / 255 * (x_max - x_min) + x_min
     return x
 
 
