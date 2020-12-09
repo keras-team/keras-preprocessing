@@ -232,12 +232,12 @@ def apply_brightness_shift(x, brightness, scale=True):
         raise ImportError('Using brightness shifts requires PIL. '
                           'Install PIL or Pillow.')
     x_min, x_max = np.min(x), np.max(x)
-    local_scale = (x_min < 0) or (x_max > 255) or scale
-    x = array_to_img(x, scale=local_scale)
+    local_scale = (x_min < 0) or (x_max > 255)
+    x = array_to_img(x, scale=local_scale or scale)
     x = imgenhancer_Brightness = ImageEnhance.Brightness(x)
     x = imgenhancer_Brightness.enhance(brightness)
     x = img_to_array(x)
-    if not local_scale:
+    if not scale and local_scale:
         x = x / 255 * (x_max - x_min) + x_min
     return x
 
