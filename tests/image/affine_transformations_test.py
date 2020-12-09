@@ -183,6 +183,24 @@ def test_random_brightness_scale():
     assert np.array_equal(zeros, must_be_0)
 
 
+def test_random_brightness_scale_outside_range_positive():
+    img = np.ones((1, 1, 3)) * 1024
+    zeros = np.zeros((1, 1, 3))
+    must_be_1024 = affine_transformations.random_brightness(img, [1, 1], False)
+    assert np.array_equal(img, must_be_1024)
+    must_be_0 = affine_transformations.random_brightness(img, [1, 1], True)
+    assert np.array_equal(zeros, must_be_0)
+
+
+def test_random_brightness_scale_outside_range_negative():
+    img = np.ones((1, 1, 3)) * -1024
+    zeros = np.zeros((1, 1, 3))
+    must_be_neg_1024 = affine_transformations.random_brightness(img, [1, 1], False)
+    assert np.array_equal(img, must_be_neg_1024)
+    must_be_0 = affine_transformations.random_brightness(img, [1, 1], True)
+    assert np.array_equal(zeros, must_be_0)
+
+
 def test_apply_affine_transform_error(monkeypatch):
     monkeypatch.setattr(affine_transformations, 'scipy', None)
     with pytest.raises(ImportError):
