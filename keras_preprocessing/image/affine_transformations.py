@@ -237,7 +237,7 @@ def apply_brightness_shift(x, brightness, scale=True):
     x = imgenhancer_Brightness = ImageEnhance.Brightness(x)
     x = imgenhancer_Brightness.enhance(brightness)
     x = img_to_array(x)
-    if not scale:
+    if not local_scale:
         x = x / 255 * (x_max - x_min) + x_min
     return x
 
