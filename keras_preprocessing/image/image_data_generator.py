@@ -885,7 +885,7 @@ class ImageDataGenerator(object):
             x = flip_axis(x, img_row_axis)
 
         if transform_parameters.get('brightness') is not None:
-            x = apply_brightness_shift(x, transform_parameters['brightness'])
+            x = apply_brightness_shift(x, transform_parameters['brightness'], False)
 
         return x
 
