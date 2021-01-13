@@ -183,6 +183,8 @@ class Tokenizer(object):
         self.word_index = {}
         self.index_word = {}
         self.analyzer = analyzer
+        if char_level:
+          self.split = ""
 
     def fit_on_texts(self, texts):
         """Updates internal vocabulary based on a list of texts.
