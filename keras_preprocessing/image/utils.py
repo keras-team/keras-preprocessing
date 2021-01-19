@@ -137,16 +137,20 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
                 resample = _PIL_INTERPOLATION_METHODS[interpolation]
 
                 if keep_aspect_ratio:
-                    img_temp = img.copy()
+                    width, height = img.size
+                    target_width, target_height = width_height_tuple
 
-                    # changes inplace without error exceptions
-                    img_temp.thumbnail(width_height_tuple, resample=resample)
+                    crop_height = (width * target_height) // target_width
+                    crop_width = (height * target_width) // target_height
 
-                    # check if resize was successful
-                    if width_height_tuple == img_temp.size:
-                        img = img_temp
-                    else:
-                        img = img.img_temp(width_height_tuple, resample)
+                    # Set back to input height / width if crop_height / crop_width is not smaller.
+                    crop_height = min(height, crop_height)
+                    crop_width = min(width, crop_width)
+
+                    crop_box_hstart = (height - crop_height) // 2
+                    crop_box_wstart = (width - crop_width) // 2
+                    crop_box = [crop_box_wstart, crop_box_hstart, crop_box_wstart+crop_width, crop_box_hstart+crop_height]
+                    img = img.resize(width_height_tuple, resample, box=crop_box)
                 else:
                     img = img.resize(width_height_tuple, resample)
         return img
