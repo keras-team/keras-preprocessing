@@ -437,6 +437,7 @@ class ImageDataGenerator(object):
     def flow_from_directory(self,
                             directory,
                             target_size=(256, 256),
+                            keep_aspect_ratio=False,
                             color_mode='rgb',
                             classes=None,
                             class_mode='categorical',
@@ -463,6 +464,8 @@ class ImageDataGenerator(object):
             target_size: Tuple of integers `(height, width)`,
                 default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
+            keep_aspect_ratio:
+                TODO
             color_mode: One of "grayscale", "rgb", "rgba". Default: "rgb".
                 Whether the images will be converted to
                 have 1, 3, or 4 channels.
@@ -527,6 +530,7 @@ class ImageDataGenerator(object):
             directory,
             self,
             target_size=target_size,
+            keep_aspect_ratio=keep_aspect_ratio,
             color_mode=color_mode,
             classes=classes,
             class_mode=class_mode,

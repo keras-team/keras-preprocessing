@@ -136,6 +136,7 @@ class BatchFromFilesMixin():
     def set_processing_attrs(self,
                              image_data_generator,
                              target_size,
+                             keep_aspect_ratio,
                              color_mode,
                              data_format,
                              save_to_dir,
@@ -171,6 +172,7 @@ class BatchFromFilesMixin():
         """
         self.image_data_generator = image_data_generator
         self.target_size = tuple(target_size)
+        self.keep_aspect_ratio = keep_aspect_ratio
         if color_mode not in {'rgb', 'rgba', 'grayscale'}:
             raise ValueError('Invalid color mode:', color_mode,
                              '; expected "rgb", "rgba", or "grayscale".')
@@ -227,7 +229,8 @@ class BatchFromFilesMixin():
             img = load_img(filepaths[j],
                            color_mode=self.color_mode,
                            target_size=self.target_size,
-                           interpolation=self.interpolation)
+                           interpolation=self.interpolation,
+                           keep_aspect_ratio=self.keep_aspect_ratio)
             x = img_to_array(img, data_format=self.data_format)
             # Pillow images should be closed after `load_img`,
             # but not PIL images.

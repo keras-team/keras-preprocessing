@@ -68,6 +68,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                  directory,
                  image_data_generator,
                  target_size=(256, 256),
+                 keep_aspect_ratio=False,
                  color_mode='rgb',
                  classes=None,
                  class_mode='categorical',
@@ -84,6 +85,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                  dtype='float32'):
         super(DirectoryIterator, self).set_processing_attrs(image_data_generator,
                                                             target_size,
+                                                            keep_aspect_ratio,
                                                             color_mode,
                                                             data_format,
                                                             save_to_dir,

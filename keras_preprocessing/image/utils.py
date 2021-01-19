@@ -77,7 +77,7 @@ def save_img(path,
 
 
 def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
-             interpolation='nearest'):
+             interpolation='nearest', keep_aspect_ratio=False):
     """Loads an image into PIL format.
 
     # Arguments
@@ -135,7 +135,20 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
                             interpolation,
                             ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
                 resample = _PIL_INTERPOLATION_METHODS[interpolation]
-                img = img.resize(width_height_tuple, resample)
+
+                if keep_aspect_ratio:
+                    img_temp = img.copy()
+
+                    # changes inplace without error exceptions
+                    img_temp.thumbnail(width_height_tuple, resample=resample)
+
+                    # check if resize was successful
+                    if width_height_tuple == img_temp.size:
+                        img = img_temp
+                    else:
+                        img = img.img_temp(width_height_tuple, resample)
+                else:
+                    img = img.resize(width_height_tuple, resample)
         return img
 
 
