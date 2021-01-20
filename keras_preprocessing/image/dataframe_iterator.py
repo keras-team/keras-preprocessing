@@ -80,6 +80,9 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
+        keep_aspect_ratio: Boolean, whether to resize images to a target size 
+            without aspect ratio distortion. The image is cropped in the center
+            with target aspect ratio before resizing.
         dtype: Dtype to use for the generated arrays.
         validate_filenames: Boolean, whether to validate image filenames in
         `x_col`. If `True`, invalid images will be ignored. Disabling this option
@@ -109,6 +112,7 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                  save_format='png',
                  subset=None,
                  interpolation='nearest',
+                 keep_aspect_ratio=False,
                  dtype='float32',
                  validate_filenames=True):
 
@@ -120,7 +124,8 @@ class DataFrameIterator(BatchFromFilesMixin, Iterator):
                                                             save_prefix,
                                                             save_format,
                                                             subset,
-                                                            interpolation)
+                                                            interpolation,
+                                                            keep_aspect_ratio)
         df = dataframe.copy()
         self.directory = directory or ''
         self.class_mode = class_mode
