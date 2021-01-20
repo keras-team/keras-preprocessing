@@ -95,6 +95,9 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported.
             Default: "nearest".
+        keep_aspect_ratio: Boolean, whether to resize images to a target
+                size without aspect ratio distortion. The image is cropped in
+                the center with target aspect ratio before resizing.
 
     # Returns
         A PIL Image instance.
@@ -143,14 +146,20 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
                     crop_height = (width * target_height) // target_width
                     crop_width = (height * target_width) // target_height
 
-                    # Set back to input height / width if crop_height / crop_width is not smaller.
+                    # Set back to input height / width 
+                    # if crop_height / crop_width is not smaller.
                     crop_height = min(height, crop_height)
                     crop_width = min(width, crop_width)
 
                     crop_box_hstart = (height - crop_height) // 2
                     crop_box_wstart = (width - crop_width) // 2
-                    crop_box = [crop_box_wstart, crop_box_hstart, crop_box_wstart+crop_width, crop_box_hstart+crop_height]
-                    img = img.resize(width_height_tuple, resample, box=crop_box)
+                    crop_box_hend = crop_box_wstart + crop_width
+                    crop_box_wend = crop_box_hstart + crop_height
+                    crop_box = [crop_box_wstart, crop_box_hstart,
+                                crop_box_wend, crop_box_hend]
+
+                    img = img.resize(width_height_tuple, resample,
+                                     box=crop_box)
                 else:
                     img = img.resize(width_height_tuple, resample)
         return img

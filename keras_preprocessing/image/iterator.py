@@ -136,14 +136,14 @@ class BatchFromFilesMixin():
     def set_processing_attrs(self,
                              image_data_generator,
                              target_size,
-                             keep_aspect_ratio,
                              color_mode,
                              data_format,
                              save_to_dir,
                              save_prefix,
                              save_format,
                              subset,
-                             interpolation):
+                             interpolation,
+                             keep_aspect_ratio):
         """Sets attributes to use later for processing files into a batch.
 
         # Arguments
