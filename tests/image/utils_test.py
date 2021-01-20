@@ -199,11 +199,11 @@ def test_load_img(tmpdir):
         loaded_im = utils.load_img(filename_rgb, target_size=(25, 25),
                                    interpolation="unsupported")
 
-    # Check that the aspect ratio is the same
+    # Check that the aspect ratio of a square is the same
 
     filename_red_square = str(tmpdir / 'red_square_utils.png')
-    A = np.zeros((50, 100, 3), dtype=np.uint8)
-    A[20:30, 45:55, 0] = 255  # red rectangle 10x10
+    A = np.zeros((50, 100, 3), dtype=np.uint8)  # rectangle image 100x50
+    A[20:30, 45:55, 0] = 255  # red square 10x10
     red_square_array = np.array(A)
     red_square = utils.array_to_img(red_square_array, scale=False)
     red_square.save(filename_red_square)
