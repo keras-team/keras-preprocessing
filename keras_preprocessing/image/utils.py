@@ -153,8 +153,8 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
 
                     crop_box_hstart = (height - crop_height) // 2
                     crop_box_wstart = (width - crop_width) // 2
-                    crop_box_hend = crop_box_wstart + crop_width
-                    crop_box_wend = crop_box_hstart + crop_height
+                    crop_box_wend = crop_box_wstart + crop_width
+                    crop_box_hend = crop_box_hstart + crop_height
                     crop_box = [crop_box_wstart, crop_box_hstart,
                                 crop_box_wend, crop_box_hend]
 
