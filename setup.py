@@ -20,7 +20,7 @@ and is distributed under the MIT license.
 '''
 
 setup(name='Keras_Preprocessing',
-      version='1.1.2',
+      version='1.1.3',
       description='Easy data preprocessing and data augmentation '
                   'for deep learning models',
       long_description=long_description,
@@ -33,13 +33,14 @@ setup(name='Keras_Preprocessing',
       extras_require={
           'tests': ['pandas',
                     'Pillow',
-                    'tensorflow',  # CPU version
+                    'tensorflow>=2.4.0',  # CPU version
                     'keras',
                     'pytest',
                     'pytest-xdist',
                     'pytest-cov'],
           'pep8': ['flake8'],
-          'image': ['scipy>=0.14',
+          'image': ['tensorflow>=2.4.0'
+                    'tensorflow-addons>=0.12.0',
                     'Pillow>=5.2.0'],
       },
       classifiers=[

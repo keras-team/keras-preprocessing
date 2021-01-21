@@ -5,13 +5,6 @@ import numpy as np
 from .utils import array_to_img, img_to_array
 
 try:
-    import scipy
-    # scipy.ndimage cannot be accessed until explicitly imported
-    from scipy import ndimage
-except ImportError:
-    scipy = None
-
-try:
     from PIL import Image as pil_image
     from PIL import ImageEnhance
 except ImportError:
@@ -41,8 +34,8 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-        interpolation_order: int, order of spline interpolation.
-            see `ndimage.interpolation.affine_transform`
+        interpolation_order: int (one of `{0, 1}`) order of interpolation.
+            see `tfa.image.transform`
 
     # Returns
         Rotated Numpy image tensor.
@@ -75,8 +68,8 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-        interpolation_order: int, order of spline interpolation.
-            see `ndimage.interpolation.affine_transform`
+        interpolation_order: int (one of `{0, 1}`) order of interpolation.
+            see `tfa.image.transform`
 
     # Returns
         Shifted Numpy image tensor.
@@ -111,8 +104,8 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-        interpolation_order: int, order of spline interpolation.
-            see `ndimage.interpolation.affine_transform`
+        interpolation_order: int (one of `{0, 1}`) order of interpolation.
+            see `tfa.image.transform`
 
     # Returns
         Sheared Numpy image tensor.
@@ -144,8 +137,8 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-        interpolation_order: int, order of spline interpolation.
-            see `ndimage.interpolation.affine_transform`
+        interpolation_order: int (one of `{0, 1}`) order of interpolation.
+            see `tfa.image.transform`
 
     # Returns
         Zoomed Numpy image tensor.
@@ -299,14 +292,30 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
-        order: int, order of interpolation
+        order: int (one of `{0, 1}`) order of interpolation.
+            see `tfa.image.transform`
+
+    # Raises
+        ImportError if fails to import tensorflow_addons.
 
     # Returns
         The transformed version of the input.
     """
-    if scipy is None:
-        raise ImportError('Image transformations require SciPy. '
-                          'Install SciPy.')
+
+    # Import tensorflow_addons here to avoid circular imports: tf->keras->tfa->tf.
+    try:
+        import tensorflow_addons as tfa
+    except ImportError:
+        raise ImportError('Image transformations require tensorflow-addons. '
+                          'Install tensorflow-addons.')
+
+    # Convert interpolation order into textual values used by tfa.image.transform.
+    if order == 0:
+        interpolation = "nearest"
+    elif order == 1:
+        interpolation = "bilinear"
+    else:
+        raise ValueError("Interpolation order can only be 0 or 1")
 
     # Input sanity checks:
     # 1. x must 2D image with one or more channels (i.e., a 3D tensor)
@@ -367,30 +376,28 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
         h, w = x.shape[row_axis], x.shape[col_axis]
         transform_matrix = transform_matrix_offset_center(
             transform_matrix, h, w)
-        x = np.rollaxis(x, channel_axis, 0)
+        x = np.moveaxis(x, channel_axis, -1)
 
         # Matrix construction assumes that coordinates are x, y (in that order).
-        # However, regular numpy arrays use y,x (aka i,j) indexing.
-        # Possible solution is:
+        # However, users may reverse that order by setting `col_axis=0`, `row_axis=1`.
+        # In this case, one possible solution is:
         #   1. Swap the x and y axes.
         #   2. Apply transform.
         #   3. Swap the x and y axes again to restore image-like data ordering.
         # Mathematically, it is equivalent to the following transformation:
         # M' = PMP, where P is the permutation matrix, M is the original
         # transformation matrix.
-        if col_axis > row_axis:
+        if col_axis < row_axis:
             transform_matrix[:, [0, 1]] = transform_matrix[:, [1, 0]]
             transform_matrix[[0, 1]] = transform_matrix[[1, 0]]
-        final_affine_matrix = transform_matrix[:2, :2]
-        final_offset = transform_matrix[:2, 2]
 
-        channel_images = [ndimage.interpolation.affine_transform(
-            x_channel,
-            final_affine_matrix,
-            final_offset,
-            order=order,
-            mode=fill_mode,
-            cval=cval) for x_channel in x]
-        x = np.stack(channel_images, axis=0)
-        x = np.rollaxis(x, 0, channel_axis + 1)
+        transform = transform_matrix.ravel()[0:8]
+        x = tfa.image.transform(
+            images=x,
+            transforms=transform,
+            interpolation=interpolation,
+            fill_mode=fill_mode,
+            fill_value=cval,
+        ).numpy()
+        x = np.moveaxis(x, -1, channel_axis)
     return x

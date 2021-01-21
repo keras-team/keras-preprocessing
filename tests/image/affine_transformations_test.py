@@ -200,8 +200,3 @@ def test_random_brightness_scale_outside_range_negative():
     must_be_0 = affine_transformations.random_brightness(img, [1, 1], True)
     assert np.array_equal(zeros, must_be_0)
 
-
-def test_apply_affine_transform_error(monkeypatch):
-    monkeypatch.setattr(affine_transformations, 'scipy', None)
-    with pytest.raises(ImportError):
-        affine_transformations.apply_affine_transform(0)
