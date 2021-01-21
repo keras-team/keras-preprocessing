@@ -439,7 +439,8 @@ class ImageDataGenerator(object):
                             save_format='png',
                             follow_links=False,
                             subset=None,
-                            interpolation='nearest'):
+                            interpolation='nearest',
+                            keep_aspect_ratio=False):
         """Takes the path to a directory & generates batches of augmented data.
 
         # Arguments
@@ -507,6 +508,9 @@ class ImageDataGenerator(object):
                 supported. If PIL version 3.4.0 or newer is installed,
                 `"box"` and `"hamming"` are also supported.
                 By default, `"nearest"` is used.
+            keep_aspect_ratio: Boolean, whether to resize images to a target
+                size without aspect ratio distortion. The image is cropped in
+                the center with target aspect ratio before resizing.
 
         # Returns
             A `DirectoryIterator` yielding tuples of `(x, y)`
@@ -518,6 +522,7 @@ class ImageDataGenerator(object):
             directory,
             self,
             target_size=target_size,
+            keep_aspect_ratio=keep_aspect_ratio,
             color_mode=color_mode,
             classes=classes,
             class_mode=class_mode,

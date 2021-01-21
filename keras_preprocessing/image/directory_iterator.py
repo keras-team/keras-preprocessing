@@ -46,7 +46,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
             images (if `save_to_dir` is set).
         save_format: Format to use for saving sample images
             (if `save_to_dir` is set).
-        follow_links: boolean,follow symbolic links to subdirectories
+        follow_links: Boolean, follow symbolic links to subdirectories
         subset: Subset of data (`"training"` or `"validation"`) if
             validation_split is set in ImageDataGenerator.
         interpolation: Interpolation method used to resample the image if the
@@ -55,6 +55,9 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
+        keep_aspect_ratio: Boolean, whether to resize images to a target size
+            without aspect ratio distortion. The image is cropped in the center
+            with target aspect ratio before resizing.
         dtype: Dtype to use for generated arrays.
     """
     allowed_class_modes = {'categorical', 'binary', 'sparse', 'input', None}
@@ -85,6 +88,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                  follow_links=False,
                  subset=None,
                  interpolation='nearest',
+                 keep_aspect_ratio=False,
                  dtype='float32'):
         super(DirectoryIterator, self).set_processing_attrs(image_data_generator,
                                                             target_size,
@@ -94,7 +98,8 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                                                             save_prefix,
                                                             save_format,
                                                             subset,
-                                                            interpolation)
+                                                            interpolation,
+                                                            keep_aspect_ratio)
         self.directory = directory
         self.classes = classes
         if class_mode not in self.allowed_class_modes:
