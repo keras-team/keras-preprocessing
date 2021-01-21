@@ -208,8 +208,8 @@ def test_load_img(tmpdir):
     red_square = utils.array_to_img(red_square_array, scale=False)
     red_square.save(filename_red_square)
 
-    loaded_im = utils.load_img(filename_red_square, target_size=(25, 25), 
-        keep_aspect_ratio=True)
+    loaded_im = utils.load_img(filename_red_square, target_size=(25, 25),
+                               keep_aspect_ratio=True)
     loaded_im_array = utils.img_to_array(loaded_im)
     assert loaded_im_array.shape == (25, 25, 3)
 
@@ -217,7 +217,7 @@ def test_load_img(tmpdir):
     square_width = np.sum(np.sum(red_channel_arr, axis=0))
     square_height = np.sum(np.sum(red_channel_arr, axis=1))
     aspect_ratio_result = square_width / square_height
-    
+
     # original square had 1:1 ratio
     assert aspect_ratio_result == pytest.approx(1.0)
 

@@ -60,7 +60,7 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
             If PIL version 1.1.3 or newer is installed, "lanczos" is also
             supported. If PIL version 3.4.0 or newer is installed, "box" and
             "hamming" are also supported. By default, "nearest" is used.
-        keep_aspect_ratio: Boolean, whether to resize images to a target size 
+        keep_aspect_ratio: Boolean, whether to resize images to a target size
             without aspect ratio distortion. The image is cropped in the center
             with target aspect ratio before resizing.
         dtype: Dtype to use for generated arrays.

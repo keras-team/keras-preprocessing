@@ -146,7 +146,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
                     crop_height = (width * target_height) // target_width
                     crop_width = (height * target_width) // target_height
 
-                    # Set back to input height / width 
+                    # Set back to input height / width
                     # if crop_height / crop_width is not smaller.
                     crop_height = min(height, crop_height)
                     crop_width = min(width, crop_width)
