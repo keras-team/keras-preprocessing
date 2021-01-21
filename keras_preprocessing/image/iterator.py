@@ -138,7 +138,8 @@ class BatchFromFilesMixin():
                              save_prefix,
                              save_format,
                              subset,
-                             interpolation):
+                             interpolation,
+                             resizing_function):
         """Sets attributes to use later for processing files into a batch.
 
         # Arguments
@@ -164,6 +165,11 @@ class BatchFromFilesMixin():
                 If PIL version 1.1.3 or newer is installed, "lanczos" is also
                 supported. If PIL version 3.4.0 or newer is installed, "box" and
                 "hamming" are also supported. By default, "nearest" is used.
+            resizing_function: function, used to resize the loaded images to the
+                target size. this will overrule interpolation. If None, then
+                interpolation will happen. The input is an image in the specified
+                data format, and the output has to be an image in the specified
+                data format with the target size.
         """
         self.image_data_generator = image_data_generator
         self.target_size = tuple(target_size)
@@ -191,6 +197,7 @@ class BatchFromFilesMixin():
         self.save_prefix = save_prefix
         self.save_format = save_format
         self.interpolation = interpolation
+        self.resizing_function = resizing_function
         if subset is not None:
             validation_split = self.image_data_generator._validation_split
             if subset == 'validation':
@@ -219,12 +226,24 @@ class BatchFromFilesMixin():
         # build batch of image data
         # self.filepaths is dynamic, is better to call it once outside the loop
         filepaths = self.filepaths
+        load_target_size = self.target_size
+        if self.resizing_function is not None:
+            load_target_size = None
         for i, j in enumerate(index_array):
             img = load_img(filepaths[j],
                            color_mode=self.color_mode,
-                           target_size=self.target_size,
+                           target_size=load_target_size,
                            interpolation=self.interpolation)
             x = img_to_array(img, data_format=self.data_format)
+            # NOTE: we could potentially have keyword arguments for the
+            # resizing function
+            if self.resizing_function is not None:
+                x = self.resizing_function(x)
+            if x.shape != self.image_shape:
+                raise ValueError(
+                    'The loaded image shape %s (at %s) does not correspond to'
+                    'the specified image shape %s' %
+                    (str(x.shape), filepaths[j], str(self.image_shape)))
             # Pillow images should be closed after `load_img`,
             # but not PIL images.
             if hasattr(img, 'close'):

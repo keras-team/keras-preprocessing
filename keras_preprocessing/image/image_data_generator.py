@@ -439,7 +439,8 @@ class ImageDataGenerator(object):
                             save_format='png',
                             follow_links=False,
                             subset=None,
-                            interpolation='nearest'):
+                            interpolation='nearest',
+                            resizing_function=None):
         """Takes the path to a directory & generates batches of augmented data.
 
         # Arguments
@@ -507,6 +508,11 @@ class ImageDataGenerator(object):
                 supported. If PIL version 3.4.0 or newer is installed,
                 `"box"` and `"hamming"` are also supported.
                 By default, `"nearest"` is used.
+            resizing_function: function, used to resize the loaded images to the
+                target size. this will overrule interpolation. If None, then
+                interpolation will happen. The input is an image in the specified
+                data format, and the output has to be an image in the specified
+                data format with the target size.
 
         # Returns
             A `DirectoryIterator` yielding tuples of `(x, y)`
@@ -531,7 +537,8 @@ class ImageDataGenerator(object):
             follow_links=follow_links,
             subset=subset,
             interpolation=interpolation,
-            dtype=self.dtype
+            dtype=self.dtype,
+            resizing_function=resizing_function
         )
 
     def flow_from_dataframe(self,
