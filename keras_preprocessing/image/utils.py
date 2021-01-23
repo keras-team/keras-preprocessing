@@ -3,6 +3,7 @@
 import io
 import os
 import warnings
+import random
 
 import numpy as np
 
@@ -204,8 +205,24 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
                 yield root, fname
 
 
+def _settle_debt(list_valid_files, debt):
+    """Iterates over list_valid_files and resamples to settle debt.
+
+    # Arguments:
+        list_valid_files: List of strings, list that contains valid filenames
+        debt: Integer, required number of samples to be resampled from
+            valid_file_names
+
+    # Yields:
+        randomly chosen filename from list_valid_files
+    """
+    for i in range(debt):
+        yield random.choice(list_valid_files)
+
+
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,
-                                       class_indices, follow_links):
+                                       class_indices, follow_links,
+                                       balance_config=None):
     """Lists paths of files in `subdir` with extensions in `white_list_formats`.
 
     # Arguments
@@ -220,6 +237,7 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             of images in each directory.
         class_indices: dictionary mapping a class name to its index.
         follow_links: boolean, follow symbolic links to subdirectories.
+        balance_config: dict, stores configurations for handling data imbalance.
 
     # Returns
          classes: a list of class indices
@@ -247,7 +265,59 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             dirname, os.path.relpath(absolute_path, directory))
         filenames.append(relative_path)
 
+    if balance_config:
+        filenames_copy = filenames.copy()
+
+        debt = balance_config['majority'] - len(filenames_copy)
+
+        for filename in _settle_debt(filenames_copy, debt):
+            classes.append(class_indices[dirname])
+            filenames.append(filename)
+
     return classes, filenames
+
+
+def _generate_class_count(directory):
+    """Maintain sample count of each class in the directory.
+
+    # Arguments
+        directory: string, absolute path to the directory
+    # Returns
+        class_count: dictionary, sample count for each class
+    """
+
+    class_count = {}
+
+    for category in os.listdir(directory):
+        category_directory = os.path.join(directory, category)
+        class_count[category] = len(os.listdir(category_directory))
+
+    return class_count
+
+
+def _make_balance_config(directory, validation_split):
+    """Scans the directory to make a config dictionary to handle data imbalance.
+
+    # Arguments
+        directory: string, absolute path to the directory
+        validation_split: float, validation split
+            Default: None
+    # Returns
+        balance_config: dictionary, specs needed to handle data imbalance
+            'majority': integer, number of samples in the majority class
+    """
+    class_count = _generate_class_count(directory)
+
+    # Get the sample count of the majority class
+    majority_class_count = class_count[max(class_count, key=class_count.get)]
+    if validation_split:
+        majority_class_count = int(majority_class_count*(1 - validation_split)) + 1
+
+    balance_config = {
+        'majority': majority_class_count
+    }
+
+    return balance_config
 
 
 def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):

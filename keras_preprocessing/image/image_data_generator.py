@@ -427,6 +427,7 @@ class ImageDataGenerator(object):
 
     def flow_from_directory(self,
                             directory,
+                            balance=False,
                             target_size=(256, 256),
                             color_mode='rgb',
                             classes=None,
@@ -452,6 +453,7 @@ class ImageDataGenerator(object):
                 See [this script](
                 https://gist.github.com/fchollet/0830affa1f7f19fd47b06d4cf89ed44d)
                 for more details.
+            balance: Boolean, handles data imbalance if True
             target_size: Tuple of integers `(height, width)`,
                 default: `(256, 256)`.
                 The dimensions to which all images found will be resized.
@@ -521,6 +523,7 @@ class ImageDataGenerator(object):
         return DirectoryIterator(
             directory,
             self,
+            balance=balance,
             target_size=target_size,
             keep_aspect_ratio=keep_aspect_ratio,
             color_mode=color_mode,
