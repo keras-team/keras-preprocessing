@@ -40,7 +40,6 @@ setup(name='Keras_Preprocessing',
                     'pytest-cov'],
           'pep8': ['flake8'],
           'image': ['tensorflow>=2.4.0'
-                    'tensorflow-addons>=0.12.0',
                     'Pillow>=5.2.0'],
       },
       classifiers=[

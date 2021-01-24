@@ -1,6 +1,7 @@
 """Utilities for performing affine transformations on image data.
 """
 import numpy as np
+import tensorflow as tf
 
 from .utils import array_to_img, img_to_array
 
@@ -296,24 +297,17 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
             see `tfa.image.transform`
 
     # Raises
-        ImportError if fails to import tensorflow_addons.
+        ValueError if `raw_axis`, `col_axis` and `channel_axis` are misconfigured.
 
     # Returns
         The transformed version of the input.
     """
 
-    # Import tensorflow_addons here to avoid circular imports: tf->keras->tfa->tf.
-    try:
-        import tensorflow_addons as tfa
-    except ImportError:
-        raise ImportError('Image transformations require tensorflow-addons. '
-                          'Install tensorflow-addons.')
-
     # Convert interpolation order into textual values used by tfa.image.transform.
     if order == 0:
-        interpolation = "nearest"
+        interpolation = "NEAREST"
     elif order == 1:
-        interpolation = "bilinear"
+        interpolation = "BILINEAR"
     else:
         raise ValueError("Interpolation order can only be 0 or 1")
 
@@ -379,8 +373,8 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
         x = np.moveaxis(x, channel_axis, -1)
 
         # Matrix construction assumes that coordinates are x, y (in that order).
-        # However, users may reverse that order by setting `col_axis=0`, `row_axis=1`.
-        # In this case, one possible solution is:
+        # However, users may reverse that order by setting `col_axis=0`,
+        # `row_axis=1`. In this case, one possible solution is:
         #   1. Swap the x and y axes.
         #   2. Apply transform.
         #   3. Swap the x and y axes again to restore image-like data ordering.
@@ -390,14 +384,64 @@ def apply_affine_transform(x, theta=0, tx=0, ty=0, shear=0, zx=1, zy=1,
         if col_axis < row_axis:
             transform_matrix[:, [0, 1]] = transform_matrix[:, [1, 0]]
             transform_matrix[[0, 1]] = transform_matrix[[1, 0]]
+            w, h = h, w
 
-        transform = transform_matrix.ravel()[0:8]
-        x = tfa.image.transform(
-            images=x,
+        transform = matrix_to_transform(transform_matrix)
+        image = to_4D_tensor(x)
+
+        image = tf.raw_ops.ImageProjectiveTransformV3(
+            images=image,
             transforms=transform,
+            output_shape=(h, w),
             interpolation=interpolation,
-            fill_mode=fill_mode,
+            fill_mode=fill_mode.upper(),
             fill_value=cval,
-        ).numpy()
+        )
+        x = from_4D_image(image, x.ndim)
         x = np.moveaxis(x, -1, channel_axis)
     return x
+
+def matrix_to_transform(matrix):
+    transform = matrix.ravel()[0:8]
+    transform = tf.convert_to_tensor(transform, dtype=tf.dtypes.float32)
+    return transform[None]
+
+
+def to_4D_tensor(image):
+    """Convert 2/3/4D image to 4D image.
+
+    # Arguments
+      image: 2/3/4D `Tensor`.
+
+    # Returns
+      4D `Tensor` with the same type.
+    """
+    image = tf.convert_to_tensor(image)
+    ndims = image.get_shape().ndims
+
+    if ndims == 2:
+        return image[None, :, :, None]
+    elif ndims == 3:
+        return image[None, :, :, :]
+    else:
+        return image
+
+
+def from_4D_image(image, ndims):
+    """Convert back to an image with `ndims` rank.
+
+    # Arguments
+      image: 4D `Tensor`.
+      ndims: The original rank of the image.
+
+    # Returns
+      `ndims`-D `numpy.array` with the same type.
+    """
+
+    if ndims == 2:
+        res = tf.squeeze(image, [0, 3])
+    elif ndims == 3:
+        res = tf.squeeze(image, [0])
+    else:
+        res = image
+    return res.numpy()
