@@ -360,7 +360,7 @@ class Tokenizer(object):
                         vect.append(word)
                 elif self.oov_token is not None:
                     vect.append(self.index_word[oov_token_index])
-            vect = ' '.join(vect)
+            vect = ''.join(vect)
             yield vect
 
     def texts_to_matrix(self, texts, mode='binary'):
