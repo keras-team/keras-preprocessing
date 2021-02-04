@@ -32,9 +32,11 @@ if pil_image is not None:
 
 def validate_filename(filename, white_list_formats):
     """Check if a filename refers to a valid file.
+
     # Arguments
         filename: String, absolute path to a file
         white_list_formats: Set, allowed file extensions
+
     # Returns
         A boolean value indicating if the filename is valid or not
     """
@@ -49,6 +51,7 @@ def save_img(path,
              scale=True,
              **kwargs):
     """Saves an image stored as a Numpy array to a path or file object.
+
     # Arguments
         path: Path or file object.
         x: Numpy array.
@@ -76,6 +79,7 @@ def load_img(path,
              interpolation='nearest',
              keep_aspect_ratio=False):
     """Loads an image into PIL format.
+
     # Arguments
         path: Path (string), pathlib.Path object, or io.BytesIO stream to image file.
         grayscale: DEPRECATED use `color_mode="grayscale"`.
@@ -94,8 +98,10 @@ def load_img(path,
         keep_aspect_ratio: Boolean, whether to resize images to a target
                 size without aspect ratio distortion. The image is cropped in
                 the center with target aspect ratio before resizing.
+
     # Returns
         A PIL Image instance.
+
     # Raises
         ImportError: if PIL is not available.
         ValueError: if interpolation method is not supported.
@@ -172,9 +178,11 @@ def load_img(path,
 def list_pictures(directory,
                   ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif', 'tiff')):
     """Lists all pictures in a directory, including all subdirectories.
+
     # Arguments
         directory: string, absolute path to the directory
         ext: tuple of strings or single string, extensions of the pictures
+
     # Returns
         a list of paths
     """
@@ -187,12 +195,14 @@ def list_pictures(directory,
 
 def _iter_valid_files(directory, white_list_formats, follow_links):
     """Iterates on files with extension in `white_list_formats` contained in `directory`.
+
     # Arguments
         directory: Absolute path to the directory
             containing files to be counted
         white_list_formats: Set of strings containing allowed extensions for
             the files to be counted.
         follow_links: Boolean, follow symbolic links to subdirectories.
+
     # Yields
         Tuple of (root, filename) with extension in `white_list_formats`.
     """
@@ -213,6 +223,7 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,
                                        class_indices, follow_links):
     """Lists paths of files in `subdir` with extensions in `white_list_formats`.
+
     # Arguments
         directory: absolute path to a directory containing the files to list.
             The directory name is used as class label
@@ -225,6 +236,7 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             of images in each directory.
         class_indices: dictionary mapping a class name to its index.
         follow_links: boolean, follow symbolic links to subdirectories.
+
     # Returns
          classes: a list of class indices
          filenames: the path of valid files in `directory`, relative from
@@ -256,6 +268,7 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
 
 def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     """Converts a 3D Numpy array to a PIL Image instance.
+
     # Arguments
         x: Input Numpy array.
         data_format: Image data format, either "channels_first" or "channels_last".
@@ -265,8 +278,10 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
             Default: True.
         dtype: Dtype to use.
             Default: "float32".
+
     # Returns
         A PIL Image instance.
+
     # Raises
         ImportError: if PIL is not available.
         ValueError: if invalid `x` or `data_format` is passed.
@@ -311,13 +326,16 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
 
 def img_to_array(img, data_format='channels_last', dtype='float32'):
     """Converts a PIL Image instance to a Numpy array.
+
     # Arguments
         img: PIL Image instance.
         data_format: Image data format,
             either "channels_first" or "channels_last".
         dtype: Dtype to use for the returned array.
+
     # Returns
         A 3D Numpy array.
+
     # Raises
         ValueError: if invalid `img` or `data_format` is passed.
     """
