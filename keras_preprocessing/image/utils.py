@@ -121,7 +121,6 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     else:
         raise TypeError('path should be path-like or io.BytesIO, not {}'.format(type(path)))
 
-
     if color_mode == 'grayscale':
         # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
         # convert it to an 8-bit grayscale image.
@@ -162,14 +161,11 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
                 crop_box_wstart = (width - crop_width) // 2
                 crop_box_wend = crop_box_wstart + crop_width
                 crop_box_hend = crop_box_hstart + crop_height
-                crop_box = [crop_box_wstart, crop_box_hstart,
-                            crop_box_wend, crop_box_hend]
-
-                img = img.resize(width_height_tuple, resample,
-                                    box=crop_box)
+                crop_box = [crop_box_wstart, crop_box_hstart, crop_box_wend, crop_box_hend]
+                img = img.resize(width_height_tuple, resample, box=crop_box)
             else:
                 img = img.resize(width_height_tuple, resample)
-        return img
+    return img
 
 
 def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif',
