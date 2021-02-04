@@ -1,5 +1,6 @@
 import io
 import resource
+from pathlib import Path
 
 import numpy as np
 import PIL
@@ -211,7 +212,7 @@ def test_load_img(tmpdir):
     loaded_im_array = utils.img_to_array(loaded_im, dtype=np.int32)
     assert np.all(loaded_im_array == original_grayscale_32bit_array)
 
-    _path = tmpdir / 'grayscale_32bit_utils.tiff'  # Path
+    _path = Path(tmpdir / 'grayscale_32bit_utils.tiff')  # Path
     loaded_im = utils.load_img(_path, color_mode='grayscale')
     loaded_im_array = utils.img_to_array(loaded_im, dtype=np.int32)
     assert np.all(loaded_im_array == original_grayscale_32bit_array)
