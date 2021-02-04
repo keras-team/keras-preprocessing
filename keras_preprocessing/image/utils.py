@@ -3,6 +3,7 @@
 import io
 import os
 import warnings
+from pathlib import Path
 
 import numpy as np
 
@@ -12,7 +13,6 @@ try:
 except ImportError:
     pil_image = None
     ImageEnhance = None
-
 
 if pil_image is not None:
     _PIL_INTERPOLATION_METHODS = {
@@ -32,16 +32,14 @@ if pil_image is not None:
 
 def validate_filename(filename, white_list_formats):
     """Check if a filename refers to a valid file.
-
     # Arguments
         filename: String, absolute path to a file
         white_list_formats: Set, allowed file extensions
-
     # Returns
         A boolean value indicating if the filename is valid or not
     """
-    return (filename.lower().endswith(white_list_formats) and
-            os.path.isfile(filename))
+    return (filename.lower().endswith(white_list_formats)
+            and os.path.isfile(filename))
 
 
 def save_img(path,
@@ -51,7 +49,6 @@ def save_img(path,
              scale=True,
              **kwargs):
     """Saves an image stored as a Numpy array to a path or file object.
-
     # Arguments
         path: Path or file object.
         x: Numpy array.
@@ -72,12 +69,15 @@ def save_img(path,
     img.save(path, format=file_format, **kwargs)
 
 
-def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
-             interpolation='nearest', keep_aspect_ratio=False):
+def load_img(path,
+             grayscale=False,
+             color_mode='rgb',
+             target_size=None,
+             interpolation='nearest',
+             keep_aspect_ratio=False):
     """Loads an image into PIL format.
-
     # Arguments
-        path: Path to image file.
+        path: Path (string), pathlib.Path object, or io.BytesIO stream to image file.
         grayscale: DEPRECATED use `color_mode="grayscale"`.
         color_mode: The desired image format. One of "grayscale", "rgb", "rgba".
             "grayscale" supports 8-bit images and 32-bit signed integer images.
@@ -94,13 +94,12 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
         keep_aspect_ratio: Boolean, whether to resize images to a target
                 size without aspect ratio distortion. The image is cropped in
                 the center with target aspect ratio before resizing.
-
     # Returns
         A PIL Image instance.
-
     # Raises
         ImportError: if PIL is not available.
         ValueError: if interpolation method is not supported.
+        TypeError: type of 'path' should be path-like or io.Byteio.
     """
     if grayscale is True:
         warnings.warn('grayscale is deprecated. Please use '
@@ -109,85 +108,91 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
                           'The use of `load_img` requires PIL.')
-    with open(path, 'rb') as f:
-        img = pil_image.open(io.BytesIO(f.read()))
-        if color_mode == 'grayscale':
-            # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
-            # convert it to an 8-bit grayscale image.
-            if img.mode not in ('L', 'I;16', 'I'):
-                img = img.convert('L')
-        elif color_mode == 'rgba':
-            if img.mode != 'RGBA':
-                img = img.convert('RGBA')
-        elif color_mode == 'rgb':
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-        else:
-            raise ValueError('color_mode must be "grayscale", "rgb", or "rgba"')
-        if target_size is not None:
-            width_height_tuple = (target_size[1], target_size[0])
-            if img.size != width_height_tuple:
-                if interpolation not in _PIL_INTERPOLATION_METHODS:
-                    raise ValueError(
-                        'Invalid interpolation method {} specified. Supported '
-                        'methods are {}'.format(
-                            interpolation,
-                            ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
-                resample = _PIL_INTERPOLATION_METHODS[interpolation]
+    if isinstance(path, io.BytesIO):
+        img = pil_image.open(path)
+    elif isinstance(path, (Path, bytes, str)):
+        if isinstance(path, Path):
+            path = str(path.resolve())
+        with open(path, 'rb') as f:
+            img = pil_image.open(io.BytesIO(f.read()))
+    else:
+        raise TypeError('path should be path-like or io.BytesIO'
+                        ', not {}'.format(type(path)))
 
-                if keep_aspect_ratio:
-                    width, height = img.size
-                    target_width, target_height = width_height_tuple
+    if color_mode == 'grayscale':
+        # if image is not already an 8-bit, 16-bit or 32-bit grayscale image
+        # convert it to an 8-bit grayscale image.
+        if img.mode not in ('L', 'I;16', 'I'):
+            img = img.convert('L')
+    elif color_mode == 'rgba':
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+    elif color_mode == 'rgb':
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+    else:
+        raise ValueError('color_mode must be "grayscale", "rgb", or "rgba"')
+    if target_size is not None:
+        width_height_tuple = (target_size[1], target_size[0])
+        if img.size != width_height_tuple:
+            if interpolation not in _PIL_INTERPOLATION_METHODS:
+                raise ValueError(
+                    'Invalid interpolation method {} specified. Supported '
+                    'methods are {}'.format(
+                        interpolation,
+                        ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
+            resample = _PIL_INTERPOLATION_METHODS[interpolation]
 
-                    crop_height = (width * target_height) // target_width
-                    crop_width = (height * target_width) // target_height
+            if keep_aspect_ratio:
+                width, height = img.size
+                target_width, target_height = width_height_tuple
 
-                    # Set back to input height / width
-                    # if crop_height / crop_width is not smaller.
-                    crop_height = min(height, crop_height)
-                    crop_width = min(width, crop_width)
+                crop_height = (width * target_height) // target_width
+                crop_width = (height * target_width) // target_height
 
-                    crop_box_hstart = (height - crop_height) // 2
-                    crop_box_wstart = (width - crop_width) // 2
-                    crop_box_wend = crop_box_wstart + crop_width
-                    crop_box_hend = crop_box_hstart + crop_height
-                    crop_box = [crop_box_wstart, crop_box_hstart,
-                                crop_box_wend, crop_box_hend]
+                # Set back to input height / width
+                # if crop_height / crop_width is not smaller.
+                crop_height = min(height, crop_height)
+                crop_width = min(width, crop_width)
 
-                    img = img.resize(width_height_tuple, resample,
-                                     box=crop_box)
-                else:
-                    img = img.resize(width_height_tuple, resample)
-        return img
+                crop_box_hstart = (height - crop_height) // 2
+                crop_box_wstart = (width - crop_width) // 2
+                crop_box_wend = crop_box_wstart + crop_width
+                crop_box_hend = crop_box_hstart + crop_height
+                crop_box = [
+                    crop_box_wstart, crop_box_hstart, crop_box_wend,
+                    crop_box_hend
+                ]
+                img = img.resize(width_height_tuple, resample, box=crop_box)
+            else:
+                img = img.resize(width_height_tuple, resample)
+    return img
 
 
-def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif',
-                                  'tiff')):
+def list_pictures(directory,
+                  ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif', 'tiff')):
     """Lists all pictures in a directory, including all subdirectories.
-
     # Arguments
         directory: string, absolute path to the directory
         ext: tuple of strings or single string, extensions of the pictures
-
     # Returns
         a list of paths
     """
-    ext = tuple('.%s' % e for e in ((ext,) if isinstance(ext, str) else ext))
-    return [os.path.join(root, f)
-            for root, _, files in os.walk(directory) for f in files
-            if f.lower().endswith(ext)]
+    ext = tuple('.%s' % e for e in ((ext, ) if isinstance(ext, str) else ext))
+    return [
+        os.path.join(root, f) for root, _, files in os.walk(directory)
+        for f in files if f.lower().endswith(ext)
+    ]
 
 
 def _iter_valid_files(directory, white_list_formats, follow_links):
     """Iterates on files with extension in `white_list_formats` contained in `directory`.
-
     # Arguments
         directory: Absolute path to the directory
             containing files to be counted
         white_list_formats: Set of strings containing allowed extensions for
             the files to be counted.
         follow_links: Boolean, follow symbolic links to subdirectories.
-
     # Yields
         Tuple of (root, filename) with extension in `white_list_formats`.
     """
@@ -198,8 +203,9 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
     for root, _, files in _recursive_list(directory):
         for fname in sorted(files):
             if fname.lower().endswith('.tiff'):
-                warnings.warn('Using ".tiff" files with multiple bands '
-                              'will cause distortion. Please verify your output.')
+                warnings.warn(
+                    'Using ".tiff" files with multiple bands '
+                    'will cause distortion. Please verify your output.')
             if fname.lower().endswith(white_list_formats):
                 yield root, fname
 
@@ -207,7 +213,6 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
 def _list_valid_filenames_in_directory(directory, white_list_formats, split,
                                        class_indices, follow_links):
     """Lists paths of files in `subdir` with extensions in `white_list_formats`.
-
     # Arguments
         directory: absolute path to a directory containing the files to list.
             The directory name is used as class label
@@ -220,7 +225,6 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
             of images in each directory.
         class_indices: dictionary mapping a class name to its index.
         follow_links: boolean, follow symbolic links to subdirectories.
-
     # Returns
          classes: a list of class indices
          filenames: the path of valid files in `directory`, relative from
@@ -230,21 +234,21 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     """
     dirname = os.path.basename(directory)
     if split:
-        all_files = list(_iter_valid_files(directory, white_list_formats,
-                                           follow_links))
+        all_files = list(
+            _iter_valid_files(directory, white_list_formats, follow_links))
         num_files = len(all_files)
         start, stop = int(split[0] * num_files), int(split[1] * num_files)
-        valid_files = all_files[start: stop]
+        valid_files = all_files[start:stop]
     else:
-        valid_files = _iter_valid_files(
-            directory, white_list_formats, follow_links)
+        valid_files = _iter_valid_files(directory, white_list_formats,
+                                        follow_links)
     classes = []
     filenames = []
     for root, fname in valid_files:
         classes.append(class_indices[dirname])
         absolute_path = os.path.join(root, fname)
-        relative_path = os.path.join(
-            dirname, os.path.relpath(absolute_path, directory))
+        relative_path = os.path.join(dirname,
+                                     os.path.relpath(absolute_path, directory))
         filenames.append(relative_path)
 
     return classes, filenames
@@ -252,7 +256,6 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
 
 def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     """Converts a 3D Numpy array to a PIL Image instance.
-
     # Arguments
         x: Input Numpy array.
         data_format: Image data format, either "channels_first" or "channels_last".
@@ -262,10 +265,8 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
             Default: True.
         dtype: Dtype to use.
             Default: "float32".
-
     # Returns
         A PIL Image instance.
-
     # Raises
         ImportError: if PIL is not available.
         ValueError: if invalid `x` or `data_format` is passed.
@@ -276,7 +277,7 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     x = np.asarray(x, dtype=dtype)
     if x.ndim != 3:
         raise ValueError('Expected image array to have rank 3 (single image). '
-                         'Got array with shape: %s' % (x.shape,))
+                         'Got array with shape: %s' % (x.shape, ))
 
     if data_format not in {'channels_first', 'channels_last'}:
         raise ValueError('Invalid data_format: %s' % data_format)
@@ -305,21 +306,18 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
             return pil_image.fromarray(x[:, :, 0].astype('int32'), 'I')
         return pil_image.fromarray(x[:, :, 0].astype('uint8'), 'L')
     else:
-        raise ValueError('Unsupported channel number: %s' % (x.shape[2],))
+        raise ValueError('Unsupported channel number: %s' % (x.shape[2], ))
 
 
 def img_to_array(img, data_format='channels_last', dtype='float32'):
     """Converts a PIL Image instance to a Numpy array.
-
     # Arguments
         img: PIL Image instance.
         data_format: Image data format,
             either "channels_first" or "channels_last".
         dtype: Dtype to use for the returned array.
-
     # Returns
         A 3D Numpy array.
-
     # Raises
         ValueError: if invalid `img` or `data_format` is passed.
     """
@@ -338,5 +336,5 @@ def img_to_array(img, data_format='channels_last', dtype='float32'):
         else:
             x = x.reshape((x.shape[0], x.shape[1], 1))
     else:
-        raise ValueError('Unsupported image shape: %s' % (x.shape,))
+        raise ValueError('Unsupported image shape: %s' % (x.shape, ))
     return x
