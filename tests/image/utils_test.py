@@ -199,22 +199,22 @@ def test_load_img(tmpdir):
         _path = io.BytesIO(f.read())  # io.Bytesio
     loaded_im = utils.load_img(_path, color_mode='grayscale')
     loaded_im_array = utils.img_to_array(loaded_im, dtype=np.int32)
-    assert loaded_im_array == original_grayscale_32bit_array
+    assert np.all(loaded_im_array == original_grayscale_32bit_array)
 
     _path = filename_grayscale_32bit    # str
     loaded_im = utils.load_img(_path, color_mode='grayscale')
     loaded_im_array = utils.img_to_array(loaded_im, dtype=np.int32)
-    assert loaded_im_array == original_grayscale_32bit_array
+    assert np.all(loaded_im_array == original_grayscale_32bit_array)
 
     _path = filename_grayscale_32bit.encode()  # bytes
     loaded_im = utils.load_img(_path, color_mode='grayscale')
     loaded_im_array = utils.img_to_array(loaded_im, dtype=np.int32)
-    assert loaded_im_array == original_grayscale_32bit_array
+    assert np.all(loaded_im_array == original_grayscale_32bit_array)
 
     _path = tmpdir / 'grayscale_32bit_utils.tiff'  # Path
     loaded_im = utils.load_img(_path, color_mode='grayscale')
     loaded_im_array = utils.img_to_array(loaded_im, dtype=np.int32)
-    assert loaded_im_array == original_grayscale_32bit_array
+    assert np.all(loaded_im_array == original_grayscale_32bit_array)
 
     # Check that exception is raised if interpolation not supported.
 
