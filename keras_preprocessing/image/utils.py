@@ -14,6 +14,7 @@ except ImportError:
     pil_image = None
     ImageEnhance = None
 
+
 if pil_image is not None:
     _PIL_INTERPOLATION_METHODS = {
         'nearest': pil_image.NEAREST,
@@ -40,8 +41,8 @@ def validate_filename(filename, white_list_formats):
     # Returns
         A boolean value indicating if the filename is valid or not
     """
-    return (filename.lower().endswith(white_list_formats)
-            and os.path.isfile(filename))
+    return (filename.lower().endswith(white_list_formats) and
+            os.path.isfile(filename))
 
 
 def save_img(path,
@@ -72,12 +73,8 @@ def save_img(path,
     img.save(path, format=file_format, **kwargs)
 
 
-def load_img(path,
-             grayscale=False,
-             color_mode='rgb',
-             target_size=None,
-             interpolation='nearest',
-             keep_aspect_ratio=False):
+def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
+             interpolation='nearest', keep_aspect_ratio=False):
     """Loads an image into PIL format.
 
     # Arguments
@@ -175,8 +172,8 @@ def load_img(path,
     return img
 
 
-def list_pictures(directory,
-                  ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif', 'tiff')):
+def list_pictures(directory, ext=('jpg', 'jpeg', 'bmp', 'png', 'ppm', 'tif',
+                                  'tiff')):
     """Lists all pictures in a directory, including all subdirectories.
 
     # Arguments
@@ -186,11 +183,10 @@ def list_pictures(directory,
     # Returns
         a list of paths
     """
-    ext = tuple('.%s' % e for e in ((ext, ) if isinstance(ext, str) else ext))
-    return [
-        os.path.join(root, f) for root, _, files in os.walk(directory)
-        for f in files if f.lower().endswith(ext)
-    ]
+    ext = tuple('.%s' % e for e in ((ext,) if isinstance(ext, str) else ext))
+    return [os.path.join(root, f)
+            for root, _, files in os.walk(directory) for f in files
+            if f.lower().endswith(ext)]
 
 
 def _iter_valid_files(directory, white_list_formats, follow_links):
@@ -213,9 +209,8 @@ def _iter_valid_files(directory, white_list_formats, follow_links):
     for root, _, files in _recursive_list(directory):
         for fname in sorted(files):
             if fname.lower().endswith('.tiff'):
-                warnings.warn(
-                    'Using ".tiff" files with multiple bands '
-                    'will cause distortion. Please verify your output.')
+                warnings.warn('Using ".tiff" files with multiple bands '
+                              'will cause distortion. Please verify your output.')
             if fname.lower().endswith(white_list_formats):
                 yield root, fname
 
@@ -246,21 +241,21 @@ def _list_valid_filenames_in_directory(directory, white_list_formats, split,
     """
     dirname = os.path.basename(directory)
     if split:
-        all_files = list(
-            _iter_valid_files(directory, white_list_formats, follow_links))
+        all_files = list(_iter_valid_files(directory, white_list_formats,
+                                           follow_links))
         num_files = len(all_files)
         start, stop = int(split[0] * num_files), int(split[1] * num_files)
-        valid_files = all_files[start:stop]
+        valid_files = all_files[start: stop]
     else:
-        valid_files = _iter_valid_files(directory, white_list_formats,
-                                        follow_links)
+        valid_files = _iter_valid_files(
+            directory, white_list_formats, follow_links)
     classes = []
     filenames = []
     for root, fname in valid_files:
         classes.append(class_indices[dirname])
         absolute_path = os.path.join(root, fname)
-        relative_path = os.path.join(dirname,
-                                     os.path.relpath(absolute_path, directory))
+        relative_path = os.path.join(
+            dirname, os.path.relpath(absolute_path, directory))
         filenames.append(relative_path)
 
     return classes, filenames
@@ -292,7 +287,7 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     x = np.asarray(x, dtype=dtype)
     if x.ndim != 3:
         raise ValueError('Expected image array to have rank 3 (single image). '
-                         'Got array with shape: %s' % (x.shape, ))
+                         'Got array with shape: %s' % (x.shape,))
 
     if data_format not in {'channels_first', 'channels_last'}:
         raise ValueError('Invalid data_format: %s' % data_format)
@@ -321,7 +316,7 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
             return pil_image.fromarray(x[:, :, 0].astype('int32'), 'I')
         return pil_image.fromarray(x[:, :, 0].astype('uint8'), 'L')
     else:
-        raise ValueError('Unsupported channel number: %s' % (x.shape[2], ))
+        raise ValueError('Unsupported channel number: %s' % (x.shape[2],))
 
 
 def img_to_array(img, data_format='channels_last', dtype='float32'):
@@ -354,5 +349,5 @@ def img_to_array(img, data_format='channels_last', dtype='float32'):
         else:
             x = x.reshape((x.shape[0], x.shape[1], 1))
     else:
-        raise ValueError('Unsupported image shape: %s' % (x.shape, ))
+        raise ValueError('Unsupported image shape: %s' % (x.shape,))
     return x
