@@ -1,3 +1,4 @@
+import io
 import resource
 
 import numpy as np
@@ -192,6 +193,20 @@ def test_load_img(tmpdir):
                                target_size=(25, 25), interpolation="nearest")
     loaded_im_array = utils.img_to_array(loaded_im, dtype='int32')
     assert loaded_im_array.shape == (25, 25, 1)
+
+    # Test different path type
+    with open(filename_grayscale_32bit, 'rb') as f:
+        _path = io.BytesIO(f.read())  # io.Bytesio
+    loaded_im = utils.load_img(_path, color_mode='grayscale')
+    assert loaded_im == original_grayscale_32bit
+
+    _path = filename_grayscale_32bit    # str
+    loaded_im = utils.load_img(_path, color_mode='grayscale')
+    assert loaded_im == original_grayscale_32bit
+
+    _path = filename_grayscale_32bit.encode()  # bytes
+    loaded_im = utils.load_img(_path, color_mode='grayscale')
+    assert loaded_im == original_grayscale_32bit
 
     # Check that exception is raised if interpolation not supported.
 
