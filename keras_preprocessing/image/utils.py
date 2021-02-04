@@ -97,6 +97,7 @@ def load_img(path, grayscale=False, color_mode='rgb', target_size=None,
 
     # Returns
         A PIL Image instance.
+        A PIL Image instance.
 
     # Raises
         ImportError: if PIL is not available.
