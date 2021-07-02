@@ -284,7 +284,7 @@ def array_to_img(x, data_format='channels_last', scale=True, dtype='float32'):
     if pil_image is None:
         raise ImportError('Could not import PIL.Image. '
                           'The use of `array_to_img` requires PIL.')
-    x = np.asarray(x, dtype=dtype)
+    x = np.asarray(x)
     if x.ndim != 3:
         raise ValueError('Expected image array to have rank 3 (single image). '
                          'Got array with shape: %s' % (x.shape,))
