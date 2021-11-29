@@ -356,6 +356,8 @@ class TimeseriesGenerator(object):
                 self.batch_size * self.stride) // (self.batch_size * self.stride)
 
     def __getitem__(self, index):
+        if index < 0:
+            index = len(self) + index
         if self.shuffle:
             rows = np.random.randint(
                 self.start_index, self.end_index + 1, size=self.batch_size)

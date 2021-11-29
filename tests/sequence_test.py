@@ -140,6 +140,21 @@ def test_TimeseriesGenerator_serde():
     assert (data_gen.targets == recovered_gen.targets).all()
 
 
+def test_TimeseriesGenerator_negative_subscript():
+    data = np.array([[i] for i in range(50)])
+    targets = np.array([[i] for i in range(50)])
+
+    data_gen = sequence.TimeseriesGenerator(data, targets,
+                                            length=10,
+                                            sampling_rate=2,
+                                            batch_size=2)
+    assert len(data_gen) == 20
+    assert (np.allclose(data_gen[19][0], data_gen[-1][0]))
+    assert (np.allclose(data_gen[19][1], data_gen[-1][1]))
+    assert (np.allclose(data_gen[18][0], data_gen[-2][0]))
+    assert (np.allclose(data_gen[18][1], data_gen[-2][1]))
+
+
 def test_TimeseriesGenerator():
     data = np.array([[i] for i in range(50)])
     targets = np.array([[i] for i in range(50)])
