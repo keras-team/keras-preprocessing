@@ -51,6 +51,8 @@ class Iterator(IteratorType):
                              'but the Sequence '
                              'has length {length}'.format(idx=idx,
                                                           length=len(self)))
+        if idx < 0:
+            idx = len(self) + idx
         if self.seed is not None:
             np.random.seed(self.seed + self.total_batches_seen)
         self.total_batches_seen += 1
