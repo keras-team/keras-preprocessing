@@ -154,6 +154,11 @@ def test_TimeseriesGenerator_negative_subscript():
     assert (np.allclose(data_gen[18][0], data_gen[-2][0]))
     assert (np.allclose(data_gen[18][1], data_gen[-2][1]))
 
+    size = len(data_gen)
+    for i in range(1, size + 1):
+        assert (np.allclose(data_gen[size - i][0], data_gen[-i][0]))
+        assert (np.allclose(data_gen[size - i][1], data_gen[-i][1]))
+
 
 def test_TimeseriesGenerator():
     data = np.array([[i] for i in range(50)])
