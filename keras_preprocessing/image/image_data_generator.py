@@ -440,7 +440,8 @@ class ImageDataGenerator(object):
                             follow_links=False,
                             subset=None,
                             interpolation='nearest',
-                            keep_aspect_ratio=False):
+                            keep_aspect_ratio=False,
+                            verbose=1):
         """Takes the path to a directory & generates batches of augmented data.
 
         # Arguments
@@ -511,6 +512,8 @@ class ImageDataGenerator(object):
             keep_aspect_ratio: Boolean, whether to resize images to a target
                 size without aspect ratio distortion. The image is cropped in
                 the center with target aspect ratio before resizing.
+            verbose: 1 or 0. Defaults to 1. 0=silent mode,
+                 1=prints total number of samples and classes.
 
         # Returns
             A `DirectoryIterator` yielding tuples of `(x, y)`
@@ -536,7 +539,8 @@ class ImageDataGenerator(object):
             follow_links=follow_links,
             subset=subset,
             interpolation=interpolation,
-            dtype=self.dtype
+            dtype=self.dtype,
+            verbose=verbose
         )
 
     def flow_from_dataframe(self,
