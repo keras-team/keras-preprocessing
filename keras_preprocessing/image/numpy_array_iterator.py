@@ -158,7 +158,7 @@ class NumpyArrayIterator(Iterator):
                            dtype=self.dtype)
         for i, j in enumerate(index_array):
             x = self.x[j]
-            params = self.image_data_generator.get_random_transform(x.shape)
+            params = self.image_data_generator.get_random_transform(x.shape, seed=self.seed)
             x = self.image_data_generator.apply_transform(
                 x.astype(self.dtype), params)
             x = self.image_data_generator.standardize(x)
