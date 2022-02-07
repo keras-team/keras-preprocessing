@@ -33,6 +33,7 @@ class Iterator(IteratorType):
         self.n = n
         self.batch_size = batch_size
         self.seed = seed
+        self.numpy_generator = np.random.default_rnq(seed)
         self.shuffle = shuffle
         self.batch_index = 0
         self.total_batches_seen = 0
@@ -43,7 +44,10 @@ class Iterator(IteratorType):
     def _set_index_array(self):
         self.index_array = np.arange(self.n)
         if self.shuffle:
-            self.index_array = np.random.permutation(self.n)
+            if self.seed is not None:
+                self.index_array = self.numpy_generator.permutation(self.n)
+            else:   
+                self.index_array = np.random.permutation(self.n)
 
     def __getitem__(self, idx):
         if idx >= len(self):
@@ -51,8 +55,6 @@ class Iterator(IteratorType):
                              'but the Sequence '
                              'has length {length}'.format(idx=idx,
                                                           length=len(self)))
-        if self.seed is not None:
-            np.random.seed(self.seed + self.total_batches_seen)
         self.total_batches_seen += 1
         if self.index_array is None:
             self._set_index_array()
@@ -73,8 +75,6 @@ class Iterator(IteratorType):
         # Ensure self.batch_index is 0.
         self.reset()
         while 1:
-            if self.seed is not None:
-                np.random.seed(self.seed + self.total_batches_seen)
             if self.batch_index == 0:
                 self._set_index_array()
 
