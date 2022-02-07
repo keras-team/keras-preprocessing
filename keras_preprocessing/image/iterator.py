@@ -44,10 +44,7 @@ class Iterator(IteratorType):
     def _set_index_array(self):
         self.index_array = np.arange(self.n)
         if self.shuffle:
-            if self.seed is not None:
-                self.index_array = self.numpy_generator.permutation(self.n)
-            else:   
-                self.index_array = np.random.permutation(self.n)
+            self.index_array = self.numpy_generator.permutation(self.n)
 
     def __getitem__(self, idx):
         if idx >= len(self):
