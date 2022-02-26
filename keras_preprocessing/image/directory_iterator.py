@@ -59,6 +59,8 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
             without aspect ratio distortion. The image is cropped in the center
             with target aspect ratio before resizing.
         dtype: Dtype to use for generated arrays.
+        verbose: 1 or 0. Defaults to 1. 0=silent mode,
+            1=prints total number of samples and classes.
     """
     allowed_class_modes = {'categorical', 'binary', 'sparse', 'input', None}
 
@@ -89,7 +91,8 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
                  subset=None,
                  interpolation='nearest',
                  keep_aspect_ratio=False,
-                 dtype='float32'):
+                 dtype='float32',
+                 verbose=1):
         super(DirectoryIterator, self).set_processing_attrs(image_data_generator,
                                                             target_size,
                                                             color_mode,
@@ -141,8 +144,11 @@ class DirectoryIterator(BatchFromFilesMixin, Iterator):
             self.classes[i:i + len(classes)] = classes
             i += len(classes)
 
-        print('Found %d images belonging to %d classes.' %
-              (self.samples, self.num_classes))
+        if verbose == 0:
+            pass
+        else :
+            print('Found %d images belonging to %d classes.' %
+                  (self.samples, self.num_classes))
         pool.close()
         pool.join()
         self._filepaths = [
