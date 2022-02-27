@@ -88,6 +88,7 @@ class ImageDataGenerator(object):
             (strictly between 0 and 1).
         interpolation_order: int, order to use for
             the spline interpolation. Higher is slower.
+        list_of_custom_transformations: list, list of transformation functions
         dtype: Dtype to use for the generated arrays.
 
     # Examples
@@ -260,6 +261,7 @@ class ImageDataGenerator(object):
                  data_format='channels_last',
                  validation_split=0.0,
                  interpolation_order=1,
+                 list_of_custom_transformations=None,
                  dtype='float32'):
 
         self.featurewise_center = featurewise_center
@@ -282,6 +284,7 @@ class ImageDataGenerator(object):
         self.preprocessing_function = preprocessing_function
         self.dtype = dtype
         self.interpolation_order = interpolation_order
+        self.list_of_custom_transformations = list_of_custom_transformations
 
         if data_format not in {'channels_last', 'channels_first'}:
             raise ValueError(
@@ -882,6 +885,11 @@ class ImageDataGenerator(object):
 
         if transform_parameters.get('brightness') is not None:
             x = apply_brightness_shift(x, transform_parameters['brightness'], False)
+
+        # Custom Transformations
+        if self.list_of_custom_transformations:
+            for transformation in self.list_of_custom_transformations:
+                x = transformation(x)
 
         return x
 
