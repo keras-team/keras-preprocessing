@@ -233,7 +233,7 @@ class BatchFromFilesMixin():
             if hasattr(img, 'close'):
                 img.close()
             if self.image_data_generator:
-                params = self.image_data_generator.get_random_transform(x.shape)
+                params = self.image_data_generator.get_random_transform(x.shape, self.seed)
                 x = self.image_data_generator.apply_transform(x, params)
                 x = self.image_data_generator.standardize(x)
             batch_x[i] = x
