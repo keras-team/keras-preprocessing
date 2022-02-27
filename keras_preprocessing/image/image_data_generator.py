@@ -498,7 +498,8 @@ class ImageDataGenerator(object):
             follow_links: Whether to follow symlinks inside
                 class subdirectories (default: False).
             subset: Subset of data (`"training"` or `"validation"`) if
-                `validation_split` is set in `ImageDataGenerator`.
+                `validation_split` is set in `ImageDataGenerator`. Files
+                will be split after sorting in alphanumeric order.
             interpolation: Interpolation method used to
                 resample the image if the
                 target size is different from that of the loaded image.
