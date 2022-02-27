@@ -197,9 +197,14 @@ class Tokenizer(object):
                 a generator of strings (for memory-efficiency),
                 or a list of list of strings.
         """
+        filtered_characters = set(self.filters)
         for text in texts:
             self.document_count += 1
             if self.char_level or isinstance(text, list):
+                if not isinstance(text, list):
+                    text = "".join(char
+                                   for char in text
+                                   if char not in filtered_characters)
                 if self.lower:
                     if isinstance(text, list):
                         text = [text_elem.lower() for text_elem in text]

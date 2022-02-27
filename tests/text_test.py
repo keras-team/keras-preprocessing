@@ -185,6 +185,15 @@ def test_tokenizer_oov_flag_and_num_words():
     assert trans_text == 'this <unk> <unk> <unk> <unk> <unk>'
 
 
+@pytest.mark.parametrize("x_train", ("ae", ["ae", "er"]))
+def test_tokenizer_filter_char_level(x_train):
+    """It does not tokenize filtered characters at the character level.
+    """
+    tokenizer = text.Tokenizer(filters="e", char_level=True)
+    tokenizer.fit_on_texts(x_train)
+    assert "e" not in tokenizer.word_index
+
+
 def test_sequences_to_texts_with_num_words_and_oov_token():
     x_train = ['This text has only known words this text']
     x_test = ['This text has some unknown words']
@@ -285,9 +294,8 @@ def test_tokenizer_lower_flag():
     char_tokenizer.fit_on_texts(texts)
     expected_word_counts = OrderedDict([('t', 11), ('h', 5), ('e', 6), (' ', 14),
                                         ('c', 2), ('a', 6), ('s', 2), ('o', 6),
-                                        ('n', 4), ('m', 1), ('.', 3), ('d', 3),
-                                        ('g', 5), ('l', 2), ('i', 2), ('v', 1),
-                                        ('r', 1)])
+                                        ('n', 4), ('m', 1), ('d', 3), ('g', 5),
+                                        ('l', 2), ('i', 2), ('v', 1), ('r', 1)])
     assert char_tokenizer.word_counts == expected_word_counts
 
 
